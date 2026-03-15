@@ -511,16 +511,42 @@ const AIRadarDashboard = () => {
         <main className={`flex-1 flex flex-col bg-white min-w-0 shadow-inner ${mobilePanel !== 'ai' ? 'hidden lg:flex' : 'flex'}`}>
           <div className="flex-1 overflow-y-auto custom-scrollbar">
             <div className="max-w-3xl mx-auto p-4 lg:p-8 space-y-6">
-              {/* Header */}
-              <div className="text-center space-y-2">
-                <div className="inline-flex relative">
-                   <div className="absolute inset-0 bg-blue-600 blur-2xl opacity-20 animate-pulse" />
-                   <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 shadow-xl flex items-center justify-center text-white">
-                      <Brain size={32} />
-                   </div>
+              {/* Enhanced Header Section */}
+              <div className="relative pt-4 pb-2">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-24 bg-blue-500/10 blur-[60px] rounded-full pointer-events-none" />
+                
+                <div className="flex flex-col items-center text-center space-y-5 relative z-10">
+                  <div className="relative group">
+                    <div className="absolute inset-0 bg-blue-600/20 blur-xl group-hover:blur-2xl transition-all duration-500 opacity-50" />
+                    <div className="relative w-20 h-20 rounded-[24px] bg-gradient-to-br from-slate-900 to-blue-800 shadow-2xl flex items-center justify-center text-white border border-white/10 group-hover:scale-105 transition-transform duration-500">
+                      <Brain size={40} className="text-blue-400" />
+                    </div>
+                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-xl shadow-lg flex items-center justify-center border border-slate-100 animate-bounce-slow">
+                      <Sparkles size={16} className="text-blue-600" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 max-w-2xl">
+                    <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+                      لوحة <span className="text-blue-600">الذكاء الاصطناعي</span> الخارق
+                    </h1>
+                    <p className="text-base text-slate-500 font-medium leading-relaxed">
+                      نظام رادار المتطور يدمج أقوى محركات الذكاء الاصطناعي مع بياناتك لتحويل الأرقام الصامتة إلى <span className="text-slate-900 font-black">رؤى استراتيجية</span>. استكشف الأنماط، تنبأ بالمستقبل، واتخذ قراراتك بناءً على تحليلات دقيقة ومعمقة.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-6 pt-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                      <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">تحليل مباشر</span>
+                    </div>
+                    <div className="w-px h-3 bg-slate-200" />
+                    <div className="flex items-center gap-2">
+                      <Zap size={14} className="text-blue-500" />
+                      <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">رؤى فورية</span>
+                    </div>
+                  </div>
                 </div>
-                <h1 className="text-2xl lg:text-3xl font-black text-gray-900 tracking-tight">مساعد التحليل الذكي</h1>
-                <p className="text-sm text-gray-500 max-w-sm mx-auto">قم بدمج البيانات واستخراج رؤى عميقة مدعومة بالذكاء الاصطناعي</p>
               </div>
 
               {/* Dataset Selection Notification */}
