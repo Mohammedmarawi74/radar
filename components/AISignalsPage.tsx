@@ -31,7 +31,8 @@ import {
     Cpu,
     CheckCircle2,
     AlertCircle,
-    Flame
+    Flame,
+    Layout
 } from 'lucide-react';
 
 // ============================================
@@ -236,24 +237,15 @@ const SignalTypeBadge: React.FC<{ type: SignalType }> = ({ type }) => {
  * Confidence Meter - مقياس الثقة
  */
 const ConfidenceMeter: React.FC<{ level: number }> = ({ level }) => {
-    const getColor = () => {
-        if (level >= 80) return 'bg-green-500';
-        if (level >= 60) return 'bg-yellow-500';
-        return 'bg-orange-500';
-    };
-
     return (
-        <div className="space-y-1">
-            <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-600 font-medium">مستوى الثقة</span>
-                <span className="font-bold text-gray-900">{level}%</span>
-            </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div className="flex items-center gap-2">
+            <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
                 <div
-                    className={`h-full ${getColor()} transition-all duration-500`}
+                    className={`h-full bg-blue-500 transition-all duration-500`}
                     style={{ width: `${level}%` }}
                 />
             </div>
+            <span className="text-[10px] font-black text-gray-400 whitespace-nowrap">{level}% ثقة</span>
         </div>
     );
 };
@@ -263,18 +255,14 @@ const ConfidenceMeter: React.FC<{ level: number }> = ({ level }) => {
  */
 const ImpactScore: React.FC<{ score: number }> = ({ score }) => {
     const getColor = () => {
-        if (score >= 80) return 'text-red-600';
-        if (score >= 60) return 'text-orange-600';
-        return 'text-yellow-600';
+        if (score >= 80) return 'bg-rose-500 text-white';
+        if (score >= 60) return 'bg-orange-500 text-white';
+        return 'bg-amber-500 text-white';
     };
 
     return (
-        <div className="flex items-center gap-2">
-            <Flame size={20} className={getColor()} />
-            <div>
-                <p className="text-xs text-gray-500 font-medium">درجة التأثير</p>
-                <p className={`text-2xl font-black ${getColor()}`}>{score}</p>
-            </div>
+        <div className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${getColor()} shadow-sm`}>
+            {score} Impact
         </div>
     );
 };
@@ -286,78 +274,48 @@ const SignalCard: React.FC<{ signal: AISignal; onClick: () => void }> = ({ signa
     return (
         <div
             onClick={onClick}
-            className="bg-white rounded-2xl border border-gray-200 shadow-lg hover:shadow-2xl hover:border-blue-300 transition-all duration-300 cursor-pointer group overflow-hidden"
+            className="bg-white rounded-2xl border border-gray-100 p-4 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:border-blue-200 transition-all duration-300 cursor-pointer group"
         >
-            {/* Header */}
-            <div className="p-6 border-b border-gray-100">
-                <div className="flex items-start justify-between gap-4 mb-4">
-                    <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-3">
+            <div className="flex flex-col h-full">
+                {/* Header: Title & Impact */}
+                <div className="flex items-start justify-between gap-3 mb-2.5">
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1.5">
                             <SignalTypeBadge type={signal.type} />
-                            <AIBadge />
+                            <ImpactScore score={signal.impactScore} />
                         </div>
-                        <h3 className="text-lg font-bold text-gray-900 leading-tight group-hover:text-blue-600 transition-colors">
+                        <h3 className="text-sm md:text-base font-black text-gray-900 leading-snug group-hover:text-blue-600 transition-colors line-clamp-2">
                             {signal.title}
                         </h3>
                     </div>
-                    <ImpactScore score={signal.impactScore} />
+                    <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center shrink-0 border border-gray-100 group-hover:bg-blue-50 group-hover:border-blue-100 transition-colors">
+                        <Zap size={18} className="text-gray-300 group-hover:text-blue-500" />
+                    </div>
                 </div>
 
-                <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">
+                <p className="text-[11px] md:text-xs text-gray-500 leading-relaxed line-clamp-2 mb-4">
                     {signal.summary}
                 </p>
-            </div>
 
-            {/* Body */}
-            <div className="p-6 space-y-4">
-                {/* Confidence */}
-                <ConfidenceMeter level={signal.confidenceLevel} />
-
-                {/* Insights Preview */}
-                <div className="space-y-2">
-                    <p className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
-                        <Lightbulb size={14} className="text-yellow-500" />
-                        رؤى رئيسية
-                    </p>
-                    <ul className="space-y-1">
-                        {signal.insights.slice(0, 2).map((insight, idx) => (
-                            <li key={idx} className="text-xs text-gray-600 flex items-start gap-2">
-                                <CheckCircle2 size={12} className="text-green-500 mt-0.5 shrink-0" />
-                                <span className="line-clamp-1">{insight}</span>
-                            </li>
-                        ))}
-                    </ul>
+                {/* Insights - Scannable */}
+                <div className="space-y-1.5 mb-4 bg-gray-50/50 p-2.5 rounded-xl border border-gray-100/50">
+                    {signal.insights.slice(0, 2).map((insight, idx) => (
+                        <div key={idx} className="flex items-start gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500/30 mt-1.5 shrink-0" />
+                            <span className="text-[10px] font-bold text-gray-600 line-clamp-1">{insight}</span>
+                        </div>
+                    ))}
                 </div>
 
-                {/* Tags */}
-                {signal.relatedSectors && signal.relatedSectors.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                        {signal.relatedSectors.slice(0, 3).map((sector, idx) => (
-                            <span
-                                key={idx}
-                                className="bg-blue-50 text-blue-700 px-2 py-1 rounded-lg text-xs font-medium border border-blue-100"
-                            >
-                                {sector}
-                            </span>
-                        ))}
+                {/* Meta & Footer */}
+                <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <ConfidenceMeter level={signal.confidenceLevel} />
                     </div>
-                )}
-
-                {/* Footer */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <Clock size={12} />
-                        <span>{new Date(signal.timestamp).toLocaleString('ar-SA', {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })}</span>
+                    <div className="flex items-center gap-1.5 text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                        <Clock size={10} />
+                        <span>{new Date(signal.timestamp).toLocaleDateString('ar-SA')}</span>
                     </div>
-                    <button className="flex items-center gap-1 text-blue-600 text-xs font-bold hover:gap-2 transition-all">
-                        <span>التفاصيل الكاملة</span>
-                        <ChevronRight size={14} className="rtl:rotate-180" />
-                    </button>
                 </div>
             </div>
         </div>
@@ -513,102 +471,58 @@ const AISignalsPage: React.FC = () => {
         : AI_SIGNALS.filter(s => s.type === filter);
 
     return (
-        <div className="max-w-7xl mx-auto p-4 lg:p-8 animate-fadeIn">
-            {/* Hero Section */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 rounded-3xl p-8 lg:p-12 mb-8 shadow-2xl">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
-                <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl -ml-32 -mb-32"></div>
-
-                <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="w-14 h-14 bg-white/20 backdrop-blur-xl text-white rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
-                            <Sparkles size={28} strokeWidth={2.5} className="animate-pulse" />
-                        </div>
-                        <div>
-                            <h1 className="text-3xl lg:text-4xl font-black text-white tracking-tight">
-                                إشارات السوق الذكية
-                            </h1>
-                            <p className="text-purple-100 text-sm font-medium mt-1">مدعومة بالكامل بالذكاء الاصطناعي</p>
-                        </div>
+        <div className="min-h-screen bg-[#f8fafc] p-4 lg:p-6 animate-fadeIn">
+            {/* Sleek Minimal Header */}
+            <div className="max-w-7xl mx-auto mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 px-1">
+                <div>
+                    <div className="flex items-center gap-2 mb-1">
+                        <Sparkles size={20} className="text-blue-600" />
+                        <h1 className="text-2xl font-black text-slate-900 tracking-tight">إشارات السوق الذكية</h1>
+                        <span className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded-md text-[10px] font-black uppercase tracking-widest border border-blue-100 shadow-sm">AI Powered</span>
                     </div>
+                    <p className="text-slate-500 text-sm font-medium">تحليل فوري وذكي لأهم الفرص والمخاطر في السوق.</p>
+                </div>
 
-                    <p className="text-white/90 text-base lg:text-lg max-w-3xl mb-6">
-                        تحليل فوري وذكي لأهم الفرص والمخاطر في السوق، مع تفسير شامل لكل إشارة ومصادر البيانات المستخدمة
-                    </p>
-
-                    {/* AI Features */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4">
-                            <Brain size={24} className="text-white mb-2" />
-                            <p className="text-white font-bold text-sm">تحليل ذكي</p>
-                            <p className="text-purple-100 text-xs">مدعوم بـ AI</p>
-                        </div>
-                        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4">
-                            <Shield size={24} className="text-white mb-2" />
-                            <p className="text-white font-bold text-sm">مصادر موثوقة</p>
-                            <p className="text-purple-100 text-xs">بيانات رسمية</p>
-                        </div>
-                        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4">
-                            <Target size={24} className="text-white mb-2" />
-                            <p className="text-white font-bold text-sm">دقة عالية</p>
-                            <p className="text-purple-100 text-xs">ثقة 70%+</p>
-                        </div>
-                        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4">
-                            <Activity size={24} className="text-white mb-2" />
-                            <p className="text-white font-bold text-sm">تحديث مستمر</p>
-                            <p className="text-purple-100 text-xs">بيانات حية</p>
-                        </div>
+                {/* Minimal Micro-Badges */}
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-xl border border-slate-200 shadow-sm">
+                        <Target size={14} className="text-blue-500" />
+                        <span className="text-[10px] font-black text-slate-700">دقة 70%+</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-xl border border-slate-200 shadow-sm">
+                        <Activity size={14} className="text-emerald-500" />
+                        <span className="text-[10px] font-black text-slate-700">بيانات حية</span>
                     </div>
                 </div>
             </div>
 
-            {/* Filters */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
-                <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
-                    <button
-                        onClick={() => setFilter('all')}
-                        className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${filter === 'all'
-                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            {/* Tabs & Navigation */}
+            <div className="max-w-7xl mx-auto mb-6">
+                <div className="inline-flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+                    {[
+                        { id: 'all', label: 'الكل', color: 'text-slate-900', bg: 'bg-slate-100', icon: Layout },
+                        { id: 'opportunity', label: 'فرص', color: 'text-emerald-600', bg: 'bg-emerald-50', icon: TrendingUp },
+                        { id: 'watch', label: 'مراقبة', color: 'text-amber-600', bg: 'bg-amber-50', icon: Eye },
+                        { id: 'risk', label: 'مخاطر', color: 'text-rose-600', bg: 'bg-rose-50', icon: AlertTriangle }
+                    ].map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setFilter(tab.id as any)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black transition-all duration-200 ${
+                                filter === tab.id 
+                                ? `${tab.bg} ${tab.color} shadow-sm border border-black/5` 
+                                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
                             }`}
-                    >
-                        الكل ({AI_SIGNALS.length})
-                    </button>
-                    <button
-                        onClick={() => setFilter('opportunity')}
-                        className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap flex items-center gap-2 ${filter === 'opportunity'
-                                ? 'bg-green-600 text-white shadow-lg shadow-green-500/30'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
-                    >
-                        <TrendingUp size={16} />
-                        فرص ({AI_SIGNALS.filter(s => s.type === 'opportunity').length})
-                    </button>
-                    <button
-                        onClick={() => setFilter('watch')}
-                        className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap flex items-center gap-2 ${filter === 'watch'
-                                ? 'bg-yellow-600 text-white shadow-lg shadow-yellow-500/30'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
-                    >
-                        <Eye size={16} />
-                        مراقبة ({AI_SIGNALS.filter(s => s.type === 'watch').length})
-                    </button>
-                    <button
-                        onClick={() => setFilter('risk')}
-                        className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap flex items-center gap-2 ${filter === 'risk'
-                                ? 'bg-red-600 text-white shadow-lg shadow-red-500/30'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
-                    >
-                        <AlertTriangle size={16} />
-                        مخاطر ({AI_SIGNALS.filter(s => s.type === 'risk').length})
-                    </button>
+                        >
+                            <tab.icon size={14} />
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
             </div>
 
             {/* Signals Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
                 {filteredSignals.map(signal => (
                     <SignalCard
                         key={signal.id}

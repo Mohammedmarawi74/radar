@@ -347,7 +347,6 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
             <NavGroup title="المحور الرئيسي" open={sections.overview} onToggle={() => toggleSection('overview')} isCollapsed={isCollapsed} icon={LayoutDashboard}>
               <NavItem to="/" icon={Home} end isCollapsed={isCollapsed} important>الصفحة الرئيسية</NavItem>
               <NavItem to="/signals" icon={Zap} isCollapsed={isCollapsed} important>إشارات السوق</NavItem>
-              <NavItem to="/ai-dashboard" icon={Cpu} isCollapsed={isCollapsed} important>لوحة الذكاء</NavItem>
               <NavItem to="/smart-radar" icon={Target} isCollapsed={isCollapsed} important>لوحات الرادار الذكية</NavItem>
               <NavItem to="/timeline" icon={Clock} isCollapsed={isCollapsed}>سجل التغييرات</NavItem>
               <NavItem to="/followers" icon={Users} isCollapsed={isCollapsed}>المجتمع</NavItem>
@@ -397,6 +396,7 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
                 <div className="h-px bg-slate-800/50 mx-2 my-2"></div>
                 <NavGroup title="الإدارة العامة" open={sections.admin} onToggle={() => toggleSection('admin')} isCollapsed={isCollapsed} icon={ShieldAlert}>
                   <NavItem to="/admin" icon={LayoutDashboard} isCollapsed={isCollapsed} important>لوحة التحكم الإدارية</NavItem>
+                  <NavItem to="/ai-dashboard" icon={Cpu} isCollapsed={isCollapsed} important>لوحة الذكاء</NavItem>
                   <NavItem to="/admin/users" icon={Users2} isCollapsed={isCollapsed} important>إدارة المستخدمين</NavItem>
                   <NavItem to="/admin/activity" icon={History} isCollapsed={isCollapsed}>سجل العمليات</NavItem>
                   <NavItem to="/admin/settings" icon={Settings2} isCollapsed={isCollapsed}>إعدادات النظام</NavItem>
@@ -494,8 +494,8 @@ const Breadcrumbs = () => {
     if (pathname === '/') return crumbs;
 
     if (pathname.includes('/ai-dashboard')) {
-      crumbs.push({ label: 'الذكاء الاصطناعي', path: '/ai-dashboard', icon: Sparkles });
-      crumbs.push({ label: 'لوحة التحكم الذكية', path: '', icon: LayoutTemplate });
+      crumbs.push({ label: 'لوحة التحكم', path: '/admin', icon: LayoutDashboard });
+      crumbs.push({ label: 'لوحة الذكاء', path: '', icon: Sparkles });
     } else if (pathname.includes('/smart-radar')) {
       crumbs.push({ label: 'المحور الرئيسي', path: '', icon: Target });
       crumbs.push({ label: 'لوحات الرادار الذكية', path: '', icon: Target });
