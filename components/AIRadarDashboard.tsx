@@ -3,7 +3,8 @@ import {
   Search, Database, Sparkles, Zap, TrendingUp, BarChart2, Activity, Layers, Clock, Star, 
   Bookmark, BookOpen, AlertTriangle, MessageCircle, FileText, Eye, Info, Check, X, 
   RefreshCw, ChevronDown, ChevronUp, ChevronRight, Filter, Target, Send, Shield, MousePointer2,
-  Brain, Edit3, Settings, Calendar, Bell, Mail, Share2
+  Brain, Edit3, Settings, Calendar, Bell, Mail, Share2, Flame, LayoutDashboard, Briefcase, 
+  ShieldCheck, Megaphone, Book, HelpCircle, List, PieChart, Repeat
 } from 'lucide-react';
 import {
   AreaChart, Area, ResponsiveContainer
@@ -37,10 +38,20 @@ const MOCK_DATASETS: DatasetMeta[] = [
 const SECTORS = ['الكل', 'الاقتصاد', 'الاستثمار', 'الطاقة', 'العقارات'];
 
 const OUTPUT_TYPES = [
-  { id: 'signals', ar: 'إشارات سريعة', icon: Zap, color: 'blue' },
-  { id: 'heatmap', ar: 'خرائط حرارية', icon: Activity, color: 'orange' },
-  { id: 'detailed', ar: 'مقالات مفصلة', icon: FileText, color: 'indigo' },
-  { id: 'insights', ar: 'رؤى استراتيجية', icon: Eye, color: 'teal' }
+  { id: 'signals', ar: 'إشارات', icon: Zap, color: 'blue' },
+  { id: 'heat', ar: 'حرارة السوق', icon: Activity, color: 'red' },
+  { id: 'compare', ar: 'مقارنات', icon: Repeat, color: 'purple' },
+  { id: 'dashboards', ar: 'لوحات', icon: LayoutDashboard, color: 'indigo' },
+  { id: 'portfolios', ar: 'محافظ', icon: Briefcase, color: 'slate' },
+  { id: 'facts', ar: 'حقائق', icon: ShieldCheck, color: 'emerald' },
+  { id: 'breaking', ar: 'عاجل', icon: Megaphone, color: 'orange' },
+  { id: 'events', ar: 'أحداث', icon: Calendar, color: 'cyan' },
+  { id: 'articles', ar: 'مقالات', icon: FileText, color: 'blue' },
+  { id: 'terms', ar: 'مصطلحات', icon: Book, color: 'amber' },
+  { id: 'insights', ar: 'رؤى', icon: Eye, color: 'teal' },
+  { id: 'qna', ar: 'سؤال وجواب', icon: HelpCircle, color: 'pink' },
+  { id: 'lists', ar: 'قوائم', icon: List, color: 'gray' },
+  { id: 'voting', ar: 'تصويت', icon: PieChart, color: 'violet' }
 ];
 
 // ─── Analytics Engine (Mocking) ───
@@ -235,16 +246,47 @@ const AIRadarDashboard = () => {
     <div className="min-h-screen bg-[#f8fafc] pb-20 font-sans" dir="rtl">
       <div className="max-w-4xl mx-auto px-6 pt-12 space-y-10">
         
-        {/* --- Header Section --- */}
-        <header className="space-y-4">
-          <div className="flex items-center gap-3">
-             <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-500/20">
-                <Brain size={28} className="text-white animate-pulse" />
-             </div>
-             <div>
-                <h1 className="text-2xl font-black text-slate-900">رادار الذكاء الاستراتيجي</h1>
-                <p className="text-sm text-slate-500 font-medium">نظام التحليل المعرفي المبني على البيانات الحية</p>
-             </div>
+        {/* --- Header & Guide Section --- */}
+        <header className="space-y-8 animate-fadeIn">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+               <div className="w-16 h-16 bg-blue-600 rounded-[24px] flex items-center justify-center shadow-2xl shadow-blue-500/20 rotate-3 hover:rotate-0 transition-transform duration-500">
+                  <Brain size={36} className="text-white animate-pulse" />
+               </div>
+               <div>
+                  <h1 className="text-3xl font-black text-slate-900 tracking-tight">رادار الذكاء الاستراتيجي</h1>
+                  <p className="text-sm text-slate-500 font-bold">بوابتك لاستخلاص المعرفة وتحويل البيانات إلى رؤى مستقبلية</p>
+               </div>
+            </div>
+            <div className="flex items-center gap-2 bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-100/50">
+               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
+               <span className="text-[11px] font-black text-emerald-700 uppercase tracking-widest">النظام جاهز للتحليل</span>
+            </div>
+          </div>
+
+          {/* Interactive Guide Steps */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+             {[
+               { step: '01', title: 'تغذية البيانات', desc: 'اختر مجموعات البيانات الحية من المستودع الاستراتيجي', icon: Database, color: 'text-blue-600', bg: 'bg-blue-50' },
+               { step: '02', title: 'صياغة الأمر', desc: 'حدد هدفك التحليلي بدقة باستخدام المحرك الطبيعي', icon: Sparkles, color: 'text-purple-600', bg: 'bg-purple-50' },
+               { step: '03', title: 'استخلاص الرؤى', desc: 'استلم مخرجات ذكية، خرائط حرارية وتوصيات عملية', icon: Zap, color: 'text-emerald-600', bg: 'bg-emerald-50' }
+             ].map((item, idx) => (
+               <div key={idx} className="relative group p-6 bg-white rounded-[32px] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500 overflow-hidden">
+                  <div className={`absolute -right-4 -top-4 w-24 h-24 ${item.bg} opacity-20 rounded-full group-hover:scale-150 transition-transform duration-700`} />
+                  <div className="relative z-10 space-y-4">
+                    <div className="flex items-center justify-between">
+                       <div className={`w-12 h-12 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center`}>
+                          <item.icon size={24} />
+                       </div>
+                       <span className={`text-2xl font-black ${item.color}`}>{item.step}</span>
+                    </div>
+                    <div className="space-y-1">
+                       <h3 className="font-black text-slate-900 text-sm">{item.title}</h3>
+                       <p className="text-[11px] text-slate-500 font-medium leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+               </div>
+             ))}
           </div>
         </header>
 
