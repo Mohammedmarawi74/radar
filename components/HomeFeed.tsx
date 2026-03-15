@@ -23,7 +23,8 @@ import {
     GraduationCap,
     MessageCircle,
     CheckSquare,
-    X
+    X,
+    Target as TargetIcon
 } from 'lucide-react';
 
 interface HomeFeedProps {
@@ -134,60 +135,130 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ feedItems, user, onOpenWizard }) =>
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-4 lg:py-8">
 
             {/* Compact Hero Section */}
-            <div className="mb-4 lg:mb-6">
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl md:rounded-2xl p-4 md:p-6 relative overflow-hidden shadow-lg shadow-blue-900/20">
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+            <div className="mb-8">
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 md:p-8 relative overflow-hidden shadow-xl shadow-blue-900/20">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
+                    <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-400/20 rounded-full blur-2xl -ml-20 -mb-20"></div>
 
-                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-4">
-                        {/* Title Section */}
-                        <div className="flex-1 text-right md:text-right">
-                            <h1 className="text-lg md:text-2xl font-bold text-white mb-1 flex items-center gap-2 justify-end md:justify-start">
-                                <Sparkles size={20} className="text-blue-200" />
-                                مركز الاكتشاف
-                            </h1>
-                            <p className="text-xs md:text-sm text-blue-100 font-medium">
-                                اكتشف التحليلات والبيانات الاستثمارية
-                            </p>
+                    <div className="relative z-10 space-y-8">
+                        {/* Title & Search Row */}
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div className="text-right">
+                                <h1 className="text-2xl md:text-3xl font-black text-white mb-2 flex items-center gap-3">
+                                    <Sparkles size={28} className="text-blue-200 animate-pulse" />
+                                    مركز الاكتشاف المعرفي
+                                </h1>
+                                <p className="text-xs md:text-sm text-blue-100 font-bold opacity-90">
+                                    تصفح أحدث التحليلات والبيانات الاقتصادية في الوقت الفعلي
+                                </p>
+                            </div>
+
+                            <div className="w-full md:w-96 relative group">
+                                <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-focus-within:text-blue-600 transition-colors" size={18} />
+                                <input
+                                    type="text"
+                                    placeholder="ابحث عن تقارير، بيانات، أو أخبار..."
+                                    className="w-full pl-4 pr-12 py-3.5 rounded-2xl border-2 border-white/20 bg-white/10 backdrop-blur-md shadow-inner focus:bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-white outline-none text-white focus:text-gray-900 text-sm font-bold transition-all placeholder:text-blue-100/50"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
                         </div>
 
-                        {/* Search Bar - Inline */}
-                        <div className="w-full md:w-96 relative group">
-                            <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-focus-within:text-blue-600 transition-colors" size={16} />
-                            <input
-                                type="text"
-                                placeholder="ابحث..."
-                                className="w-full pl-3 pr-10 py-2 md:py-2.5 rounded-lg border-2 border-white/20 bg-white/90 backdrop-blur-sm shadow-sm focus:bg-white focus:ring-2 focus:ring-white/50 focus:border-white outline-none text-gray-900 text-sm font-medium transition-all placeholder:text-gray-500"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                            {searchQuery && (
-                                <button
-                                    onClick={() => setSearchQuery('')}
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
-                                >
-                                    <X size={14} />
-                                </button>
-                            )}
+                        {/* Homepage 3-Step Guide (Matching AIRadar Style) */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {[
+                                { step: '01', title: 'مراقبة النبض', desc: 'تابع تدفق البيانات والتحليلات الحية من خبراء الرادار', icon: Activity, color: 'text-blue-400', bg: 'bg-white/10' },
+                                { step: '02', title: 'تحليل الفرص', desc: 'استخدم أدوات الذكاء الاصطناعي لاستكشاف الأنماط الخفية', icon: Sparkles, color: 'text-purple-300', bg: 'bg-white/10' },
+                                { step: '03', title: 'اتخاذ القرار', desc: 'بناء استراتيجيتك بناءً على حقائق ومقارنات دقيقة', icon: TargetIcon, color: 'text-emerald-300', bg: 'bg-white/10' }
+                            ].map((item, idx) => (
+                                <div key={idx} className="p-4 rounded-2x border border-white/10 bg-white/5 backdrop-blur-sm group hover:bg-white/10 transition-all">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className={`w-10 h-10 ${item.bg} ${item.color} rounded-xl flex items-center justify-center`}>
+                                            <item.icon size={20} />
+                                        </div>
+                                        <span className={`text-lg font-black ${item.color}`}>{item.step}</span>
+                                    </div>
+                                    <h3 className="text-white text-xs font-black mb-1">{item.title}</h3>
+                                    <p className="text-blue-100/60 text-[10px] leading-relaxed font-medium">{item.desc}</p>
+                                </div>
+                            ))}
                         </div>
-
-                        {/* AI Assistant Button - Compact */}
-                        {onOpenWizard && !searchQuery && (
-                            <button
-                                onClick={onOpenWizard}
-                                className="hidden md:flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-4 py-2.5 rounded-lg font-bold transition-all border border-white/20 hover:border-white/40"
-                            >
-                                <Sparkles size={16} className="text-blue-200" />
-                                <span className="text-xs">مساعد AI</span>
-                            </button>
-                        )}
                     </div>
                 </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-8">
+            <div className="flex flex-col lg:flex-row gap-8 items-start">
 
-                {/* Main Feed Column */}
-                <div className="flex-1 w-full max-w-full">
+                {/* --- Enhanced Sidebar (Profile & Trending) --- */}
+                {/* On Mobile: Appears at the top (order-1) | On Desktop: Appears at the left/end (order-2 in RTL) */}
+                <div className="w-full lg:w-80 shrink-0 space-y-6 lg:order-2">
+                    {/* User Profile Card */}
+                    <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-6 rounded-2xl shadow-xl text-white relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all duration-700"></div>
+                        <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all duration-700"></div>
+
+                        <div className="relative z-10">
+                            <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm mx-auto mb-3 border-4 border-white/30 shadow-lg overflow-hidden relative">
+                                <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                            </div>
+                            <h3 className="font-bold text-white text-center mb-1 text-lg">{user.name}</h3>
+                            <p className="text-xs text-white/80 font-medium text-center mb-4 bg-white/10 inline-block px-3 py-1 rounded-full mx-auto">{user.role}</p>
+
+                            <div className="grid grid-cols-3 gap-2 mt-6">
+                                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-2 text-center border border-white/10">
+                                    <p className="text-xl font-black">12</p>
+                                    <p className="text-[10px] text-white/70 font-bold uppercase">اشتراك</p>
+                                </div>
+                                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-2 text-center border border-white/10">
+                                    <p className="text-xl font-black">48</p>
+                                    <p className="text-[10px] text-white/70 font-bold uppercase">محفوظ</p>
+                                </div>
+                                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-2 text-center border border-white/10">
+                                    <p className="text-xl font-black">156</p>
+                                    <p className="text-[10px] text-white/70 font-bold uppercase">إعجاب</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Trending Topics - Sticky on Desktop only */}
+                    <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm lg:sticky lg:top-24">
+                        <h3 className="font-bold text-gray-900 mb-4 text-sm flex items-center gap-2">
+                            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center shadow-red-200 shadow-lg">
+                                <TrendingUp size={16} className="text-white" />
+                            </div>
+                            المواضيع الرائجة
+                        </h3>
+                        <div className="space-y-3">
+                            {[
+                                { tag: '#رؤية_2030', count: '2.4K', trend: '+12%' },
+                                { tag: '#الطاقة_المتجددة', count: '1.8K', trend: '+8%' },
+                                { tag: '#الذكاء_الاصطناعي', count: '3.1K', trend: '+24%' },
+                                { tag: '#التعدين', count: '892', trend: '+5%' },
+                                { tag: '#الاستثمار_الأجنبي', count: '1.2K', trend: '+15%' }
+                            ].map((item, idx) => (
+                                <button
+                                    key={item.tag}
+                                    onClick={() => setSearchQuery(item.tag.replace('#', ''))}
+                                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all group"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-lg font-black text-gray-300 group-hover:text-blue-500 transition-colors w-6">{idx + 1}</span>
+                                        <div className="text-right">
+                                            <p className="text-sm font-bold text-gray-800">{item.tag}</p>
+                                            <p className="text-[10px] text-gray-400">{item.count} منشور</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">{item.trend}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* --- Main Feed Column (order-2 on mobile, order-1 on desktop) --- */}
+                <div className="flex-1 w-full min-w-0 lg:order-1">
 
                     {/* --- POWERFUL FILTER BAR (Sticky) --- */}
                     <div className="sticky top-[60px] lg:top-[72px] z-30 transition-all duration-300">
@@ -334,85 +405,6 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ feedItems, user, onOpenWizard }) =>
                                 </button>
                             </div>
                         )}
-                    </div>
-                </div>
-
-                {/* Enhanced Right Sidebar */}
-                <div className="hidden lg:block w-80 shrink-0 space-y-6 pt-2">
-                    {/* User Profile Card */}
-                    <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-6 rounded-2xl shadow-xl text-white relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all duration-700"></div>
-                        <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all duration-700"></div>
-
-                        <div className="relative z-10">
-                            <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm mx-auto mb-3 border-4 border-white/30 shadow-lg overflow-hidden relative">
-                                <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-black/20 hidden group-hover:flex items-center justify-center backdrop-blur-[1px] cursor-pointer">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider">تعديل</span>
-                                </div>
-                            </div>
-                            <h3 className="font-bold text-white text-center mb-1 text-lg">{user.name}</h3>
-                            <p className="text-xs text-white/80 font-medium text-center mb-4 bg-white/10 inline-block px-3 py-1 rounded-full mx-auto">{user.role}</p>
-
-                            {/* Quick Stats */}
-                            <div className="grid grid-cols-3 gap-2 mt-6">
-                                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-2 text-center border border-white/10 hover:bg-white/20 transition-colors cursor-pointer">
-                                    <p className="text-xl font-black">12</p>
-                                    <p className="text-[10px] text-white/70 font-bold uppercase">اشتراك</p>
-                                </div>
-                                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-2 text-center border border-white/10 hover:bg-white/20 transition-colors cursor-pointer">
-                                    <p className="text-xl font-black">48</p>
-                                    <p className="text-[10px] text-white/70 font-bold uppercase">محفوظ</p>
-                                </div>
-                                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-2 text-center border border-white/10 hover:bg-white/20 transition-colors cursor-pointer">
-                                    <p className="text-xl font-black">156</p>
-                                    <p className="text-[10px] text-white/70 font-bold uppercase">إعجاب</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Trending Topics Enhanced */}
-                    <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm sticky top-24">
-                        <h3 className="font-bold text-gray-900 mb-4 text-sm flex items-center gap-2">
-                            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center shadow-red-200 shadow-lg">
-                                <TrendingUp size={16} className="text-white" />
-                            </div>
-                            المواضيع الرائجة
-                        </h3>
-                        <div className="space-y-3">
-                            {[
-                                { tag: '#رؤية_2030', count: '2.4K', trend: '+12%', color: 'blue' },
-                                { tag: '#الطاقة_المتجددة', count: '1.8K', trend: '+8%', color: 'green' },
-                                { tag: '#الذكاء_الاصطناعي', count: '3.1K', trend: '+24%', color: 'purple' },
-                                { tag: '#التعدين', count: '892', trend: '+5%', color: 'amber' },
-                                { tag: '#الاستثمار_الأجنبي', count: '1.2K', trend: '+15%', color: 'indigo' }
-                            ].map((item, idx) => (
-                                <button
-                                    key={item.tag}
-                                    onClick={() => setSearchQuery(item.tag.replace('#', ''))}
-                                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all group"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-lg font-black text-gray-300 group-hover:text-blue-500 transition-colors w-6">
-                                            {idx + 1}
-                                        </span>
-                                        <div className="text-right">
-                                            <p className={`text-sm font-bold text-gray-800`}>
-                                                {item.tag}
-                                            </p>
-                                            <p className="text-[10px] text-gray-400">{item.count} منشور</p>
-                                        </div>
-                                    </div>
-                                    <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100">
-                                        {item.trend}
-                                    </span>
-                                </button>
-                            ))}
-                        </div>
-                        <button className="w-full mt-4 py-2 text-xs font-bold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                            عرض المزيد من التحليلات
-                        </button>
                     </div>
                 </div>
             </div>
