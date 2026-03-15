@@ -3,7 +3,7 @@ import {
   Search, Database, Sparkles, Zap, TrendingUp, BarChart2, Activity, Layers, Clock, Star, 
   Bookmark, BookOpen, AlertTriangle, MessageCircle, FileText, Eye, Info, Check, X, 
   RefreshCw, ChevronDown, ChevronUp, ChevronRight, Filter, Target, Send, Shield, MousePointer2,
-  Brain, Edit3, Settings
+  Brain, Edit3, Settings, Calendar, Bell, Mail, Share2
 } from 'lucide-react';
 import {
   AreaChart, Area, ResponsiveContainer
@@ -99,6 +99,83 @@ const PulsingDot = () => (
   </span>
 );
 
+const SchedulingModal = ({ isOpen, onClose, cardTitle }: { isOpen: boolean, onClose: () => void, cardTitle: string }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fadeIn" onClick={onClose} />
+      <div className="relative w-full max-w-lg bg-white rounded-[40px] shadow-2xl overflow-hidden animate-scaleIn origin-center">
+        <div className="p-8 space-y-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                <Calendar size={24} />
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900">جدولة التنبيهات</h3>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Intelligent Automation</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-xl transition-colors text-slate-400">
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">تنبيه لـ:</p>
+            <p className="text-sm font-bold text-slate-700 truncate">{cardTitle}</p>
+          </div>
+
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">تكرار التنبيه</label>
+              <div className="grid grid-cols-3 gap-2">
+                {['يومي', 'أسبوعي', 'شهري'].map(freq => (
+                  <button key={freq} className={`py-3 rounded-xl border-2 text-xs font-black transition-all ${freq === 'يومي' ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-white border-slate-100 text-slate-400 hover:border-blue-200'}`}>
+                    {freq}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">قناة الاستلام</label>
+              <div className="flex flex-col gap-2">
+                {[
+                  { label: 'البريد الإلكتروني', icon: Mail, desc: 'استلام ملخص مفصل' },
+                  { label: 'تنبيهات المنصة', icon: Bell, desc: 'إشعارات لحظية داخل النظام' },
+                  { label: 'واتساب (WhatsApp)', icon: MessageCircle, desc: 'وصول سريع ومباشر' }
+                ].map((channel, i) => (
+                  <button key={i} className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all group ${i === 1 ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-50 hover:border-blue-100'}`}>
+                    <div className="flex items-center gap-3">
+                      <channel.icon size={18} className={i === 1 ? 'text-blue-400' : 'text-slate-300 group-hover:text-blue-500'} />
+                      <div className="text-right">
+                        <p className="text-xs font-black">{channel.label}</p>
+                        <p className={`text-[10px] ${i === 1 ? 'text-slate-400' : 'text-slate-300'}`}>{channel.desc}</p>
+                      </div>
+                    </div>
+                    {i === 1 && <Check size={16} className="text-blue-400" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button onClick={onClose} className="flex-1 py-4 rounded-2xl bg-blue-600 text-white text-sm font-black shadow-xl shadow-blue-500/20 hover:bg-blue-700 transition-all">
+              تفعيل الجدولة
+            </button>
+            <button onClick={onClose} className="px-6 py-4 rounded-2xl border border-slate-100 text-sm font-black text-slate-400 hover:bg-slate-50 transition-all">
+              إلغاء
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AIRadarDashboard = () => {
   // --- States ---
   const [searchQuery, setSearchQuery] = useState('');
@@ -114,6 +191,7 @@ const AIRadarDashboard = () => {
   const [showResults, setShowResults] = useState(false);
   const [outputs, setOutputs] = useState<OutputCard[]>([]);
   const [resultsFilter, setResultsFilter] = useState('all');
+  const [schedulingCard, setSchedulingCard] = useState<OutputCard | null>(null);
 
   // --- Memos ---
   const filteredDatasets = useMemo(() => {
@@ -466,11 +544,17 @@ const AIRadarDashboard = () => {
                                    </div>
                                 </div>
                                 
-                                <div className="flex items-center justify-end gap-3 pt-4">
-                                   <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-100 text-[11px] font-black text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all">
+                                <div className="flex flex-wrap items-center justify-end gap-3 pt-6 border-t border-slate-50">
+                                   <button 
+                                    onClick={() => setSchedulingCard(card)}
+                                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-50 text-blue-600 text-[11px] font-black hover:bg-blue-600 hover:text-white transition-all shadow-sm group/btn"
+                                   >
+                                      <Calendar size={14} className="group-hover/btn:animate-bounce" /> جدولة التنبيهات
+                                   </button>
+                                   <button className="flex items-center gap-2 px-5 py-3 rounded-xl border border-slate-100 text-[11px] font-black text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all">
                                       <Edit3 size={14} /> حفظ كمسودة
                                    </button>
-                                   <button className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 text-white text-[11px] font-black hover:bg-blue-600 shadow-lg shadow-slate-900/10 transition-all">
+                                   <button className="flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 text-white text-[11px] font-black hover:bg-blue-600 shadow-lg shadow-slate-900/10 transition-all">
                                       <Star size={14} className="text-amber-400" /> إضافة للمفضلة
                                    </button>
                                 </div>
@@ -496,6 +580,12 @@ const AIRadarDashboard = () => {
         </section>
 
       </div>
+
+      <SchedulingModal 
+        isOpen={!!schedulingCard} 
+        onClose={() => setSchedulingCard(null)} 
+        cardTitle={schedulingCard?.title || ''} 
+      />
 
       {/* --- Global Styles --- */}
       <style>{`
