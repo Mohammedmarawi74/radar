@@ -100,10 +100,11 @@ interface NavItemProps {
   end?: boolean;
   className?: string;
   badge?: React.ReactNode;
+  isCollapsed?: boolean;
   key?: React.Key;
 }
 
-const NavItem = ({ to, icon: Icon, children, end = false, className = '', badge = null }: NavItemProps) => {
+const NavItem = ({ to, icon: Icon, children, end = false, className = '', badge = null, isCollapsed = false }: NavItemProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isActive = end ? location.pathname === to : location.pathname.startsWith(to) && (to === '/' ? location.pathname === '/' : true);
@@ -115,11 +116,12 @@ const NavItem = ({ to, icon: Icon, children, end = false, className = '', badge 
   return (
     <div
       onClick={() => navigate(to)}
-      className={`${baseClass} ${isActive ? activeClass : inactiveClass} ${className}`}
+      className={`${baseClass} ${isActive ? activeClass : inactiveClass} ${className} ${isCollapsed ? 'justify-center px-0' : ''}`}
+      title={isCollapsed && typeof children === 'string' ? children : ''}
     >
-      {Icon && <Icon size={18} className={`group-hover:scale-110 transition-transform duration-200 ${isActive ? "fill-white text-white" : ""}`} />}
-      {children}
-      {badge}
+      {Icon && <Icon size={20} className={`shrink-0 transition-transform duration-200 ${isActive ? "fill-white text-white" : ""} ${isCollapsed ? "group-hover:scale-110" : ""}`} />}
+      {!isCollapsed && <span className="truncate">{children}</span>}
+      {!isCollapsed && badge}
     </div>
   );
 };
@@ -178,17 +180,19 @@ const MobileBottomNav = () => {
 };
 
 // --- NavGroup Helper ---
-const NavGroup = ({ title, open, onToggle, children }: { title: string, open: boolean, onToggle: () => void, children: React.ReactNode }) => (
+const NavGroup = ({ title, open, onToggle, children, isCollapsed }: { title: string, open: boolean, onToggle: () => void, children: React.ReactNode, isCollapsed: boolean }) => (
   <div className="mb-2">
-    <button
-      onClick={onToggle}
-      className="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all mb-1 group"
-    >
-      <span className="text-[10px] font-bold uppercase tracking-widest group-hover:text-blue-400 transition-colors">{title}</span>
-      <ChevronDown size={14} className={`transition-transform duration-300 text-slate-600 group-hover:text-slate-400 ${open ? 'rotate-180' : ''}`} />
-    </button>
-    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${open ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'}`}>
-      <div className="space-y-0.5">
+    {!isCollapsed && (
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all mb-1 group"
+      >
+        <span className="text-[10px] font-bold uppercase tracking-widest group-hover:text-blue-400 transition-colors">{title}</span>
+        <ChevronDown size={14} className={`transition-transform duration-300 text-slate-600 group-hover:text-slate-400 ${open ? 'rotate-180' : ''}`} />
+      </button>
+    )}
+    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isCollapsed ? 'max-h-none opacity-100' : (open ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0')}`}>
+      <div className={`space-y-0.5 ${isCollapsed ? 'flex flex-col items-center gap-1.5' : ''}`}>
         {children}
       </div>
     </div>
@@ -196,7 +200,7 @@ const NavGroup = ({ title, open, onToggle, children }: { title: string, open: bo
 );
 
 // --- Sidebar Component (DYNAMIC RBAC) ---
-const Sidebar = ({ role, dashboards }: { role: UserRole, dashboards: Dashboard[] }) => {
+const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: { role: UserRole, dashboards: Dashboard[], isCollapsed: boolean, onToggle: () => void }) => {
   // Helper for role checks
   const isAtLeast = (target: UserRole) => {
     const hierarchy = [
@@ -236,66 +240,80 @@ const Sidebar = ({ role, dashboards }: { role: UserRole, dashboards: Dashboard[]
     admin: true
   });
 
-  const toggle = (key: keyof typeof sections) => {
+  const toggleSection = (key: keyof typeof sections) => {
     setSections(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
-    <aside className="w-64 bg-slate-900 text-white h-screen sticky top-0 hidden lg:flex flex-col shadow-2xl z-50 overflow-hidden border-l border-slate-800">
-      {/* Brand */}
-      <div className="p-6 border-b border-slate-800 flex items-center gap-3 bg-slate-950/20 shrink-0">
-        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-          <Activity size={24} className="text-white" />
-        </div>
-        <div>
-          <h1 className="font-black text-lg tracking-tight leading-none bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">رادار المستثمر</h1>
-          <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest mt-1 opacity-80 underline decoration-blue-500/30 underline-offset-4">Investor Radar</p>
-        </div>
+    <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-slate-900 text-white h-screen fixed inset-y-0 right-0 hidden lg:flex flex-col shadow-2xl z-50 overflow-hidden border-l border-slate-800 transition-all duration-300 ease-in-out`}>
+      {/* Brand & Toggle */}
+      <div className={`p-4 border-b border-slate-800 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} bg-slate-950/20 shrink-0 relative group/brand`}>
+        {!isCollapsed && (
+          <div className="flex items-center gap-3 animate-fadeIn">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <Activity size={24} className="text-white" />
+            </div>
+            <div>
+              <h1 className="font-black text-lg tracking-tight leading-none bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">رادار المستثمر</h1>
+              <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest mt-1 opacity-80 underline decoration-blue-500/30 underline-offset-4">Investor Radar</p>
+            </div>
+          </div>
+        )}
+        
+        <button 
+          onClick={onToggle}
+          className={`p-2 rounded-xl bg-slate-800/50 hover:bg-blue-600 text-slate-400 hover:text-white transition-all duration-300 border border-slate-700/50 ${isCollapsed ? '' : 'ml-0'}`}
+          title={isCollapsed ? "توسيع القائمة" : "طي القائمة"}
+        >
+          {isCollapsed ? <ChevronLeft size={18} className="rotate-180" /> : <ChevronLeft size={18} />}
+        </button>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-3 custom-scrollbar">
 
-        <NavGroup title="المحور الرئيسي" open={sections.discovery} onToggle={() => toggle('discovery')}>
-          <NavItem to="/" icon={Compass} end>مركز الاكتشاف</NavItem>
-          <NavItem to="/ai-dashboard" icon={Cpu}>لوحة الذكاء</NavItem>
-          <NavItem to="/signals" icon={Zap}>إشارات السوق</NavItem>
-          <NavItem to="/timeline" icon={Clock}>سجل التغييرات</NavItem>
-          <NavItem to="/followers" icon={Users}>المجتمع</NavItem>
+        <NavGroup title="المحور الرئيسي" open={sections.discovery} onToggle={() => toggleSection('discovery')} isCollapsed={isCollapsed}>
+          <NavItem to="/" icon={Compass} end isCollapsed={isCollapsed}>مركز الاكتشاف</NavItem>
+          <NavItem to="/ai-dashboard" icon={Cpu} isCollapsed={isCollapsed}>لوحة الذكاء</NavItem>
+          <NavItem to="/signals" icon={Zap} isCollapsed={isCollapsed}>إشارات السوق</NavItem>
+          <NavItem to="/timeline" icon={Clock} isCollapsed={isCollapsed}>سجل التغييرات</NavItem>
+          <NavItem to="/followers" icon={Users} isCollapsed={isCollapsed}>المجتمع</NavItem>
         </NavGroup>
 
         <div className="my-2 border-t border-slate-800/40 mx-2"></div>
 
-        <NavGroup title="البيانات والتحليل" open={sections.data} onToggle={() => toggle('data')}>
-          <NavItem to="/dashboards" icon={LayoutDashboard}>كل اللوحات</NavItem>
+        <NavGroup title="البيانات والتحليل" open={sections.data} onToggle={() => toggleSection('data')} isCollapsed={isCollapsed}>
+          <NavItem to="/dashboards" icon={LayoutDashboard} isCollapsed={isCollapsed}>كل اللوحات</NavItem>
           {isExpert && (
-            <NavItem to="/expert-studio" icon={LayoutTemplate} className="text-amber-400 hover:text-amber-300 shadow-amber-500/10 hover:shadow-amber-500/20">استوديو الخبراء</NavItem>
+            <NavItem to="/expert-studio" icon={LayoutTemplate} isCollapsed={isCollapsed} className="text-amber-400 hover:text-amber-300 shadow-amber-500/10 hover:shadow-amber-500/20">استوديو الخبراء</NavItem>
           )}
           {isAnalyst && (
             <>
-              <NavItem to="/builder" icon={PieChart}>بناء اللوحات</NavItem>
-              <NavItem to="/queries" icon={Search}>المسح البياني</NavItem>
+              <NavItem to="/builder" icon={PieChart} isCollapsed={isCollapsed}>بناء اللوحات</NavItem>
+              <NavItem to="/queries" icon={Search} isCollapsed={isCollapsed}>المسح البياني</NavItem>
             </>
           )}
         </NavGroup>
 
         <div className="my-2 border-t border-slate-800/40 mx-2"></div>
 
-        <NavGroup title="مساحتي" open={sections.workspace} onToggle={() => toggle('workspace')}>
-          <NavItem to="/favorites" icon={Bookmark}>مفضلتي</NavItem>
-          <NavItem to="/my-dashboards" icon={Star}>لوحاتي الخاصة</NavItem>
-          {dashboards.filter(d => d.type === 'user').map(d => (
-            <NavItem key={d.id} to={`/my-dashboards?id=${d.id}`} icon={Layout} className="pl-8 opacity-70 scale-95 border-l border-slate-700 ml-4">{d.name}</NavItem>
+        <NavGroup title="مساحتي" open={sections.workspace} onToggle={() => toggleSection('workspace')} isCollapsed={isCollapsed}>
+          <NavItem to="/favorites" icon={Bookmark} isCollapsed={isCollapsed}>مفضلتي</NavItem>
+          <NavItem to="/my-dashboards" icon={Star} isCollapsed={isCollapsed}>لوحاتي الخاصة</NavItem>
+          {!isCollapsed && dashboards.filter(d => d.type === 'user').map(d => (
+            <NavItem key={d.id} to={`/my-dashboards?id=${d.id}`} icon={Layout} isCollapsed={isCollapsed} className="pl-8 opacity-70 scale-95 border-l border-slate-700 ml-4">{d.name}</NavItem>
           ))}
         </NavGroup>
 
-        <NavGroup title="التطبيقات" open={sections.apps} onToggle={() => toggle('apps')}>
-          <NavItem to="/profile" icon={UserIcon}>ملف المستخدم</NavItem>
+        <NavGroup title="التطبيقات" open={sections.apps} onToggle={() => toggleSection('apps')} isCollapsed={isCollapsed}>
+          <NavItem to="/profile" icon={UserIcon} isCollapsed={isCollapsed}>ملف المستخدم</NavItem>
           {/* Mock Sub-profiles */}
-          <div className="pl-8 flex flex-col gap-1 mt-1 border-l border-slate-700 ml-4 pb-2">
-            <div className="text-[11px] text-slate-500 hover:text-white cursor-pointer transition-colors">Personal Profile</div>
-            <div className="text-[11px] text-slate-500 hover:text-white cursor-pointer transition-colors">Team Dashboard</div>
-          </div>
+          {!isCollapsed && (
+            <div className="pl-8 flex flex-col gap-1 mt-1 border-l border-slate-700 ml-4 pb-2">
+              <div className="text-[11px] text-slate-500 hover:text-white cursor-pointer transition-colors">Personal Profile</div>
+              <div className="text-[11px] text-slate-500 hover:text-white cursor-pointer transition-colors">Team Dashboard</div>
+            </div>
+          )}
         </NavGroup>
 
         {/* Specialized Roles Groups */}
@@ -304,43 +322,43 @@ const Sidebar = ({ role, dashboards }: { role: UserRole, dashboards: Dashboard[]
         )}
 
         {isWriter && (
-          <NavGroup title="Authoring Center" open={sections.authoring} onToggle={() => toggle('authoring')}>
-            <NavItem to="/writer/create" icon={PenTool}>إنشاء منشور</NavItem>
-            <NavItem to="/writer/drafts" icon={BookOpen}>مسوداتي</NavItem>
-            <NavItem to="/writer/research" icon={Database}>المراجع</NavItem>
+          <NavGroup title="Authoring Center" open={sections.authoring} onToggle={() => toggleSection('authoring')} isCollapsed={isCollapsed}>
+            <NavItem to="/writer/create" icon={PenTool} isCollapsed={isCollapsed}>إنشاء منشور</NavItem>
+            <NavItem to="/writer/drafts" icon={BookOpen} isCollapsed={isCollapsed}>مسوداتي</NavItem>
+            <NavItem to="/writer/research" icon={Database} isCollapsed={isCollapsed}>المراجع</NavItem>
           </NavGroup>
         )}
 
         {isDesigner && (
-          <NavGroup title="Creative Studio" open={sections.creative} onToggle={() => toggle('creative')}>
-            <NavItem to="/designer/assets" icon={ImageIcon}>Asset Manager</NavItem>
-            <NavItem to="/designer/upload" icon={Palette}>رفع تصاميم</NavItem>
+          <NavGroup title="Creative Studio" open={sections.creative} onToggle={() => toggleSection('creative')} isCollapsed={isCollapsed}>
+            <NavItem to="/designer/assets" icon={ImageIcon} isCollapsed={isCollapsed}>Asset Manager</NavItem>
+            <NavItem to="/designer/upload" icon={Palette} isCollapsed={isCollapsed}>رفع تصاميم</NavItem>
           </NavGroup>
         )}
 
         {isContentManager && (
-          <NavGroup title="Editorial Desk" open={sections.editorial} onToggle={() => toggle('editorial')}>
-            <NavItem to="/editorial/approvals" icon={ClipboardList}>مراجعة المحتوى</NavItem>
-            <NavItem to="/editorial/schedule" icon={Clock}>جدولة المنشورات</NavItem>
+          <NavGroup title="Editorial Desk" open={sections.editorial} onToggle={() => toggleSection('editorial')} isCollapsed={isCollapsed}>
+            <NavItem to="/editorial/approvals" icon={ClipboardList} isCollapsed={isCollapsed}>مراجعة المحتوى</NavItem>
+            <NavItem to="/editorial/schedule" icon={Clock} isCollapsed={isCollapsed}>جدولة المنشورات</NavItem>
           </NavGroup>
         )}
 
         {isAdmin && (
-          <NavGroup title="System Admin" open={sections.admin} onToggle={() => toggle('admin')}>
-            <NavItem to="/admin" icon={Shield}>لوحة التحكم</NavItem>
-            <NavItem to="/admin/datasets" icon={Database}>قواعد البيانات</NavItem>
-            {isSuperAdmin && <NavItem to="/super/users" icon={Users}>المستخدمين</NavItem>}
-            {isCurbTron && <NavItem to="/curbtron/core" icon={Cpu}>CurbTron Nexus</NavItem>}
+          <NavGroup title="System Admin" open={sections.admin} onToggle={() => toggleSection('admin')} isCollapsed={isCollapsed}>
+            <NavItem to="/admin" icon={Shield} isCollapsed={isCollapsed}>لوحة التحكم</NavItem>
+            <NavItem to="/admin/datasets" icon={Database} isCollapsed={isCollapsed}>قواعد البيانات</NavItem>
+            {isSuperAdmin && <NavItem to="/super/users" icon={Users} isCollapsed={isCollapsed}>المستخدمين</NavItem>}
+            {isCurbTron && <NavItem to="/curbtron/core" icon={Cpu} isCollapsed={isCollapsed}>CurbTron Nexus</NavItem>}
           </NavGroup>
         )}
 
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-slate-800 bg-slate-950/30 backdrop-blur-sm shrink-0">
+      <div className={`p-4 border-t border-slate-800 bg-slate-950/30 backdrop-blur-sm shrink-0 flex ${isCollapsed ? 'justify-center' : ''}`}>
         <button className="flex items-center gap-3 px-3 py-2.5 text-red-400 hover:text-white hover:bg-red-500/10 rounded-lg w-full text-sm font-medium transition-colors border border-transparent hover:border-red-500/20 group">
-          <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
-          تسجيل الخروج
+          <LogOut size={20} className="shrink-0 group-hover:-translate-x-1 transition-transform" />
+          {!isCollapsed && <span>تسجيل الخروج</span>}
         </button>
       </div>
     </aside>
@@ -370,88 +388,104 @@ const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange
   const { title, section } = getPageInfo(location.pathname);
 
   return (
-    <header className="h-[60px] lg:h-[72px] sticky top-0 z-40 w-full backdrop-blur-xl bg-white/90 border-b border-gray-200/80 transition-all duration-300">
-      <div className="px-4 lg:px-8 h-full flex items-center justify-between gap-3 lg:gap-6">
+    <header className="h-[64px] lg:h-[80px] sticky top-0 z-40 w-full backdrop-blur-md bg-white/70 border-b border-gray-200/50 transition-all duration-300">
+      <div className="px-4 lg:px-10 h-full flex items-center justify-between gap-3 lg:gap-8">
 
-        <div className="flex items-center flex-1 gap-4 lg:gap-10">
-          <div className="lg:hidden flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
-              <Activity size={18} className="text-white" />
+        <div className="flex items-center flex-1 gap-4 lg:gap-12">
+          {/* Mobile Logo */}
+          <div className="lg:hidden flex items-center gap-3 group">
+            <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0 group-hover:scale-105 transition-transform">
+              <Activity size={20} className="text-white" />
             </div>
-            <span className="font-bold text-gray-900 text-sm hidden sm:block">رادار المستثمر</span>
+            <span className="font-black text-slate-900 text-sm hidden sm:block tracking-tight">رادار المستثمر</span>
           </div>
 
-          <div className="relative group w-full max-w-md hidden md:block">
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <Search className="w-4 h-4 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
+          {/* Enhanced Search Bar */}
+          <div className="relative group w-full max-w-lg hidden md:block">
+            <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+              <Search className="w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
             </div>
             <input
               type="text"
-              className="block w-full py-2.5 pr-10 pl-12 text-sm text-gray-900 bg-gray-100/50 border border-gray-200/60 rounded-xl focus:ring-4 focus:ring-blue-50/10 focus:border-blue-500 focus:bg-white transition-all placeholder-gray-400 shadow-sm hover:bg-white"
-              placeholder="ابحث عن مؤشر، تقرير، أو خبير..."
+              className="block w-full py-2.5 pr-11 pl-14 text-sm text-slate-900 bg-slate-100/40 border border-slate-200/60 rounded-2xl focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 focus:bg-white transition-all placeholder-slate-400 shadow-sm hover:border-slate-300"
+              placeholder="ابحث عن مؤشرات، تقارير، أو خبراء..."
             />
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+              <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold text-slate-400 bg-white border border-slate-200 rounded-lg shadow-sm">
+                <Command size={10} />
+                <span>K</span>
+              </kbd>
+            </div>
           </div>
 
-          <div className="hidden xl:flex items-center gap-2 text-sm text-gray-400 font-medium">
-            <span className="hover:text-gray-800 cursor-pointer transition-colors flex items-center gap-1">
-              <Home size={14} className="mb-0.5" />
-              {section}
-            </span>
-            <ChevronLeft size={14} className="text-gray-300 rtl:rotate-180" />
-            <span className="text-gray-900 font-bold bg-gray-100/80 px-3 py-1 rounded-lg border border-gray-200/50 shadow-sm">
+          {/* Elegant Breadcrumbs */}
+          <div className="hidden xl:flex items-center gap-3 text-[13px] font-semibold">
+            <div className="flex items-center gap-1.5 text-slate-400 hover:text-blue-600 cursor-pointer transition-colors group">
+              <Home size={15} className="mb-0.5 group-hover:scale-110 transition-transform" />
+              <span>{section}</span>
+            </div>
+            <div className="w-1.5 h-1.5 rounded-full bg-slate-200 mx-1"></div>
+            <span className="text-slate-900 bg-blue-50 border border-blue-100/50 px-3 py-1.5 rounded-xl shadow-sm">
               {title}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 lg:gap-5">
+        <div className="flex items-center gap-3 lg:gap-6">
+          {/* Smart Advisor Button with Gradient Glow */}
           <button
             onClick={onOpenWizard}
-            className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-xl lg:px-4 lg:py-2 text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-500/20 active:scale-95 border border-blue-500 overflow-hidden group relative"
+            className="relative group bg-slate-900 hover:bg-slate-800 text-white p-2.5 rounded-2xl lg:px-5 lg:py-2.5 text-xs font-black flex items-center gap-2.5 transition-all shadow-xl shadow-slate-200 overflow-hidden active:scale-95"
           >
-            <Sparkles size={18} className="group-hover:animate-spin" />
-            <span className="hidden lg:inline relative z-10">المستشار الذكي</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <Sparkles size={16} className="relative z-10 text-blue-300 group-hover:text-white group-hover:animate-pulse" />
+            <span className="hidden lg:inline relative z-10 tracking-wide uppercase">المستشار الذكي</span>
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl blur opacity-0 group-hover:opacity-20 transition-opacity"></div>
           </button>
 
-          <div className="hidden lg:flex items-center bg-white border border-gray-200 rounded-lg p-1 shadow-sm hover:border-gray-300 transition-colors">
-            {user.role === UserRole.CURBTRON && (
-              <div className="mr-2 px-2 py-0.5 bg-cyan-500 text-white text-[9px] font-black rounded-md animate-pulse">
-                CORE ACTIVE
-              </div>
-            )}
-            <span className="text-[10px] font-bold text-gray-400 uppercase px-2 tracking-wider">الدور:</span>
+          {/* Role Selector with Better UI */}
+          <div className="hidden lg:flex items-center bg-slate-50 border border-slate-200/80 rounded-2xl p-1 shadow-sm hover:bg-white hover:border-slate-300 transition-all group">
+            <div className="flex items-center gap-2 pr-3 pl-1 border-l border-slate-200 ml-1">
+              <ShieldCheck size={14} className="text-blue-500" />
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">الدور</span>
+            </div>
             <select
               value={user.role}
               onChange={(e) => onRoleChange(e.target.value as UserRole)}
-              className="bg-transparent text-xs font-bold text-gray-700 outline-none py-1 pr-1 pl-2 cursor-pointer hover:text-blue-600 focus:ring-0 border-none"
+              className="bg-transparent text-[11px] font-black text-slate-700 outline-none py-1.5 pr-2 pl-4 cursor-pointer hover:text-blue-600 focus:ring-0 border-none appearance-none"
             >
-              <optgroup label="User">
-                <option value={UserRole.STANDARD}>{UserRole.STANDARD}</option>
-                <option value={UserRole.ANALYST}>{UserRole.ANALYST}</option>
-                <option value={UserRole.EXPERT}>{UserRole.EXPERT}</option>
-                <option value={UserRole.CURBTRON}>{UserRole.CURBTRON}</option>
-              </optgroup>
-              <optgroup label="Admin">
-                <option value={UserRole.WRITER}>{UserRole.WRITER}</option>
-                <option value={UserRole.DESIGNER}>{UserRole.DESIGNER}</option>
-                <option value={UserRole.CONTENT_MANAGER}>{UserRole.CONTENT_MANAGER}</option>
-                <option value={UserRole.EDITOR}>{UserRole.EDITOR}</option>
-                <option value={UserRole.ADMIN}>{UserRole.ADMIN}</option>
-                <option value={UserRole.SUPER_ADMIN}>{UserRole.SUPER_ADMIN}</option>
+              <optgroup label="صلاحيات المستخدم">
+                <option value={UserRole.STANDARD}>قياسي</option>
+                <option value={UserRole.ADMIN}>مشرف النظام</option>
+                <option value={UserRole.SUPER_ADMIN}>مدير عام</option>
               </optgroup>
             </select>
+            <ChevronDown size={12} className="ml-2 text-slate-400 group-hover:text-blue-500 transition-colors" />
           </div>
 
-          <button className="relative p-2 lg:p-2.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all border border-transparent hover:border-blue-100 group">
+          {/* Notifications */}
+          <button className="relative p-2.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all group border border-transparent hover:border-blue-100">
             <Bell size={22} className="group-hover:animate-swing" />
+            <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
           </button>
 
-          <div className="flex items-center gap-3 cursor-pointer pl-2 pr-1 py-1 rounded-xl hover:bg-gray-50 transition-all border border-transparent hover:border-gray-200/60 group">
-            <div className="hidden lg:block text-left">
-              <p className="text-sm font-bold text-gray-800 leading-none mb-1 group-hover:text-blue-700 transition-colors">{user.name}</p>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide group-hover:text-blue-500/70">{user.role}</p>
+          {/* User Profile */}
+          <div className="flex items-center gap-4 cursor-pointer p-1.5 pr-3 rounded-2xl hover:bg-white hover:shadow-lg hover:shadow-slate-100 transition-all group border border-transparent hover:border-slate-100">
+            <div className="hidden lg:block text-right">
+              <p className="text-[13px] font-black text-slate-900 leading-none mb-1 group-hover:text-blue-600 transition-colors tracking-tight">{user.name}</p>
+              <div className="flex items-center justify-end gap-1">
+                <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse"></div>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{user.role}</p>
+              </div>
             </div>
-            <img src={user.avatar} alt="User" className="w-8 h-8 lg:w-10 lg:h-10 rounded-xl border border-gray-100 shadow-sm object-cover group-hover:ring-2 ring-blue-500/20 transition-all" />
+            <div className="relative">
+              <img 
+                src={user.avatar} 
+                alt="User" 
+                className="w-10 h-10 rounded-xl border-2 border-white shadow-md object-cover group-hover:scale-105 transition-transform" 
+              />
+              <div className="absolute -bottom-1 -left-1 w-4 h-4 bg-green-500 border-4 border-white rounded-full"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -801,10 +835,19 @@ const TimelinePage = ({ events }: { events: TimelineEvent[] }) => {
 // --- Main App Component ---
 const App = () => {
   const [currentUser, setCurrentUser] = useState(CURRENT_USER);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('sidebarCollapsed');
+    return saved === 'true';
+  });
+
   const [userDashboards, setUserDashboards] = useState<Dashboard[]>(() => {
     const saved = localStorage.getItem('userDashboards');
     return saved ? JSON.parse(saved) : INITIAL_DASHBOARDS.filter(d => d.type === 'user');
   });
+
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', String(isSidebarCollapsed));
+  }, [isSidebarCollapsed]);
   const [allWidgets, setAllWidgets] = useState<Widget[]>(WIDGETS);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
 
@@ -892,10 +935,15 @@ const App = () => {
 
   return (
     <div className="flex min-h-screen bg-slate-50 font-sans overflow-x-hidden" dir="rtl">
-      <Sidebar role={currentUser.role} dashboards={allDashboards} />
+      <Sidebar 
+        role={currentUser.role} 
+        dashboards={allDashboards} 
+        isCollapsed={isSidebarCollapsed}
+        onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
 
-      {/* Main Layout Adjustments for Mobile */}
-      <main className="flex-1 transition-all duration-300 pb-24 lg:pb-0 min-w-0">
+      {/* Main Layout Adjustments for Mobile and Collapsible Sidebar */}
+      <main className={`flex-1 transition-all duration-300 pb-24 lg:pb-0 ${isSidebarCollapsed ? 'lg:mr-20' : 'lg:mr-64'} min-w-0`}>
         <Topbar
           user={currentUser}
           onRoleChange={handleRoleChange}
