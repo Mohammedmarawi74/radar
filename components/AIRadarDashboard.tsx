@@ -74,8 +74,8 @@ const generateOutputs = (datasetIds: string[], prompt: string, selectedTypes: st
       cards.push({
         id: `out-${cat.id}-${i}-${Date.now()}`,
         category: cat.id, categoryAr: cat.ar,
-        title: `${cat.ar}: تحليل ${datasetIds.length > 1 ? 'مشترك' : 'مباشر'} #${ci + 1}`,
-        content: `بناءً على "${prompt.slice(0, 40)}..." تم استخلاص رؤية ${cat.ar} من ${datasetIds.length} مجموعة بيانات. النتائج تشير إلى اتجاهات مهمة تستحق المتابعة والتقييم.`,
+        title: `${cat.ar}: تحليل استراتيجي #${ci + 1}`,
+        content: `بناءً على "${prompt.slice(0, 40)}..." تم استخلاص رؤية ${cat.ar} من ${datasetIds.length} مجموعة بيانات. النتائج تشير إلى اتجاهات مهمة تستحق المتابعة والتقييم الاستراتيجي الفوري للمخاطر والفرص المحتملة.`,
         confidence: Math.floor(60 + Math.random() * 35),
         impact: Math.floor(40 + Math.random() * 55),
         source: MOCK_DATASETS.find(d => d.id === datasetIds[0])?.name || 'مصادر متعددة',
@@ -97,7 +97,7 @@ const generateOutputs = (datasetIds: string[], prompt: string, selectedTypes: st
 const Toast = ({ message, onClose }: { message: string; onClose: () => void }) => {
   useEffect(() => { const t = setTimeout(onClose, 3000); return () => clearTimeout(t); }, [onClose]);
   return (
-    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[999] animate-slideUp">
+    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[999] animate-fadeIn">
       <div className="bg-slate-900 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-700">
         <Check size={18} className="text-emerald-400" />
         <span className="text-sm font-medium">{message}</span>
@@ -123,23 +123,21 @@ const DatasetCard: React.FC<{ ds: DatasetMeta; selected: boolean; onToggle: () =
     <div 
       onClick={onToggle} 
       role="button"
-      aria-pressed={selected}
-      aria-label={`اختر مجموعة بيانات ${ds.name}`}
-      className={`group p-3 rounded-xl border cursor-pointer transition-all duration-200 ${selected ? 'border-blue-500 bg-blue-50/80 shadow-md shadow-blue-500/10 ring-1 ring-blue-400/30' : 'border-white bg-white hover:border-blue-300 hover:shadow-lg'}`}
+      className={`group p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${selected ? 'border-blue-500 bg-blue-50 shadow-xl shadow-blue-500/10' : 'border-slate-100 bg-white hover:border-blue-200 hover:shadow-lg'}`}
     >
       <div className="flex items-start justify-between mb-2">
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${selected ? 'border-blue-500 bg-blue-500' : 'border-gray-200 group-hover:border-blue-200'}`}>
-            {selected && <Check size={12} className="text-white" />}
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${selected ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 group-hover:border-blue-300'}`}>
+            {selected && <Check size={14} />}
           </div>
-          <h4 className="text-sm font-bold text-gray-800 truncate">{ds.name}</h4>
+          <h4 className="text-sm font-black text-slate-800 truncate">{ds.name}</h4>
         </div>
-        <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${statusColors[ds.status]} ${ds.status === 'live' ? 'animate-pulse' : ''}`} title={ds.status} />
+        <span className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1.5 ${statusColors[ds.status]} ${ds.status === 'live' ? 'animate-pulse' : ''}`} />
       </div>
-      <div className="flex items-center gap-3 text-[11px] text-gray-500 pr-7">
-        <span className="bg-gray-100 px-2 py-0.5 rounded-md font-medium">{ds.sector}</span>
+      <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-400 font-bold pr-9">
+        <span className="bg-slate-100 px-2 py-0.5 rounded-md text-slate-500">{ds.sector}</span>
         <span>{ds.date}</span>
-        <span className="font-mono">{ds.records.toLocaleString('ar-SA')}</span>
+        <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">{ds.records.toLocaleString()} سـجل</span>
       </div>
     </div>
   );
@@ -148,58 +146,46 @@ const DatasetCard: React.FC<{ ds: DatasetMeta; selected: boolean; onToggle: () =
 // ─── Scheduling Modal ───
 const SchedulingModal: React.FC<{ isOpen: boolean; onClose: () => void; onSave: (config: ScheduleConfig) => void }> = ({ isOpen, onClose, onSave }) => {
   const [config, setConfig] = useState<ScheduleConfig>({ frequency: 'daily', time: '09:00', reminders: true });
-  
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
       <div className="bg-white rounded-3xl w-full max-w-md relative shadow-2xl overflow-hidden animate-zoomIn">
         <div className="p-6 border-b border-gray-100">
-          <h3 className="text-lg font-black text-gray-900">جدولة تسليم المحتوى</h3>
-          <p className="text-sm text-gray-500 mt-1">تلقى الرؤى والتقارير في مواعيد محددة</p>
+          <h3 className="text-xl font-black text-gray-900">جدولة تسليم المعرفة</h3>
+          <p className="text-sm text-gray-400 font-medium mt-1">تلقى الرؤى الاستراتيجية في مواعيدك المفضلة</p>
         </div>
-        <div className="p-6 space-y-5">
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-600 block">التكرار</label>
+        <div className="p-6 space-y-6">
+          <div className="space-y-3">
+            <label className="text-xs font-black text-gray-400 uppercase">وتيرة التكرار</label>
             <div className="grid grid-cols-3 gap-2">
               {(['daily', 'weekly', 'custom'] as const).map(f => (
                 <button
                   key={f}
                   onClick={() => setConfig({ ...config, frequency: f })}
-                  className={`py-2 rounded-xl text-xs font-bold border transition-all ${config.frequency === f ? 'bg-blue-600 border-blue-600 text-white' : 'bg-gray-50 border-gray-100 text-gray-500 hover:bg-white hover:border-blue-200'}`}
+                  className={`py-3 rounded-xl text-xs font-black border-2 transition-all ${config.frequency === f ? 'bg-slate-900 border-slate-900 text-white shadow-lg' : 'bg-slate-50 border-slate-50 text-slate-400 hover:border-slate-200'}`}
                 >
                   {f === 'daily' ? 'يومي' : f === 'weekly' ? 'أسبوعي' : 'مخصص'}
                 </button>
               ))}
             </div>
           </div>
-          
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-600 block">التوقيت</label>
-              <input 
-                type="time" 
-                value={config.time}
-                onChange={e => setConfig({ ...config, time: e.target.value })}
-                className="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-100 outline-none"
-              />
+            <div className="space-y-3">
+              <label className="text-xs font-black text-gray-400 uppercase">وقت الإرسال</label>
+              <input type="time" value={config.time} onChange={e => setConfig({ ...config, time: e.target.value })} className="w-full bg-slate-50 border-2 border-slate-50 rounded-xl px-4 py-3 text-sm font-black focus:bg-white focus:border-blue-500 outline-none transition-all" />
             </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-600 block">التنبيهات</label>
-              <button 
-                onClick={() => setConfig({ ...config, reminders: !config.reminders })}
-                className={`w-full py-2 rounded-xl text-xs font-bold border flex items-center justify-center gap-2 transition-all ${config.reminders ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-gray-50 text-gray-400 border-gray-100'}`}
-              >
-                {config.reminders ? <Bell size={14} className="fill-current" /> : <Bell size={14} />}
-                {config.reminders ? 'مفعلة' : 'معطلة'}
+            <div className="space-y-3">
+              <label className="text-xs font-black text-gray-400 uppercase">التنبيهات</label>
+              <button onClick={() => setConfig({ ...config, reminders: !config.reminders })} className={`w-full py-3 rounded-xl text-xs font-black border-2 flex items-center justify-center gap-2 transition-all ${config.reminders ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-slate-50 text-slate-400 border-slate-50'}`}>
+                <Bell size={14} className={config.reminders ? 'fill-current' : ''} /> {config.reminders ? 'مفعلة' : 'معطلة'}
               </button>
             </div>
           </div>
         </div>
-        <div className="p-6 bg-gray-50 flex gap-3">
-          <button onClick={onClose} className="flex-1 py-3 text-sm font-bold text-gray-500 hover:text-gray-700">إلغاء</button>
-          <button onClick={() => { onSave(config); onClose(); }} className="flex-1 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-600/20 active:scale-95 transition-transform">حفظ الجدول</button>
+        <div className="p-6 bg-slate-50 flex gap-4">
+          <button onClick={onClose} className="flex-1 py-4 text-sm font-black text-slate-400 hover:text-slate-600 uppercase">إلغاء</button>
+          <button onClick={() => { onSave(config); onClose(); }} className="flex-1 py-4 bg-slate-900 text-white rounded-2xl text-sm font-black shadow-xl hover:bg-blue-600 active:scale-95 transition-all">تأكيد الجدولة</button>
         </div>
       </div>
     </div>
@@ -210,91 +196,89 @@ const SchedulingModal: React.FC<{ isOpen: boolean; onClose: () => void; onSave: 
 const OutputCardItem: React.FC<{ card: OutputCard; onBookmark: (id: string) => void; onDraft: (id: string) => void }> = ({ card, onBookmark, onDraft }) => {
   const [expanded, setExpanded] = useState(false);
   const typeStyles = {
-    positive: { border: 'border-l-emerald-500', bg: 'bg-emerald-50/40', badge: 'bg-emerald-100 text-emerald-700' },
-    negative: { border: 'border-l-red-500', bg: 'bg-red-50/40', badge: 'bg-red-100 text-red-700' },
-    neutral: { border: 'border-l-slate-400', bg: 'bg-slate-50/40', badge: 'bg-slate-100 text-slate-700' },
-    alert: { border: 'border-l-amber-500', bg: 'bg-amber-50/40', badge: 'bg-amber-100 text-amber-700' },
+    positive: { border: 'border-l-emerald-500', bg: 'bg-emerald-50/30', badge: 'bg-emerald-100 text-emerald-700' },
+    negative: { border: 'border-l-red-500', bg: 'bg-red-50/30', badge: 'bg-red-100 text-red-700' },
+    neutral: { border: 'border-l-slate-400', bg: 'bg-slate-50/30', badge: 'bg-slate-100 text-slate-700' },
+    alert: { border: 'border-l-amber-500', bg: 'bg-amber-50/30', badge: 'bg-amber-100 text-amber-700' },
   };
   const s = typeStyles[card.type];
   const catObj = OUTPUT_CATEGORIES.find(c => c.id === card.category);
   const CatIcon = catObj?.icon || Zap;
 
   return (
-    <div className={`rounded-xl border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:translate-x-1 ${card.isDraft ? 'opacity-75 bg-gray-50' : s.bg} border-l-4 ${s.border}`} aria-expanded={expanded}>
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-sm" style={{ backgroundColor: catObj?.color + '20' }}>
-              <CatIcon size={16} style={{ color: catObj?.color }} />
+    <div className={`rounded-2xl border border-slate-100 overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 ${card.isDraft ? 'opacity-70 grayscale bg-slate-50' : s.bg} border-l-4 ${s.border}`}>
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg" style={{ backgroundColor: catObj?.color + '15' }}>
+              <CatIcon size={20} style={{ color: catObj?.color }} />
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <span className={`text-[10px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider ${s.badge}`}>{card.categoryAr}</span>
-                {card.isDraft && <span className="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-bold">مسودة</span>}
+              <div className="flex items-center gap-2 mb-1">
+                <span className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest ${s.badge}`}>{card.categoryAr}</span>
+                {card.isDraft && <span className="text-[9px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded-md font-black">مسودة</span>}
               </div>
-              <h4 className="text-sm font-black text-gray-900 truncate mt-1">{card.title}</h4>
+              <h4 className="text-sm font-black text-slate-900 truncate">{card.title}</h4>
             </div>
           </div>
-          <div className="flex gap-1 shrink-0">
-             <button 
-               onClick={() => onBookmark(card.id)} 
-               className="p-1.5 hover:bg-white/80 rounded-lg transition-colors border border-transparent hover:border-gray-200"
-               title="حفظ"
-             >
-               <Bookmark size={15} className={card.bookmarked ? 'text-amber-500 fill-amber-500' : 'text-gray-400'} />
+          <div className="flex gap-2">
+             <button onClick={() => onBookmark(card.id)} className="w-8 h-8 rounded-xl bg-white/80 flex items-center justify-center transition-all hover:bg-white shadow-sm border border-slate-100 group">
+               <Bookmark size={14} className={card.bookmarked ? 'text-amber-500 fill-amber-500' : 'text-slate-300 group-hover:text-slate-500'} />
              </button>
              {!card.isDraft && (
-               <button 
-                 onClick={() => onDraft(card.id)} 
-                 className="p-1.5 hover:bg-white/80 rounded-lg transition-colors border border-transparent hover:border-gray-200 text-gray-400 hover:text-blue-600"
-                 title="تحويل لمسودة"
-               >
-                 <Edit3 size={15} />
+               <button onClick={() => onDraft(card.id)} className="w-8 h-8 rounded-xl bg-white/80 flex items-center justify-center transition-all hover:bg-white shadow-sm border border-slate-100 group text-slate-300 hover:text-blue-500">
+                 <Edit3 size={14} />
                </button>
              )}
           </div>
         </div>
 
-        {expanded && (
-          <div className="animate-slideDown overflow-hidden">
-            <p className="text-xs text-slate-600 leading-relaxed mb-4 pr-11 border-r-2 border-slate-200/50 mr-1">{card.content}</p>
+        {expanded ? (
+          <div className="animate-fadeIn">
+            <p className="text-xs text-slate-600 leading-relaxed mb-5 font-medium">{card.content}</p>
             {card.chartData && (
-              <div className="pr-11 mb-4 h-24 bg-white/60 rounded-2xl p-3 border border-gray-100 shadow-inner">
+              <div className="mb-5 bg-white/80 rounded-2xl p-4 border border-slate-100 shadow-inner">
                 <Sparkline data={card.chartData} color={catObj?.color || '#3b82f6'} />
               </div>
             )}
-            <div className="pr-11 mb-4 grid grid-cols-2 gap-3">
-              <div className="p-2.5 bg-white/80 rounded-xl border border-gray-100 shadow-sm">
-                <span className="text-[10px] text-gray-400 block mb-1 font-bold">المصدر</span>
+            <div className="grid grid-cols-2 gap-4 mb-5">
+              <div className="p-3 bg-white/80 rounded-xl border border-slate-50">
+                <span className="text-[9px] text-slate-400 font-bold uppercase block mb-1">المصدر الاستشهادي</span>
                 <span className="text-[10px] font-black text-slate-700 truncate block">{card.source}</span>
               </div>
-              <div className="p-2.5 bg-white/80 rounded-xl border border-gray-100 shadow-sm">
-                <span className="text-[10px] text-gray-400 block mb-1 font-bold">التاريخ</span>
+              <div className="p-3 bg-white/80 rounded-xl border border-slate-50">
+                <span className="text-[9px] text-slate-400 font-bold uppercase block mb-1">توقيت الاستنتاج</span>
                 <span className="text-[10px] font-black text-slate-700 block">{card.date}</span>
               </div>
             </div>
           </div>
+        ) : (
+          <p className="text-xs text-slate-500 line-clamp-2 mb-4 font-medium leading-relaxed opacity-60">{card.content}</p>
         )}
 
-        <div className="flex items-center justify-between pr-11">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5 group/score relative cursor-help">
-              <div className="w-14 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-500 transition-all duration-1000" style={{ width: `${card.confidence}%` }} />
+        <div className="flex items-center justify-between pt-2 border-t border-slate-200/50">
+          <div className="flex items-center gap-6">
+            <div className="space-y-1">
+              <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Confidence</span>
+              <div className="flex items-center gap-2">
+                <div className="w-12 h-1 bg-slate-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-blue-500 rounded-full" style={{ width: `${card.confidence}%` }} />
+                </div>
+                <span className="text-[10px] font-black text-slate-900">{card.confidence}%</span>
               </div>
-              <span className="text-[10px] font-black text-slate-500">{card.confidence}%</span>
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-slate-900 text-white text-[10px] rounded-lg opacity-0 group-hover/score:opacity-100 pointer-events-none transition-all shadow-xl whitespace-nowrap z-50">درجة الثقة</div>
             </div>
-            <div className="flex items-center gap-1.5 group/impact relative cursor-help">
-              <div className="w-14 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                <div className="h-full bg-indigo-500 transition-all duration-1000" style={{ width: `${card.impact}%` }} />
+            <div className="space-y-1">
+              <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Impact</span>
+              <div className="flex items-center gap-2">
+                <div className="w-12 h-1 bg-slate-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${card.impact}%` }} />
+                </div>
+                <span className="text-[10px] font-black text-slate-900">{card.impact}%</span>
               </div>
-              <span className="text-[10px] font-black text-slate-500">{card.impact}%</span>
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-slate-900 text-white text-[10px] rounded-lg opacity-0 group-hover/impact:opacity-100 pointer-events-none transition-all shadow-xl whitespace-nowrap z-50">درجة الأثر</div>
             </div>
           </div>
-          <button onClick={() => setExpanded(!expanded)} className="text-[10px] text-blue-600 hover:text-blue-800 font-black flex items-center gap-1.5 bg-blue-50/50 px-3 py-1.5 rounded-lg transition-colors">
-            {expanded ? <><ChevronUp size={12} /> إخفاء</> : <><ChevronDown size={12} /> التفاصيل</>}
+          <button onClick={() => setExpanded(!expanded)} className="text-[10px] font-black text-blue-600 flex items-center gap-1.5 hover:underline">
+            {expanded ? <><ChevronUp size={14} /> إخفاء</> : <><ChevronDown size={14} /> عرض التحليل</>}
           </button>
         </div>
       </div>
@@ -308,13 +292,7 @@ const MiniHeatmap = ({ score }: { score: number }) => {
   return (
     <div className="grid grid-cols-6 gap-0.5 w-24 h-8 bg-gray-100 p-0.5 rounded">
       {cells.map(i => (
-        <div 
-          key={i} 
-          className="rounded-sm" 
-          style={{ 
-            backgroundColor: i * 8 < score ? `rgba(239, 68, 68, ${0.3 + (i / 12)})` : '#e2e8f0' 
-          }} 
-        />
+        <div key={i} className="rounded-sm" style={{ backgroundColor: i * 8 < score ? `rgba(239, 68, 68, ${0.3 + (i / 12)})` : '#e2e8f0' }} />
       ))}
     </div>
   );
@@ -373,27 +351,25 @@ const AIRadarDashboard = () => {
 
   const handleGenerate = useCallback(() => {
     if (selectedDatasets.length === 0) { setToast('يرجى اختيار مجموعة بيانات واحدة على الأقل'); return; }
-    if (selectedContentTypes.length === 0) { setToast('يرجى اختيار نوع محتوى واحد على الأقل'); return; }
-    if (!prompt.trim()) { setToast('يرجى إدخال تعليمات للذكاء الاصطناعي'); return; }
+    if (selectedContentTypes.length === 0) { setToast('مطلوب اختيار محتوى واحد على الأقل'); return; }
+    if (!prompt.trim()) { setToast('يرجى إدخال تعليمات التحليل'); return; }
     
     setIsGenerating(true);
-    if (window.innerWidth < 1024) setMobilePanel('ai');
-
     setTimeout(() => {
       const newOutputs = generateOutputs(selectedDatasets, prompt, selectedContentTypes);
       setOutputs(newOutputs);
       setIsGenerating(false);
-      setToast('✅ تم توليد الرؤى بنجاح!');
+      setToast('✅ تم استخلاص الرؤى بنجاح!');
       if (window.innerWidth < 1024) setMobilePanel('outputs');
     }, 2000);
   }, [selectedDatasets, prompt, selectedContentTypes]);
 
   const loadSample = () => {
-    setSelectedDatasets(['ds1', 'ds2', 'ds5']);
-    setSelectedContentTypes(['signals', 'heatmap', 'insights']);
-    setPrompt('حلل الارتباط بين نمو سوق العمل ونشاط العقارات السكنية مع توقعات الاستثمار الأجنبي المباشر للربع القادم.');
-    setAiMode('comparative');
-    setToast('تم تحميل نموذج تجريبي');
+    setSelectedDatasets(['ds1', 'ds2', 'ds7', 'ds8']);
+    setSelectedContentTypes(['signals', 'heatmap', 'insights', 'facts']);
+    setPrompt('حلل الارتباط بين مؤشرات سوق العمل والمشاريع التقنية وتأثيرها المتوقع على الطاقة المتجددة للعام القادم.');
+    setAiMode('trend');
+    setToast('تم تطبيق النموذج الاستراتيجي');
   };
 
   const handleBookmark = useCallback((id: string) => {
@@ -403,7 +379,7 @@ const AIRadarDashboard = () => {
 
   const handleDraft = useCallback((id: string) => {
     setOutputs(prev => prev.map(o => o.id === id ? { ...o, isDraft: true } : o));
-    setToast('تم الحفظ كمسودة');
+    setToast('تم الحفظ في المسودات');
   }, []);
 
   const filteredOutputs = useMemo(() => {
@@ -412,389 +388,298 @@ const AIRadarDashboard = () => {
   }, [outputs, activeOutputFilter]);
 
   const handleSaveSchedule = (config: ScheduleConfig) => {
-    setToast(`تمت جدولة التسليم: ${config.frequency === 'daily' ? 'يومياً' : config.frequency === 'weekly' ? 'أسبوعياً' : 'مخصص'} في ${config.time}`);
+    setToast(`تم جدولة المعالجة الاستباقية في ${config.time}`);
   };
 
-  // ─── RENDER ───
   return (
     <div className="h-[calc(100vh-72px)] flex flex-col overflow-hidden bg-slate-50">
-      {/* ── Mobile Tab Bar ── */}
-      <div className="lg:hidden flex border-b border-gray-200 bg-white sticky top-0 z-20">
-        {[{ k: 'datasets' as const, l: 'البيانات', I: Database }, { k: 'ai' as const, l: 'الذكاء', I: Brain }, { k: 'outputs' as const, l: 'المخرجات', I: Layers }].map(t => (
+      {/* ── Mobile Navigation ── */}
+      <div className="lg:hidden flex border-b border-slate-200 bg-white sticky top-0 z-50">
+        {[{ k: 'datasets' as const, l: 'البيانات', I: Database }, { k: 'ai' as const, l: 'الذكاء', I: Brain }, { k: 'outputs' as const, l: 'الرؤى', I: Layers }].map(t => (
           <button 
             key={t.k} 
             onClick={() => setMobilePanel(t.k)} 
-            className={`flex-1 py-3 flex items-center justify-center gap-2 text-sm font-bold transition-all ${mobilePanel === t.k ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-gray-500'}`}
+            className={`flex-1 py-4 flex flex-col items-center justify-center gap-1 text-[10px] font-black transition-all ${mobilePanel === t.k ? 'text-blue-600 bg-blue-50/50' : 'text-slate-400'}`}
           >
-            <t.I size={16} />{t.l}
-            {t.k === 'outputs' && outputs.length > 0 && <span className="w-2 h-2 bg-blue-600 rounded-full animate-ping" />}
+            <t.I size={18} />{t.l}
+            {t.k === 'outputs' && outputs.length > 0 && <span className="absolute top-2 w-2 h-2 bg-blue-600 rounded-full animate-ping" />}
           </button>
         ))}
       </div>
 
-      {/* ── Three Column Layout ── */}
       <div className="flex-1 flex overflow-hidden">
-
-        {/* ══════ RIGHT COLUMN ─ Datasets ══════ */}
-        <aside className={`w-full lg:w-80 xl:w-96 border-l border-gray-200 bg-white flex flex-col shrink-0 ${mobilePanel !== 'datasets' ? 'hidden lg:flex' : 'flex'}`}>
-          {/* Sticky Header */}
-          <div className="p-4 border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-10 shrink-0">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-black text-gray-900 flex items-center gap-2">
-                <Database size={18} className="text-blue-600" /> مجموعات البيانات
-              </h2>
-              <div className="flex items-center gap-1.5">
-                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-emerald-50 rounded-md border border-emerald-100">
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                  <span className="text-[9px] font-bold text-emerald-700 uppercase">Live Sync</span>
-                </div>
+        {/* ══════ RIGHT: DATA INGESTION (Phase 1) ══════ */}
+        <aside className={`w-full lg:w-80 xl:w-96 border-l border-slate-200 bg-white flex flex-col shrink-0 ${mobilePanel !== 'datasets' ? 'hidden lg:flex' : 'flex'}`}>
+          <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                  <Database size={16} className="text-blue-600" /> مراجعة البيانات
+                </h2>
+                <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-0.5">Phase 1: Knowledge Ingestion</p>
+              </div>
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 rounded-full border border-emerald-100">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                <span className="text-[9px] font-black text-emerald-700">LIVE</span>
               </div>
             </div>
-            <div className="relative mb-2">
-              <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input value={datasetSearch} onChange={e => setDatasetSearch(e.target.value)} placeholder="بحث عن بيانات..." className="w-full pr-9 pl-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none" />
+            <div className="relative">
+              <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input value={datasetSearch} onChange={e => setDatasetSearch(e.target.value)} placeholder="ابحث في المستودع..." className="w-full pr-9 pl-4 py-2.5 text-xs bg-white border-2 border-slate-100 rounded-xl focus:border-blue-500 outline-none transition-all font-bold" />
             </div>
-            <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
               {sectors.map(s => (
-                <button key={s} onClick={() => setSectorFilter(s)} className={`px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${sectorFilter === s ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>{s}</button>
+                <button key={s} onClick={() => setSectorFilter(s)} className={`px-4 py-1.5 rounded-full text-[10px] font-black whitespace-nowrap transition-all border-2 ${sectorFilter === s ? 'bg-slate-900 border-slate-900 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-400 hover:border-blue-200'}`}>{s}</button>
               ))}
             </div>
           </div>
-          {/* Selected Count */}
-          {selectedDatasets.length > 0 && (
-            <div className="px-4 py-2 bg-blue-50 border-b border-blue-100 flex items-center justify-between shrink-0">
-              <span className="text-xs font-bold text-blue-700">{selectedDatasets.length} محدد</span>
-              <button onClick={() => setSelectedDatasets([])} className="text-[11px] text-blue-600 hover:underline font-medium">مسح الكل</button>
-            </div>
-          )}
-          {/* Dataset List */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-slate-50/30">
+
+          <div className="flex-1 overflow-y-auto p-5 space-y-3 custom-scrollbar">
             {paginatedDatasets.map(ds => (
-              <DatasetCard 
-                key={ds.id} 
-                ds={ds} 
-                selected={selectedDatasets.includes(ds.id)} 
-                onToggle={() => toggleDataset(ds.id)} 
-              />
+              <DatasetCard key={ds.id} ds={ds} selected={selectedDatasets.includes(ds.id)} onToggle={() => toggleDataset(ds.id)} />
             ))}
-            {filteredDatasets.length === 0 && <div className="text-center py-12 text-gray-400 text-sm">لا توجد نتائج</div>}
           </div>
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="p-3 border-t border-gray-100 bg-white flex items-center justify-between shrink-0">
-               <button 
-                 disabled={currentPage === 1}
-                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                 className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
-               >
-                 <ChevronRight size={18} />
-               </button>
-               <span className="text-[11px] font-black text-slate-500">صفحة {currentPage} من {totalPages}</span>
-               <button 
-                 disabled={currentPage === totalPages}
-                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                 className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
-               >
-                 <ChevronLeft size={18} />
-               </button>
-            </div>
-          )}
-          {/* Sync Status Footer */}
-          <div className="p-4 bg-white border-t border-gray-100 text-center shrink-0">
-            <p className="text-[10px] text-gray-400 flex items-center justify-center gap-1.5 font-bold uppercase tracking-wider">
-              <RefreshCw size={10} className="animate-spin-slow text-blue-500" /> المزامنة الحية: <span className="text-slate-600">{lastSync}</span>
-            </p>
+
+          <div className="p-5 border-t border-slate-100 bg-slate-50/50">
+             <div className="flex items-center justify-between mb-2">
+               <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">مستوى التحديث</span>
+               <span className="text-[9px] font-black text-blue-600">{lastSync}</span>
+             </div>
+             <p className="text-[10px] text-slate-500 font-medium leading-relaxed italic">يتم سحب البيانات لحظياً من محركات الرصد العالمية والمحلية لبناء سياق التحليل.</p>
           </div>
         </aside>
 
-        {/* ══════ CENTER COLUMN ─ AI Workspace ══════ */}
-        <main className={`flex-1 flex flex-col bg-white min-w-0 shadow-inner ${mobilePanel !== 'ai' ? 'hidden lg:flex' : 'flex'}`}>
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
-            <div className="max-w-3xl mx-auto p-4 lg:p-8 space-y-6">
-              {/* Enhanced Header Section */}
-              <div className="relative pt-4 pb-2">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-24 bg-blue-500/10 blur-[60px] rounded-full pointer-events-none" />
+        {/* ══════ CENTER: AI COMMAND CENTER (Phase 2 & 3) ══════ */}
+        <main className={`flex-1 flex flex-col bg-slate-50 min-w-0 ${mobilePanel !== 'ai' ? 'hidden lg:flex' : 'flex'}`}>
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-6 lg:p-12">
+            <div className="max-w-4xl mx-auto space-y-12">
+              <header className="text-center space-y-6 relative">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-blue-500/10 blur-[90px] rounded-full" />
+                <div className="relative inline-block group">
+                  <div className="w-28 h-28 mx-auto rounded-[32px] bg-slate-900 shadow-2xl flex items-center justify-center border border-white/10 relative z-10">
+                    <Brain size={56} className="text-blue-400 animate-pulse" />
+                  </div>
+                  <div className="absolute -inset-4 bg-blue-500/20 blur-2xl rounded-full animate-pulse opacity-40" />
+                </div>
+                <div className="space-y-4 relative z-10">
+                  <h1 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-none">
+                    مركز <span className="bg-gradient-to-l from-blue-600 to-indigo-600 bg-clip-text text-transparent">الذكاء الاستراتيجي</span>
+                  </h1>
+                  <p className="text-lg text-slate-500 font-medium max-w-2xl mx-auto">
+                    Phase 2: Intent & Parameterization. قم ببرمجة المحرك التحليلي بناءً على أهدافك الاستراتيجية ونوع المخرجات المطلوبة.
+                  </p>
+                </div>
+              </header>
+
+              <div className="bg-white rounded-[48px] shadow-2xl shadow-blue-900/10 border border-slate-200/50 p-8 lg:p-14 space-y-12 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-80 h-80 bg-slate-50 rounded-full -mr-40 -mt-40 transition-transform group-hover:scale-110" />
                 
-                <div className="flex flex-col items-center text-center space-y-5 relative z-10">
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-blue-600/20 blur-xl group-hover:blur-2xl transition-all duration-500 opacity-50" />
-                    <div className="relative w-20 h-20 rounded-[24px] bg-gradient-to-br from-slate-900 to-blue-800 shadow-2xl flex items-center justify-center text-white border border-white/10 group-hover:scale-105 transition-transform duration-500">
-                      <Brain size={40} className="text-blue-400" />
-                    </div>
-                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-xl shadow-lg flex items-center justify-center border border-slate-100 animate-bounce-slow">
-                      <Sparkles size={16} className="text-blue-600" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 max-w-2xl">
-                    <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight">
-                      لوحة <span className="text-blue-600">الذكاء الاصطناعي</span> الخارق
-                    </h1>
-                    <p className="text-base text-slate-500 font-medium leading-relaxed">
-                      نظام رادار المتطور يدمج أقوى محركات الذكاء الاصطناعي مع بياناتك لتحويل الأرقام الصامتة إلى <span className="text-slate-900 font-black">رؤى استراتيجية</span>. استكشف الأنماط، تنبأ بالمستقبل، واتخذ قراراتك بناءً على تحليلات دقيقة ومعمقة.
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-6 pt-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                      <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">تحليل مباشر</span>
-                    </div>
-                    <div className="w-px h-3 bg-slate-200" />
-                    <div className="flex items-center gap-2">
-                      <Zap size={14} className="text-blue-500" />
-                      <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">رؤى فورية</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Dataset Selection Notification */}
-              {selectedDatasets.length === 0 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3 animate-pulse">
-                  <AlertTriangle size={18} className="text-amber-500 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-bold text-amber-800">بانتظار البيانات</p>
-                    <p className="text-[11px] text-amber-600 mt-0.5">يرجى اختيار مجموعة بيانات واحدة على الأقل من القائمة اليمنى للبدء.</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Selected Datasets Tags */}
-              {selectedDatasets.length > 0 && (
-                <div className="space-y-2">
-                   <div className="flex items-center justify-between">
-                     <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5"><Database size={14} /> مصدر التحليل</h3>
-                     <span className="text-[10px] text-gray-400">{selectedDatasets.length} مصادر مختارة</span>
-                   </div>
-                   <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                    {selectedDatasets.map(id => {
-                      const ds = MOCK_DATASETS.find(d => d.id === id);
-                      return ds ? (
-                        <span key={id} className="inline-flex items-center gap-1.5 bg-white text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold border border-blue-100 shadow-sm transition-all hover:scale-105">
-                          {ds.name}
-                          <button onClick={() => toggleDataset(id)} className="hover:text-red-500 transition-colors"><X size={12} /></button>
-                        </span>
-                      ) : null;
-                    })}
-                   </div>
-                </div>
-              )}
-
-              {/* Interaction Panel */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-5 lg:p-6 relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-1 h-full bg-blue-600 opacity-0 group-focus-within:opacity-100 transition-opacity" />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col md:flex-row items-start justify-between gap-6 relative z-10">
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-gray-700 flex items-center gap-1.5">
-                      <Filter size={14} className="text-blue-600" /> ذكاء المبدع
-                    </label>
-                    <select value={aiMode} onChange={e => setAiMode(e.target.value)} className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-sm font-black focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer">
-                      <option value="predictive">🔮 تنبؤي (Predictive)</option>
-                      <option value="descriptive">📊 تحليلي (Analytical)</option>
-                      <option value="summarization">📝 تلخيص (Summarization)</option>
-                      <option value="trend">📉 رصد الاتجاهات (Trends)</option>
-                    </select>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-900 text-white rounded-lg text-[9px] font-black uppercase tracking-widest">Operational Protocol</div>
+                    <h3 className="text-3x font-black text-slate-900 mt-1">توجيه المحرك الذكي</h3>
                   </div>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-black text-gray-700">مستوى الثقة</label>
-                      <span className="text-xs font-black text-blue-600 px-2 py-0.5 bg-blue-50 rounded-md">{confidence}%</span>
-                    </div>
-                    <div className="relative pt-1">
-                      <input type="range" min={30} max={99} value={confidence} onChange={e => setConfidence(+e.target.value)} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
-                      <div className="flex justify-between text-[10px] text-gray-400 mt-2 font-bold uppercase">
-                        <span>سريع</span>
-                        <span>شامل</span>
+                  <div className="flex gap-3">
+                    <button onClick={loadSample} className="px-5 py-2.5 border-2 border-slate-100 rounded-2xl text-xs font-black text-slate-500 hover:bg-slate-50 hover:border-slate-200 transition-all">تعبئة نموذج ذكي</button>
+                    <button onClick={() => setShowScheduling(true)} className="px-5 py-2.5 bg-indigo-50 border-2 border-indigo-100 rounded-2xl text-xs font-black text-indigo-600 hover:bg-indigo-100 transition-all">الجدولة الآلية</button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 relative z-10">
+                  <div className="space-y-10">
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <Zap size={14} className="text-amber-500" /> نمط المعالجة المعرفية
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {[
+                          { id: 'predictive', l: 'تنبؤي', i: Sparkles },
+                          { id: 'trend', l: 'اتجاهات', i: TrendingUp },
+                          { id: 'descriptive', l: 'تحليلي', i: BarChart2 },
+                          { id: 'summarization', l: 'تلخيص', i: FileText },
+                        ].map(m => (
+                          <button 
+                            key={m.id}
+                            onClick={() => setAiMode(m.id)}
+                            className={`flex items-center gap-4 p-5 rounded-3xl border-2 transition-all duration-300 ${aiMode === m.id ? 'bg-slate-900 border-slate-900 text-white shadow-2xl -translate-y-1' : 'bg-slate-50 border-slate-50 text-slate-400 hover:border-slate-200'}`}
+                          >
+                            <m.i size={20} />
+                            <span className="text-xs font-black">{m.l}</span>
+                          </button>
+                        ))}
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                {/* Content Types Multi-select */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-black text-gray-700 flex items-center gap-1.5">
-                      <Layers size={14} className="text-blue-600" /> أنواع المخرجات المطلوبة
-                    </label>
-                    <span className="text-[10px] font-bold text-slate-400">{selectedContentTypes.length} محدد</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {OUTPUT_CATEGORIES.map(c => {
-                      const isSelected = selectedContentTypes.includes(c.id);
-                      return (
-                        <button
-                          key={c.id}
-                          onClick={() => toggleContentType(c.id)}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-black transition-all border ${isSelected ? 'bg-slate-900 border-slate-900 text-white shadow-lg' : 'bg-white border-gray-100 text-slate-500 hover:border-blue-200'}`}
-                        >
-                          <c.icon size={12} className={isSelected ? 'text-blue-400' : 'text-gray-400'} />
-                          {c.ar}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-black text-gray-700 flex items-center gap-1.5">
-                      <MessageCircle size={14} className="text-blue-600" /> تعليمات التحليل
-                    </label>
-                    <div className="flex gap-2">
-                       <button onClick={() => setShowScheduling(true)} className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-xl hover:bg-indigo-100 transition-colors flex items-center gap-1.5 shadow-sm border border-indigo-100">
-                          <Clock size={12} /> جدولة التسليم
-                       </button>
-                       <button onClick={loadSample} className="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1.5 rounded-xl hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">تحميل نموذج</button>
+                    <div className="space-y-5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">عمق البحث والثقة</label>
+                        <span className="text-xs font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-lg">Accuracy: {confidence}%</span>
+                      </div>
+                      <input type="range" min={30} max={99} value={confidence} onChange={e => setConfidence(+e.target.value)} className="w-full h-3 bg-slate-100 rounded-full appearance-none cursor-pointer accent-blue-600" />
                     </div>
                   </div>
-                  <div className="relative group">
+
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                      <MessageCircle size={14} className="text-blue-500" /> أمر التشغيل الاستراتيجي
+                    </label>
                     <textarea 
                       value={prompt} 
-                      onChange={e => setPrompt(e.target.value)} 
-                      placeholder="صف ما تريد استخلاصه من البيانات... (مثال: توقعات الربع القادم بناءً على التاريخ)"
-                      className="w-full bg-slate-50/50 border border-gray-200 rounded-3xl px-5 py-5 text-sm resize-none h-40 focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none placeholder-gray-400 font-medium leading-relaxed transition-all" 
+                      onChange={e => setPrompt(e.target.value)}
+                      placeholder="صف هنا أهدافك، التساؤلات المعقدة، أو نوع الاستنتاجات التي تريد استخلاصها من البيانات المختارة..."
+                      className="w-full h-full min-h-[220px] bg-slate-50 border-2 border-slate-50 rounded-[40px] p-8 text-sm font-bold focus:bg-white focus:border-blue-500/20 focus:ring-[12px] focus:ring-blue-50 outline-none transition-all placeholder:text-slate-200 leading-relaxed shadow-inner"
                     />
-                    <div className="absolute bottom-4 left-4 flex gap-2">
-                       <Sparkles size={18} className={`text-blue-500 transition-all duration-700 ${prompt ? 'animate-pulse scale-110' : 'opacity-20'}`} />
-                    </div>
                   </div>
                 </div>
 
-                <button 
-                  onClick={handleGenerate} 
-                  disabled={isGenerating || selectedDatasets.length === 0} 
-                  className={`w-full py-4.5 rounded-2xl text-sm font-black flex items-center justify-center gap-3 transition-all ${isGenerating ? 'bg-slate-100 text-slate-400 cursor-wait' : 'bg-gradient-to-l from-slate-900 to-slate-800 text-white hover:to-blue-600 shadow-2xl hover:shadow-blue-600/30 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group'}`}
-                >
-                  {isGenerating ? <><RefreshCw size={22} className="animate-spin" /> جاري التحليل النمطي...</> : <><Zap size={22} className="fill-blue-400 group-hover:fill-white transition-colors" /> إنشاء المحتوى الذكي</>}
-                </button>
+                <div className="space-y-5 relative z-10 pt-6 border-t border-slate-100">
+                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">توليد المخرجات (Multi-Output Matrix)</label>
+                   <div className="flex flex-wrap gap-3">
+                      {OUTPUT_CATEGORIES.map(c => {
+                        const isSelected = selectedContentTypes.includes(c.id);
+                        return (
+                          <button
+                            key={c.id}
+                            onClick={() => toggleContentType(c.id)}
+                            className={`px-5 py-3 rounded-2xl text-xs font-black transition-all border-2 flex items-center gap-2.5 ${isSelected ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-300'}`}
+                          >
+                            <c.icon size={16} className={isSelected ? 'text-white' : 'text-slate-300'} />
+                            {c.ar}
+                          </button>
+                        );
+                      })}
+                   </div>
+                </div>
+
+                <div className="pt-8 relative z-10">
+                  <button 
+                    onClick={handleGenerate}
+                    disabled={isGenerating || selectedDatasets.length === 0}
+                    className={`w-full py-8 rounded-[32px] text-xl font-black flex items-center justify-center gap-5 transition-all shadow-2xl ${isGenerating ? 'bg-slate-100 text-slate-300 cursor-wait' : 'bg-slate-900 text-white hover:bg-blue-600 hover:-translate-y-2 active:translate-y-0 shadow-blue-500/30'}`}
+                  >
+                    {isGenerating ? (
+                      <>
+                        <RefreshCw size={28} className="animate-spin" />
+                        <span>Phase 3: Deep Synthesis...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Zap size={28} className="fill-blue-400" />
+                        <span>تفعيل المعالجة المعرفية</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
-              {/* Generation State Visualizer */}
               {isGenerating && (
-                <div className="bg-slate-900 rounded-2xl p-8 text-center space-y-4 border border-slate-800 shadow-2xl relative overflow-hidden">
-                  <div className="absolute inset-0 bg-blue-600/5 animate-pulse" />
-                  <div className="relative z-10">
-                    <div className="w-16 h-16 mx-auto bg-blue-500/10 rounded-full flex items-center justify-center mb-4">
-                      <RefreshCw size={32} className="text-blue-500 animate-spin" />
-                    </div>
-                    <h3 className="text-lg font-bold text-white mb-1">الذكاء الجماعي يعمل الآن</h3>
-                    <p className="text-xs text-slate-400 max-w-xs mx-auto">نقوم الآن بمعالجة {MOCK_DATASETS.filter(d=>selectedDatasets.includes(d.id)).reduce((acc,d)=>acc+d.records, 0).toLocaleString()} سجلاً بيانيًا...</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Progress/Success Summary */}
-              {outputs.length > 0 && !isGenerating && (
-                <div className="p-6 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl text-white shadow-xl flex items-center gap-5 group relative overflow-hidden">
-                  <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
-                  <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center shrink-0 border border-white/30">
-                    <Check size={32} />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-black leading-tight">اكتمل التوليد</h3>
-                    <p className="text-xs text-blue-100 opacity-90 mt-1">تمت مراجعة {selectedDatasets.length} مصادر وخرجنا بـ {outputs.length} رؤية ذكية متنوعة.</p>
-                  </div>
-                  <button onClick={() => setMobilePanel('outputs')} className="lg:hidden bg-white text-blue-600 px-4 py-2 rounded-lg text-xs font-bold shadow-sm">عرض النتائج</button>
+                <div className="animate-fadeIn space-y-6 max-w-2xl mx-auto">
+                   <div className="flex items-center gap-5 text-slate-900 font-black">
+                      <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-xl">
+                         <Activity size={24} className="animate-pulse" />
+                      </div>
+                      <div className="flex-1">
+                         <div className="flex justify-between items-end mb-2">
+                            <span className="text-sm font-black uppercase tracking-widest">Processing Collective IQ...</span>
+                            <span className="text-[10px] text-blue-600 font-black bg-blue-50 px-2 py-0.5 rounded">Syncing across {selectedDatasets.length} nodes</span>
+                         </div>
+                         <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                            <div className="h-full bg-blue-600 animate-[loading_2s_ease-in-out_infinite]" />
+                         </div>
+                      </div>
+                   </div>
                 </div>
               )}
             </div>
           </div>
         </main>
 
-        {/* ══════ LEFT COLUMN ─ Outputs ══════ */}
-        <aside className={`w-full lg:w-80 xl:w-[420px] border-r border-gray-200 bg-white flex flex-col shrink-0 ${mobilePanel !== 'outputs' ? 'hidden lg:flex' : 'flex'}`}>
-          {/* Sticky Header */}
-          <div className="p-4 border-b border-gray-100 bg-gray-50/50 backdrop-blur-sm sticky top-0 z-10 shrink-0">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-black text-gray-900 flex items-center gap-2">
-                <Layers size={18} className="text-indigo-600" /> المخرجات الذكية
-              </h2>
-              <div className="flex items-center gap-2">
-                 <button className="p-1.5 hover:bg-white rounded-md transition-colors" title="إعدادات التصدير"><Copy size={14} className="text-gray-400" /></button>
-                 <button className="p-1.5 hover:bg-white rounded-md transition-colors" title="تصفية المخرجات"><Filter size={14} className="text-gray-400" /></button>
+        {/* ══════ LEFT: STRATEGIC INSIGHTS (Phase 4) ══════ */}
+        <aside className={`w-full lg:w-80 xl:w-[450px] border-r border-slate-200 bg-white flex flex-col shrink-0 ${mobilePanel !== 'outputs' ? 'hidden lg:flex' : 'flex'}`}>
+          <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col gap-5 sticky top-0 z-20">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                  <Layers size={16} className="text-indigo-600" /> مستودع المعرفة
+                </h2>
+                <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-0.5">Phase 4: Consumption & Strategy</p>
               </div>
+              <button className="w-10 h-10 rounded-2xl hover:bg-white border-2 border-transparent hover:border-slate-100 flex items-center justify-center transition-all shadow-sm">
+                <Filter size={16} className="text-slate-400" />
+              </button>
             </div>
             
-            {/* Output Category Filter */}
-            <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-              <button onClick={() => setActiveOutputFilter('all')} className={`px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all ${activeOutputFilter === 'all' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}>الكل</button>
-              {OUTPUT_CATEGORIES.map(c => (
-                <button 
-                  key={c.id} 
-                  onClick={() => setActiveOutputFilter(c.id)} 
-                  className={`px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all flex items-center gap-1.5 border ${activeOutputFilter === c.id ? 'text-white shadow-lg' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`} 
-                  style={activeOutputFilter === c.id ? { backgroundColor: c.color, borderColor: c.color, boxShadow: `0 4px 12px -2px ${c.color}40` } : {}}
-                >
-                  <c.icon size={12} />{c.ar}
-                </button>
-              ))}
+            <div className="flex gap-2 overflow-x-auto no-scrollbar">
+              <button onClick={() => setActiveOutputFilter('all')} className={`px-5 py-2.5 rounded-2xl text-[10px] font-black transition-all ${activeOutputFilter === 'all' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white text-slate-500 border-2 border-slate-50'}`}>الكل</button>
+              {OUTPUT_CATEGORIES.filter(c => outputs.some(o => o.category === c.id)).map(c => {
+                 const isActive = activeOutputFilter === c.id;
+                 return (
+                   <button key={c.id} onClick={() => setActiveOutputFilter(c.id)} className={`px-5 py-2.5 rounded-2xl text-[10px] font-black whitespace-nowrap flex items-center gap-2 border-2 transition-all ${isActive ? 'text-white border-transparent' : 'bg-white border-slate-50 text-slate-500'}`} style={isActive ? { backgroundColor: c.color, boxShadow: `0 12px 20px -5px ${c.color}50` } : {}}>
+                     <c.icon size={14} />{c.ar}
+                   </button>
+                 );
+              })}
             </div>
           </div>
 
-          {/* Output Cards Scrollable Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-slate-50/50">
-            {filteredOutputs.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-24 text-center">
-                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-gray-100">
-                   <Lightbulb size={32} className="text-gray-300" />
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-slate-50/10">
+            {filteredOutputs.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center px-12 space-y-6 opacity-40 grayscale">
+                <div className="w-24 h-24 bg-white rounded-[40px] shadow-sm border border-slate-100 flex items-center justify-center">
+                   <Zap size={40} className="text-slate-200" />
                 </div>
-                <h3 className="text-sm font-bold text-gray-600">لا توجد رؤى متاحة</h3>
-                <p className="text-[11px] text-gray-400 max-w-[180px] mt-1 italic">بانتظار تعليماتك في مساحة العمل المركزية لتوليد تحليل جديد...</p>
+                <div className="space-y-2">
+                  <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Awaiting Golden Insights</h3>
+                  <p className="text-[11px] text-slate-400 font-medium leading-relaxed">بمجرد تفعيل المعالجة في مساحة العمل المركزية، ستظهر هنا نتائج التحليل الممنهج لبياناتك.</p>
+                </div>
               </div>
+            ) : (
+              filteredOutputs.map(card => (
+                <div key={card.id} className="animate-fadeIn">
+                  <OutputCardItem card={card} onBookmark={handleBookmark} onDraft={handleDraft} />
+                </div>
+              ))
             )}
-            
-            {filteredOutputs.map(card => (
-              <div key={card.id} className="group relative">
-                <OutputCardItem card={card} onBookmark={handleBookmark} onDraft={handleDraft} />
-                {card.category === 'heatmap' && (
-                  <div className="absolute left-4 bottom-4 opacity-40 group-hover:opacity-100 transition-opacity pointer-events-none">
-                     <MiniHeatmap score={card.impact} />
-                  </div>
-                )}
-              </div>
-            ))}
           </div>
 
-          {/* Actions Footer */}
           {outputs.length > 0 && (
-            <div className="p-3 bg-white border-t border-gray-100 grid grid-cols-2 gap-2">
-               <button className="flex items-center justify-center gap-2 py-2.5 bg-gray-900 text-white rounded-xl text-xs font-bold hover:bg-gray-800 transition-colors">
-                  <FileText size={14} /> تصوير التقرير
+            <div className="p-6 border-t border-slate-100 bg-white grid grid-cols-2 gap-4 shadow-[0_-15px_40px_-5px_rgba(0,0,0,0.04)]">
+               <button className="flex items-center justify-center gap-3 py-4 bg-slate-900 text-white rounded-[24px] text-xs font-black shadow-2xl hover:bg-slate-800 active:scale-95 transition-all">
+                  <ExternalLink size={16} /> تصدير المعرفة
                </button>
-               <button className="flex items-center justify-center gap-2 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-50 transition-colors">
-                  <Star size={14} className="text-amber-500" /> حفظ الكل
+               <button className="flex items-center justify-center gap-3 py-4 border-2 border-slate-100 bg-white text-slate-900 rounded-[24px] text-xs font-black hover:bg-slate-50 active:scale-95 transition-all">
+                  <Star size={16} className="text-amber-500 fill-amber-500" /> حفظ كمجلد
                </button>
             </div>
           )}
         </aside>
       </div>
 
-      {/* Toast Notification */}
       {toast && <Toast message={toast} onClose={() => setToast('')} />}
+      <SchedulingModal isOpen={showScheduling} onClose={() => setShowScheduling(false)} onSave={handleSaveSchedule} />
       
-      {/* Scheduling Modal */}
-      <SchedulingModal 
-        isOpen={showScheduling} 
-        onClose={() => setShowScheduling(false)} 
-        onSave={handleSaveSchedule} 
-      />
-      
-      {/* Global CSS Enhancements */}
       <style>{`
-        .animate-spin-slow { animation: spin 4s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+        
+        @keyframes loading {
+          0% { width: 0%; transform: translateX(-100%); }
+          50% { width: 60%; transform: translateX(20%); }
+          100% { width: 100%; transform: translateX(100%); }
+        }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
         
         @keyframes zoomIn {
-          from { opacity: 0; transform: scale(0.95); }
+          from { opacity: 0; transform: scale(0.9); }
           to { opacity: 1; transform: scale(1); }
         }
-        .animate-zoomIn { animation: zoomIn 0.2s ease-out forwards; }
       `}</style>
     </div>
   );
