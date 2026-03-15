@@ -129,13 +129,16 @@ interface NavItemProps {
   className?: string;
   badge?: React.ReactNode;
   isCollapsed?: boolean;
+  important?: boolean;
   key?: React.Key;
 }
 
-const NavItem = ({ to, icon: Icon, children, end = false, className = '', badge = null, isCollapsed = false }: NavItemProps) => {
+const NavItem = ({ to, icon: Icon, children, end = false, className = '', badge = null, isCollapsed = false, important = false }: NavItemProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isActive = end ? location.pathname === to : location.pathname.startsWith(to) && (to === '/' ? location.pathname === '/' : true);
+
+  if (isCollapsed && !important) return null;
 
   const baseClass = `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group cursor-pointer select-none`;
   const activeClass = `bg-blue-600 text-white shadow-lg shadow-blue-900/40`;
@@ -222,32 +225,41 @@ const NavGroup = ({
   children: React.ReactNode, 
   isCollapsed: boolean,
   icon?: any
-}) => (
-  <div className="mb-1">
-    {!isCollapsed ? (
-      <button
-        onClick={onToggle}
-        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all group ${open ? 'bg-slate-800/40' : 'hover:bg-slate-800/30'}`}
-      >
-        <div className="flex items-center gap-2.5">
-          {Icon && <Icon size={16} className={`transition-colors ${open ? 'text-blue-400' : 'text-slate-500'}`} />}
-          <span className={`text-[11px] font-black uppercase tracking-wider transition-colors ${open ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-200'}`}>{title}</span>
+}) => {
+  // Check if any child is an 'important' NavItem
+  const hasImportantChildren = React.Children.toArray(children).some(
+    (child: any) => child?.props?.important === true
+  );
+
+  if (isCollapsed && !hasImportantChildren) return null;
+
+  return (
+    <div className="mb-1">
+      {!isCollapsed ? (
+        <button
+          onClick={onToggle}
+          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all group ${open ? 'bg-slate-800/40' : 'hover:bg-slate-800/30'}`}
+        >
+          <div className="flex items-center gap-2.5">
+            {Icon && <Icon size={16} className={`transition-colors ${open ? 'text-blue-400' : 'text-slate-500'}`} />}
+            <span className={`text-[11px] font-black uppercase tracking-wider transition-colors ${open ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-200'}`}>{title}</span>
+          </div>
+          <ChevronDown 
+            size={14} 
+            className={`transition-all duration-300 text-slate-600 group-hover:text-slate-400 ${open ? 'rotate-180 text-blue-400' : ''}`} 
+          />
+        </button>
+      ) : (
+        <div className="h-px bg-slate-800/20 my-4 mx-4"></div>
+      )}
+      <div className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-h-none opacity-100' : (open ? 'max-h-[1000px] opacity-100 mt-1' : 'max-h-0 opacity-0')}`}>
+        <div className={`space-y-0.5 ${isCollapsed ? 'flex flex-col items-center gap-1.5' : 'pr-2'}`}>
+          {children}
         </div>
-        <ChevronDown 
-          size={14} 
-          className={`transition-all duration-300 text-slate-600 group-hover:text-slate-400 ${open ? 'rotate-180 text-blue-400' : ''}`} 
-        />
-      </button>
-    ) : (
-      <div className="h-px bg-slate-800 my-4 mx-4"></div>
-    )}
-    <div className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'max-h-none opacity-100' : (open ? 'max-h-[1000px] opacity-100 mt-1' : 'max-h-0 opacity-0')}`}>
-      <div className={`space-y-0.5 ${isCollapsed ? 'flex flex-col items-center gap-1.5' : 'pr-2'}`}>
-        {children}
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // --- Sidebar Component (DYNAMIC RBAC) ---
 const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: { 
@@ -333,10 +345,10 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
           <>
             {/* --- Standard Mode: Dashboard & Overview --- */}
             <NavGroup title="المحور الرئيسي" open={sections.overview} onToggle={() => toggleSection('overview')} isCollapsed={isCollapsed} icon={LayoutDashboard}>
-              <NavItem to="/" icon={Home} end isCollapsed={isCollapsed}>الصفحة الرئيسية</NavItem>
-              <NavItem to="/signals" icon={Zap} isCollapsed={isCollapsed}>إشارات السوق</NavItem>
-              <NavItem to="/ai-dashboard" icon={Cpu} isCollapsed={isCollapsed}>لوحة الذكاء</NavItem>
-              <NavItem to="/smart-radar" icon={Target} isCollapsed={isCollapsed}>لوحات الرادار الذكية</NavItem>
+              <NavItem to="/" icon={Home} end isCollapsed={isCollapsed} important>الصفحة الرئيسية</NavItem>
+              <NavItem to="/signals" icon={Zap} isCollapsed={isCollapsed} important>إشارات السوق</NavItem>
+              <NavItem to="/ai-dashboard" icon={Cpu} isCollapsed={isCollapsed} important>لوحة الذكاء</NavItem>
+              <NavItem to="/smart-radar" icon={Target} isCollapsed={isCollapsed} important>لوحات الرادار الذكية</NavItem>
               <NavItem to="/timeline" icon={Clock} isCollapsed={isCollapsed}>سجل التغييرات</NavItem>
               <NavItem to="/followers" icon={Users} isCollapsed={isCollapsed}>المجتمع</NavItem>
             </NavGroup>
@@ -369,12 +381,12 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
           <>
             {/* --- Admin Mode: Content Management --- */}
             <NavGroup title="إدارة المحتوى" open={sections.content} onToggle={() => toggleSection('content')} isCollapsed={isCollapsed} icon={FileText}>
-              <NavItem to="/editorial/review" icon={Eye} isCollapsed={isCollapsed}>مراجعة المحتوى</NavItem>
+              <NavItem to="/editorial/review" icon={Eye} isCollapsed={isCollapsed} important>مراجعة المحتوى</NavItem>
               <NavItem to="/campaigns" icon={Radio} isCollapsed={isCollapsed}>الحملات التفاعلية</NavItem>
               <NavItem to="/moderation" icon={MessageSquare} isCollapsed={isCollapsed}>إشراف التعليقات</NavItem>
               <NavItem to="/tags" icon={Tags} isCollapsed={isCollapsed}>إدارة الوسوم</NavItem>
               <NavItem to="/media" icon={ImageIcon} isCollapsed={isCollapsed}>مكتبة الوسائط</NavItem>
-              <NavItem to="/create-post" icon={FilePlus} isCollapsed={isCollapsed}>إنشاء منشور</NavItem>
+              <NavItem to="/create-post" icon={FilePlus} isCollapsed={isCollapsed} important>إنشاء منشور</NavItem>
               <NavItem to="/my-posts" icon={FileText} isCollapsed={isCollapsed}>منشوراتي</NavItem>
               <NavItem to="/design-studio" icon={Brush} isCollapsed={isCollapsed}>استوديو التصميم</NavItem>
             </NavGroup>
@@ -384,8 +396,8 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
               <>
                 <div className="h-px bg-slate-800/50 mx-2 my-2"></div>
                 <NavGroup title="الإدارة العامة" open={sections.admin} onToggle={() => toggleSection('admin')} isCollapsed={isCollapsed} icon={ShieldAlert}>
-                  <NavItem to="/admin" icon={LayoutDashboard} isCollapsed={isCollapsed}>لوحة التحكم الإدارية</NavItem>
-                  <NavItem to="/admin/users" icon={Users2} isCollapsed={isCollapsed}>إدارة المستخدمين</NavItem>
+                  <NavItem to="/admin" icon={LayoutDashboard} isCollapsed={isCollapsed} important>لوحة التحكم الإدارية</NavItem>
+                  <NavItem to="/admin/users" icon={Users2} isCollapsed={isCollapsed} important>إدارة المستخدمين</NavItem>
                   <NavItem to="/admin/activity" icon={History} isCollapsed={isCollapsed}>سجل العمليات</NavItem>
                   <NavItem to="/admin/settings" icon={Settings2} isCollapsed={isCollapsed}>إعدادات النظام</NavItem>
                   <div className="h-px bg-slate-800/20 mx-3 my-2"></div>
@@ -566,14 +578,26 @@ const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange
     setNotifications(notifications.map(n => ({ ...n, unread: false })));
   };
 
-  const MenuItem = ({ icon: Icon, label, danger = false }: { icon: any, label: string, danger?: boolean }) => (
-    <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all cursor-pointer group/item ${danger ? 'hover:bg-red-50 text-red-500 hover:text-red-600' : 'hover:bg-slate-50 text-slate-600 hover:text-blue-600'}`}>
-      <div className={`p-2 rounded-lg transition-colors ${danger ? 'bg-red-50 group-hover/item:bg-red-100' : 'bg-slate-100 group-hover/item:bg-blue-50'}`}>
-        <Icon size={16} className={danger ? 'text-red-500' : 'text-slate-500 group-hover/item:text-blue-600'} />
+  const MenuItem = ({ icon: Icon, label, to, danger = false }: { icon: any, label: string, to?: string, danger?: boolean }) => {
+    const content = (
+      <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all cursor-pointer group/item ${danger ? 'hover:bg-red-50 text-red-500 hover:text-red-600' : 'hover:bg-slate-50 text-slate-600 hover:text-blue-600'}`}>
+        <div className={`p-2 rounded-lg transition-colors ${danger ? 'bg-red-50 group-hover/item:bg-red-100' : 'bg-slate-100 group-hover/item:bg-blue-50'}`}>
+          <Icon size={16} className={danger ? 'text-red-500' : 'text-slate-500 group-hover/item:text-blue-600'} />
+        </div>
+        <span className="text-sm font-bold tracking-tight">{label}</span>
       </div>
-      <span className="text-sm font-bold tracking-tight">{label}</span>
-    </div>
-  );
+    );
+
+    if (to) {
+      return (
+        <Link to={to} onClick={() => setIsMenuOpen(false)} className="block no-underline">
+          {content}
+        </Link>
+      );
+    }
+
+    return content;
+  };
 
   return (
     <header className="h-[72px] lg:h-[84px] sticky top-0 z-[90] w-full bg-white/80 backdrop-blur-xl border-b border-slate-200/60 transition-all duration-300">
@@ -693,8 +717,8 @@ const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange
                   </div>
                 </div>
                 <div className="space-y-0.5">
-                  <MenuItem icon={UserIcon} label="الملف الشخصي" />
-                  <MenuItem icon={Settings} label="الإعدادات" />
+                  <MenuItem icon={UserIcon} label="الملف الشخصي" to="/profile" />
+                  <MenuItem icon={Settings} label="الإعدادات" to="/profile?tab=settings" />
                   <MenuItem icon={CreditCard} label="الاشتراكات" />
                   <div className="h-px bg-slate-100 mx-3 my-2"></div>
                   <MenuItem icon={LogOut} label="تسجيل الخروج" danger />

@@ -134,53 +134,66 @@ const HomeFeed: React.FC<HomeFeedProps> = ({ feedItems, user, onOpenWizard }) =>
     return (
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-4 lg:py-8">
 
-            {/* Compact Hero Section */}
-            <div className="mb-8">
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 md:p-8 relative overflow-hidden shadow-xl shadow-blue-900/20">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
-                    <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-400/20 rounded-full blur-2xl -ml-20 -mb-20"></div>
+            {/* Sleek, Compact Hero Section */}
+            <div className="mb-6">
+                <div className="bg-[#0f172a] rounded-[32px] p-5 md:p-7 relative overflow-hidden shadow-2xl shadow-blue-900/10 border border-white/5">
+                    {/* Abstract Decorative Elements */}
+                    <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                        <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[140%] bg-blue-600/10 rounded-full blur-[120px] rotate-12"></div>
+                        <div className="absolute bottom-[-20%] left-[-10%] w-[30%] h-[100%] bg-indigo-600/10 rounded-full blur-[100px]"></div>
+                    </div>
 
-                    <div className="relative z-10 space-y-8">
-                        {/* Title & Search Row */}
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="relative z-10 space-y-6">
+                        {/* Compact Header: Title + Search Row */}
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
                             <div className="text-right">
-                                <h1 className="text-2xl md:text-3xl font-black text-white mb-2 flex items-center gap-3">
-                                    <Sparkles size={28} className="text-blue-200 animate-pulse" />
+                                <h1 className="text-xl md:text-2xl font-black text-white mb-1 flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+                                        <Sparkles size={18} className="text-blue-400" />
+                                    </div>
                                     مركز الاكتشاف المعرفي
                                 </h1>
-                                <p className="text-xs md:text-sm text-blue-100 font-bold opacity-90">
+                                <p className="text-[10px] md:text-xs text-slate-400 font-medium">
                                     تصفح أحدث التحليلات والبيانات الاقتصادية في الوقت الفعلي
                                 </p>
                             </div>
 
-                            <div className="w-full md:w-96 relative group">
-                                <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-focus-within:text-blue-600 transition-colors" size={18} />
+                            <div className="w-full lg:max-w-md relative group">
+                                <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors" size={16} />
                                 <input
                                     type="text"
                                     placeholder="ابحث عن تقارير، بيانات، أو أخبار..."
-                                    className="w-full pl-4 pr-12 py-3.5 rounded-2xl border-2 border-white/20 bg-white/10 backdrop-blur-md shadow-inner focus:bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-white outline-none text-white focus:text-gray-900 text-sm font-bold transition-all placeholder:text-blue-100/50"
+                                    className="w-full pl-4 pr-11 py-2.5 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 outline-none text-white text-xs font-bold transition-all placeholder:text-slate-500"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
                         </div>
 
-                        {/* Homepage 3-Step Guide (Matching AIRadar Style) */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Redesigned 3-Step Guide: Ultra Compact & Elegant */}
+                        <div className="flex flex-col md:flex-row items-stretch gap-3 pt-2">
                             {[
-                                { step: '01', title: 'مراقبة النبض', desc: 'تابع تدفق البيانات والتحليلات الحية من خبراء الرادار', icon: Activity, color: 'text-blue-400', bg: 'bg-white/10' },
-                                { step: '02', title: 'تحليل الفرص', desc: 'استخدم أدوات الذكاء الاصطناعي لاستكشاف الأنماط الخفية', icon: Sparkles, color: 'text-purple-300', bg: 'bg-white/10' },
-                                { step: '03', title: 'اتخاذ القرار', desc: 'بناء استراتيجيتك بناءً على حقائق ومقارنات دقيقة', icon: TargetIcon, color: 'text-emerald-300', bg: 'bg-white/10' }
+                                { step: '01', title: 'مراقبة النبض', desc: 'تدفق بيانات حي', icon: Activity, color: 'text-blue-400' },
+                                { step: '02', title: 'تحليل الفرص', desc: 'أنماط ذكاء اصطناعي', icon: Sparkles, color: 'text-purple-400' },
+                                { step: '03', title: 'اتخاذ القرار', desc: 'حقائق ومقارنات', icon: TargetIcon, color: 'text-emerald-400' }
                             ].map((item, idx) => (
-                                <div key={idx} className="p-4 rounded-2x border border-white/10 bg-white/5 backdrop-blur-sm group hover:bg-white/10 transition-all">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className={`w-10 h-10 ${item.bg} ${item.color} rounded-xl flex items-center justify-center`}>
-                                            <item.icon size={20} />
-                                        </div>
-                                        <span className={`text-lg font-black ${item.color}`}>{item.step}</span>
+                                <div key={idx} className="flex-1 flex items-center gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.06] transition-all group overflow-hidden relative">
+                                    <div className={`shrink-0 w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-white/20 transition-all ${item.color}`}>
+                                        <item.icon size={18} />
                                     </div>
-                                    <h3 className="text-white text-xs font-black mb-1">{item.title}</h3>
-                                    <p className="text-blue-100/60 text-[10px] leading-relaxed font-medium">{item.desc}</p>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between gap-2 mb-0.5">
+                                            <h3 className="text-white text-[11px] font-black truncate">{item.title}</h3>
+                                            <span className={`text-[10px] font-black opacity-40 group-hover:opacity-100 transition-opacity ${item.color}`}>{item.step}</span>
+                                        </div>
+                                        <p className="text-slate-500 text-[9px] font-bold leading-none">{item.desc}</p>
+                                    </div>
+                                    {/* Connectivity line for desktop */}
+                                    {idx < 2 && (
+                                        <div className="hidden md:block absolute -left-1.5 top-1/2 -translate-y-1/2 text-white/5 pointer-events-none">
+                                            <ChevronLeft size={12} />
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
