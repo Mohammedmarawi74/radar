@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { HashRouter as Router, Routes, Route, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, useLocation, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   LayoutDashboard,
   PieChart,
@@ -57,7 +57,15 @@ import {
   Terminal,
   ShieldAlert,
   Server,
-  LayoutTemplate
+  LayoutTemplate,
+  CreditCard,
+  HelpCircle,
+  Moon,
+  Sun,
+  CheckCircle2,
+  AlertCircle,
+  Info,
+  Calendar
 } from 'lucide-react';
 import {
   UserRole,
@@ -114,15 +122,15 @@ const NavItem = ({ to, icon: Icon, children, end = false, className = '', badge 
   const inactiveClass = `hover:bg-slate-800 text-slate-400 hover:text-white`;
 
   return (
-    <div
-      onClick={() => navigate(to)}
+    <Link
+      to={to}
       className={`${baseClass} ${isActive ? activeClass : inactiveClass} ${className} ${isCollapsed ? 'justify-center px-0' : ''}`}
       title={isCollapsed && typeof children === 'string' ? children : ''}
     >
       {Icon && <Icon size={20} className={`shrink-0 transition-transform duration-200 ${isActive ? "fill-white text-white" : ""} ${isCollapsed ? "group-hover:scale-110" : ""}`} />}
       {!isCollapsed && <span className="truncate">{children}</span>}
       {!isCollapsed && badge}
-    </div>
+    </Link>
   );
 };
 
@@ -138,43 +146,43 @@ const MobileBottomNav = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 pb-[env(safe-area-inset-bottom,20px)] bg-white/95 backdrop-blur-lg border-t border-gray-200 z-50 lg:hidden flex justify-around items-start pt-3 px-2 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.05)] transition-all">
-      <div
-        onClick={() => navigate('/')}
+      <Link
+        to="/"
         className={`flex flex-col items-center justify-center w-full space-y-1 cursor-pointer active:scale-90 transition-transform duration-200 ${isPathActive('/', true) ? 'text-blue-600' : 'text-gray-400'}`}
       >
         <Compass size={24} strokeWidth={isPathActive('/', true) ? 2.5 : 2} />
         <span className="text-[10px] font-bold">الرئيسية</span>
-      </div>
+      </Link>
 
-      <div
-        onClick={() => navigate('/signals')}
+      <Link
+        to="/signals"
         className={`flex flex-col items-center justify-center w-full space-y-1 cursor-pointer active:scale-90 transition-transform duration-200 ${isPathActive('/signals') ? 'text-blue-600' : 'text-gray-400'}`}
       >
         <Zap size={24} strokeWidth={isPathActive('/signals') ? 2.5 : 2} />
         <span className="text-[10px] font-bold">إشارات</span>
-      </div>
+      </Link>
 
-      <div className="relative -top-8 cursor-pointer active:scale-90 transition-transform duration-200 group" onClick={() => navigate('/my-dashboards')}>
+      <Link to="/my-dashboards" className="relative -top-8 cursor-pointer active:scale-90 transition-transform duration-200 group">
         <div className="flex items-center justify-center w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg shadow-blue-500/40 border-[4px] border-slate-50 group-hover:bg-blue-700">
           <Plus size={28} />
         </div>
-      </div>
+      </Link>
 
-      <div
-        onClick={() => navigate('/dashboards')}
+      <Link
+        to="/dashboards"
         className={`flex flex-col items-center justify-center w-full space-y-1 cursor-pointer active:scale-90 transition-transform duration-200 ${isPathActive('/dashboards') ? 'text-blue-600' : 'text-gray-400'}`}
       >
         <LayoutDashboard size={24} strokeWidth={isPathActive('/dashboards') ? 2.5 : 2} />
         <span className="text-[10px] font-bold">اللوحات</span>
-      </div>
+      </Link>
 
-      <div
-        onClick={() => navigate('/timeline')}
+      <Link
+        to="/timeline"
         className={`flex flex-col items-center justify-center w-full space-y-1 cursor-pointer active:scale-90 transition-transform duration-200 ${isPathActive('/timeline') ? 'text-blue-600' : 'text-gray-400'}`}
       >
         <Clock size={24} strokeWidth={isPathActive('/timeline') ? 2.5 : 2} />
         <span className="text-[10px] font-bold">السجل</span>
-      </div>
+      </Link>
     </div>
   );
 };
@@ -245,7 +253,7 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: { role: UserRole, 
   };
 
   return (
-    <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-slate-900 text-white h-screen fixed inset-y-0 right-0 hidden lg:flex flex-col shadow-2xl z-50 overflow-hidden border-l border-slate-800 transition-all duration-300 ease-in-out`}>
+    <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-slate-900 text-white h-screen fixed inset-y-0 right-0 hidden lg:flex flex-col shadow-2xl z-[100] overflow-hidden border-l border-slate-800 transition-all duration-300 ease-in-out`}>
       {/* Brand & Toggle */}
       <div className={`p-4 border-b border-slate-800 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} bg-slate-950/20 shrink-0 relative group/brand`}>
         {!isCollapsed && (
@@ -366,8 +374,82 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: { role: UserRole, 
 };
 
 // --- Topbar Component ---
+const MOCK_NOTIFICATIONS = [
+  {
+    id: 1,
+    title: "تنبيه ذكاء اصطناعي",
+    desc: "تم اكتشاف حركة غير اعتيادية في أسهم قطاع التكنولوجيا.",
+    time: "منذ 5 دقائق",
+    type: 'ai',
+    unread: true,
+    icon: Sparkles,
+    color: 'text-blue-500',
+    bg: 'bg-blue-50'
+  },
+  {
+    id: 2,
+    title: "تقرير سوق جديد",
+    desc: "نشر الخبير محمد تقريراً جديداً حول العملات الرقمية.",
+    time: "منذ ساعة",
+    type: 'expert',
+    unread: true,
+    icon: LayoutTemplate,
+    color: 'text-amber-500',
+    bg: 'bg-amber-50'
+  },
+  {
+    id: 3,
+    title: "تعديل في القواعد",
+    desc: "تم تحديث شروط الاستخدام والخصوصية للمنصة.",
+    time: "منذ 3 ساعات",
+    type: 'system',
+    unread: false,
+    icon: ShieldCheck,
+    color: 'text-green-500',
+    bg: 'bg-green-50'
+  },
+  {
+    id: 4,
+    title: "موعد لوحة البيانات",
+    desc: "تذكير: موعد تحديث بيانات لوحة التحكم غداً الساعة 9 صباحاً.",
+    time: "منذ يوم",
+    type: 'event',
+    unread: false,
+    icon: Clock,
+    color: 'text-slate-500',
+    bg: 'bg-slate-50'
+  }
+];
+
 const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange: (r: UserRole) => void, onOpenWizard: () => void }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  
+  const menuRef = React.useRef<HTMLDivElement>(null);
+  const notificationsRef = React.useRef<HTMLDivElement>(null);
   const location = useLocation();
+
+  const unreadCount = notifications.filter(n => n.unread).length;
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (menuRef.current && !menuRef.current.contains(target)) {
+        setIsMenuOpen(false);
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(target)) {
+        setIsNotificationsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const markAllAsRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, unread: false })));
+  };
 
   const getPageInfo = (pathname: string) => {
     if (pathname === '/') return { title: 'مركز الاكتشاف', section: 'الرئيسية' };
@@ -387,105 +469,144 @@ const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange
 
   const { title, section } = getPageInfo(location.pathname);
 
+  const MenuItem = ({ icon: Icon, label, danger = false }: { icon: any, label: string, danger?: boolean }) => (
+    <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all cursor-pointer group/item ${danger ? 'hover:bg-red-50 text-red-500 hover:text-red-600' : 'hover:bg-slate-50 text-slate-600 hover:text-blue-600'}`}>
+      <div className={`p-2 rounded-lg transition-colors ${danger ? 'bg-red-50 group-hover/item:bg-red-100' : 'bg-slate-100 group-hover/item:bg-blue-50'}`}>
+        <Icon size={16} className={danger ? 'text-red-500' : 'text-slate-500 group-hover/item:text-blue-600'} />
+      </div>
+      <span className="text-sm font-bold tracking-tight">{label}</span>
+    </div>
+  );
+
   return (
-    <header className="h-[64px] lg:h-[80px] sticky top-0 z-40 w-full backdrop-blur-md bg-white/70 border-b border-gray-200/50 transition-all duration-300">
-      <div className="px-4 lg:px-10 h-full flex items-center justify-between gap-3 lg:gap-8">
+    <header className="h-[72px] lg:h-[84px] sticky top-0 z-[90] w-full bg-white/80 backdrop-blur-xl border-b border-slate-200/60 transition-all duration-300">
+      <div className="px-6 lg:px-12 h-full flex items-center justify-between gap-8">
 
-        <div className="flex items-center flex-1 gap-4 lg:gap-12">
-          {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center gap-3 group">
-            <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0 group-hover:scale-105 transition-transform">
-              <Activity size={20} className="text-white" />
-            </div>
-            <span className="font-black text-slate-900 text-sm hidden sm:block tracking-tight">رادار المستثمر</span>
-          </div>
-
-          {/* Enhanced Search Bar */}
-          <div className="relative group w-full max-w-lg hidden md:block">
-            <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-              <Search className="w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-            </div>
-            <input
-              type="text"
-              className="block w-full py-2.5 pr-11 pl-14 text-sm text-slate-900 bg-slate-100/40 border border-slate-200/60 rounded-2xl focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 focus:bg-white transition-all placeholder-slate-400 shadow-sm hover:border-slate-300"
-              placeholder="ابحث عن مؤشرات، تقارير، أو خبراء..."
-            />
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-              <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold text-slate-400 bg-white border border-slate-200 rounded-lg shadow-sm">
-                <Command size={10} />
-                <span>K</span>
-              </kbd>
+        {/* --- Section 1: Page Context (Breadcrumbs) --- */}
+        <div className="flex items-center gap-6 min-w-[200px]">
+          {/* Mobile Logo Only */}
+          <div className="lg:hidden group cursor-pointer">
+            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
+              <Activity size={22} className="text-white" />
             </div>
           </div>
 
-          {/* Elegant Breadcrumbs */}
-          <div className="hidden xl:flex items-center gap-3 text-[13px] font-semibold">
-            <div className="flex items-center gap-1.5 text-slate-400 hover:text-blue-600 cursor-pointer transition-colors group">
-              <Home size={15} className="mb-0.5 group-hover:scale-110 transition-transform" />
+          <div className="hidden sm:flex flex-col gap-0.5">
+            <div className="flex items-center gap-2 text-[11px] font-black text-slate-400 uppercase tracking-[0.1em]">
+              <Home size={12} className="mb-0.5" />
               <span>{section}</span>
+              <ChevronLeft size={10} className="text-slate-300" />
             </div>
-            <div className="w-1.5 h-1.5 rounded-full bg-slate-200 mx-1"></div>
-            <span className="text-slate-900 bg-blue-50 border border-blue-100/50 px-3 py-1.5 rounded-xl shadow-sm">
+            <h2 className="text-xl font-black text-slate-900 tracking-tight leading-tight">
               {title}
-            </span>
+            </h2>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 lg:gap-6">
-          {/* Smart Advisor Button with Gradient Glow */}
-          <button
-            onClick={onOpenWizard}
-            className="relative group bg-slate-900 hover:bg-slate-800 text-white p-2.5 rounded-2xl lg:px-5 lg:py-2.5 text-xs font-black flex items-center gap-2.5 transition-all shadow-xl shadow-slate-200 overflow-hidden active:scale-95"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <Sparkles size={16} className="relative z-10 text-blue-300 group-hover:text-white group-hover:animate-pulse" />
-            <span className="hidden lg:inline relative z-10 tracking-wide uppercase">المستشار الذكي</span>
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl blur opacity-0 group-hover:opacity-20 transition-opacity"></div>
-          </button>
-
-          {/* Role Selector with Better UI */}
-          <div className="hidden lg:flex items-center bg-slate-50 border border-slate-200/80 rounded-2xl p-1 shadow-sm hover:bg-white hover:border-slate-300 transition-all group">
-            <div className="flex items-center gap-2 pr-3 pl-1 border-l border-slate-200 ml-1">
-              <ShieldCheck size={14} className="text-blue-500" />
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">الدور</span>
+        {/* --- Section 2: Centered Global Search --- */}
+        <div className="flex-1 max-w-2xl hidden md:block group">
+          <div className="relative">
+            <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+              <Search className="w-4.5 h-4.5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
             </div>
-            <select
-              value={user.role}
-              onChange={(e) => onRoleChange(e.target.value as UserRole)}
-              className="bg-transparent text-[11px] font-black text-slate-700 outline-none py-1.5 pr-2 pl-4 cursor-pointer hover:text-blue-600 focus:ring-0 border-none appearance-none"
-            >
-              <optgroup label="صلاحيات المستخدم">
-                <option value={UserRole.STANDARD}>قياسي</option>
-                <option value={UserRole.ADMIN}>مشرف النظام</option>
-                <option value={UserRole.SUPER_ADMIN}>مدير عام</option>
-              </optgroup>
-            </select>
-            <ChevronDown size={12} className="ml-2 text-slate-400 group-hover:text-blue-500 transition-colors" />
-          </div>
-
-          {/* Notifications */}
-          <button className="relative p-2.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all group border border-transparent hover:border-blue-100">
-            <Bell size={22} className="group-hover:animate-swing" />
-            <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
-          </button>
-
-          {/* User Profile */}
-          <div className="flex items-center gap-4 cursor-pointer p-1.5 pr-3 rounded-2xl hover:bg-white hover:shadow-lg hover:shadow-slate-100 transition-all group border border-transparent hover:border-slate-100">
-            <div className="hidden lg:block text-right">
-              <p className="text-[13px] font-black text-slate-900 leading-none mb-1 group-hover:text-blue-600 transition-colors tracking-tight">{user.name}</p>
-              <div className="flex items-center justify-end gap-1">
-                <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse"></div>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{user.role}</p>
+            <input
+              type="text"
+              className="block w-full py-3 pr-12 pl-16 text-sm text-slate-900 bg-slate-100/50 border border-slate-200/50 rounded-[18px] focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 focus:bg-white transition-all placeholder-slate-400 shadow-sm hover:border-slate-300"
+              placeholder="ابحث عن أي شيء في المنصة... (تقارير، مستخدمين، بيانات)"
+            />
+            <div className="absolute inset-y-0 left-0 flex items-center pl-4">
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-white border border-slate-200 rounded-lg shadow-sm">
+                <Command size={11} className="text-slate-400" />
+                <span className="text-[10px] font-black text-slate-400 tracking-wider">K</span>
               </div>
             </div>
-            <div className="relative">
-              <img 
-                src={user.avatar} 
-                alt="User" 
-                className="w-10 h-10 rounded-xl border-2 border-white shadow-md object-cover group-hover:scale-105 transition-transform" 
-              />
-              <div className="absolute -bottom-1 -left-1 w-4 h-4 bg-green-500 border-4 border-white rounded-full"></div>
+          </div>
+        </div>
+
+        {/* --- Section 3: User Actions & Profile --- */}
+        <div className="flex items-center gap-4 lg:gap-8">
+          
+          <div className="flex items-center bg-slate-100/50 p-1.5 rounded-2xl border border-slate-200/30">
+            {/* Notifications */}
+            <div className="relative" ref={notificationsRef}>
+              <button 
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                className={`p-2.5 rounded-xl transition-all ${isNotificationsOpen ? 'bg-white text-blue-600 shadow-sm border-slate-200' : 'text-slate-500 hover:text-blue-600 hover:bg-white'}`}
+              >
+                <Bell size={20} className={isNotificationsOpen ? '' : 'group-hover:animate-swing'} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-2 right-2 w-4 h-4 bg-red-600 border-2 border-white rounded-full flex items-center justify-center text-[9px] font-black text-white">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notifications Panel */}
+              {isNotificationsOpen && (
+                <div className="absolute left-[-20px] lg:left-0 mt-5 w-[340px] lg:w-[400px] bg-white rounded-[28px] shadow-[0_30px_70px_-15px_rgba(0,0,0,0.15)] border border-slate-200 overflow-hidden animate-scaleIn origin-top-left z-[110]">
+                  <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                    <h3 className="text-sm font-black text-slate-900">مركز الإشعارات</h3>
+                    <button onClick={markAllAsRead} className="text-[11px] font-bold text-blue-600 hover:bg-blue-50 px-2 py-1 rounded-lg transition-all">تحديد الكل كقروء</button>
+                  </div>
+                  <div className="max-h-[420px] overflow-y-auto custom-scrollbar">
+                    {notifications.map((n) => (
+                      <div key={n.id} className={`p-4 hover:bg-slate-50 transition-all cursor-pointer flex gap-4 ${n.unread ? 'bg-blue-50/20' : ''}`}>
+                        <div className={`w-11 h-11 ${n.bg} rounded-xl flex items-center justify-center shrink-0 border border-white`}><n.icon size={18} className={n.color} /></div>
+                        <div className="flex-1 text-right">
+                          <div className="flex items-center justify-between mb-0.5">
+                            <h4 className="text-[13px] font-black text-slate-900 truncate">{n.title}</h4>
+                            <span className="text-[9px] font-bold text-slate-400">{n.time}</span>
+                          </div>
+                          <p className="text-[11px] font-bold text-slate-500 leading-relaxed line-clamp-1">{n.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="p-3 bg-slate-50/50 border-t border-slate-100 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-blue-600 transition-colors">عرض جميع التنبيهات</div>
+                </div>
+              )}
             </div>
+
+            <div className="w-px h-6 bg-slate-200 mx-1 opacity-50"></div>
+
+            {/* Help/Settings Quick Icon */}
+            <button className="p-2.5 text-slate-500 hover:text-blue-600 hover:bg-white rounded-xl transition-all">
+              <HelpCircle size={20} />
+            </button>
+          </div>
+
+          {/* User Profile Hook */}
+          <div className="relative" ref={menuRef}>
+            <button 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="flex items-center gap-3 p-1.5 hover:bg-white rounded-2xl transition-all border border-transparent hover:border-slate-100 hover:shadow-lg hover:shadow-slate-100/50"
+            >
+              <div className="relative">
+                <img src={user.avatar} alt="User" className="w-10 h-10 rounded-xl border-2 border-white shadow-md object-cover" />
+                <div className="absolute -bottom-1 -left-1 w-4 h-4 bg-green-500 border-4 border-white rounded-full"></div>
+              </div>
+              <ChevronDown size={14} className={`text-slate-400 transition-transform duration-300 ${isMenuOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* Dropdown Menu */}
+            {isMenuOpen && (
+              <div className="absolute left-0 mt-3 w-72 bg-white rounded-[28px] shadow-[0_30px_70px_-15px_rgba(0,0,0,0.15)] border border-slate-200 p-2 animate-scaleIn origin-top-left z-[110]">
+                <div className="p-4 bg-slate-50 rounded-[22px] mb-2 flex items-center gap-4">
+                  <img src={user.avatar} alt="User" className="w-12 h-12 rounded-2xl border-2 border-white shadow-md object-cover" />
+                  <div className="text-right flex-1 min-w-0">
+                    <p className="text-sm font-black text-slate-900 truncate">{user.name}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{user.role}</p>
+                  </div>
+                </div>
+                <div className="space-y-0.5">
+                  <MenuItem icon={UserIcon} label="الملف الشخصي" />
+                  <MenuItem icon={Settings} label="الإعدادات" />
+                  <MenuItem icon={Bookmark} label="مفضلتي" />
+                  <div className="h-px bg-slate-100 mx-3 my-2"></div>
+                  <MenuItem icon={LogOut} label="تسجيل الخروج" danger />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
