@@ -454,7 +454,7 @@ const MOCK_NOTIFICATIONS = [
     title: "موعد لوحة البيانات",
     desc: "تذكير: موعد تحديث بيانات لوحة التحكم غداً الساعة 9 صباحاً.",
     time: "منذ يوم",
-    type: 'event',
+    type: 'events',
     unread: false,
     icon: Clock,
     color: 'text-slate-500',
