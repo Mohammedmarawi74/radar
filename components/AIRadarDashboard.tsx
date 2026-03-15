@@ -5,7 +5,7 @@ import {
   MessageCircle, FileText, Eye, Thermometer, Scale, Briefcase, Globe, ListFilter,
   X, Check, Copy, RefreshCw, Settings, Brain, Send, Filter, ArrowDownUp,
   Flame, Bell, Newspaper, GraduationCap, HelpCircle, List, Lightbulb,
-  Calendar, Edit3, Save, ExternalLink, ChevronRight, ChevronLeft
+  Calendar, Edit3, Save, ExternalLink, ChevronRight, ChevronLeft, Info
 } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
@@ -451,119 +451,163 @@ const AIRadarDashboard = () => {
 
         {/* ══════ CENTER: AI COMMAND CENTER (Phase 2 & 3) ══════ */}
         <main className={`flex-1 flex flex-col bg-slate-50 min-w-0 ${mobilePanel !== 'ai' ? 'hidden lg:flex' : 'flex'}`}>
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-6 lg:p-12">
-            <div className="max-w-4xl mx-auto space-y-12">
-              <header className="text-center space-y-6 relative">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-blue-500/10 blur-[90px] rounded-full" />
-                <div className="relative inline-block group">
-                  <div className="w-28 h-28 mx-auto rounded-[32px] bg-slate-900 shadow-2xl flex items-center justify-center border border-white/10 relative z-10">
-                    <Brain size={56} className="text-blue-400 animate-pulse" />
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
+            <div className="max-w-5xl mx-auto p-6 lg:p-10 space-y-8">
+              
+              {/* --- Section Header --- */}
+              <header className="relative p-8 rounded-[40px] bg-white border border-slate-200/60 shadow-sm overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full -mr-32 -mt-32 transition-transform group-hover:scale-110" />
+                <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 text-center md:text-right">
+                  <div className="relative">
+                    <div className="w-20 h-20 rounded-3xl bg-slate-900 flex items-center justify-center shadow-2xl relative z-10">
+                      <Brain size={40} className="text-blue-400 animate-pulse" />
+                    </div>
+                    <div className="absolute -inset-2 bg-blue-500/20 blur-xl rounded-full animate-pulse opacity-40" />
                   </div>
-                  <div className="absolute -inset-4 bg-blue-500/20 blur-2xl rounded-full animate-pulse opacity-40" />
-                </div>
-                <div className="space-y-4 relative z-10">
-                  <h1 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-none">
-                    مركز <span className="bg-gradient-to-l from-blue-600 to-indigo-600 bg-clip-text text-transparent">الذكاء الاستراتيجي</span>
-                  </h1>
-                  <p className="text-lg text-slate-500 font-medium max-w-2xl mx-auto">
-                    Phase 2: Intent & Parameterization. قم ببرمجة المحرك التحليلي بناءً على أهدافك الاستراتيجية ونوع المخرجات المطلوبة.
-                  </p>
+                  <div className="flex-1 space-y-2">
+                    <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
+                      مركز <span className="bg-gradient-to-l from-blue-600 to-indigo-600 bg-clip-text text-transparent">الذكاء الاستراتيجي</span>
+                    </h1>
+                    <p className="text-sm text-slate-500 font-medium max-w-2xl">
+                      <span className="text-blue-600 font-black">Phase 2: Intent & Parameterization.</span> قم ببرمجة المحرك التحليلي بناءً على أهدافك الاستراتيجية ونوع المخرجات المطلوبة.
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={loadSample} title="تعبئة نموذج ذكي" className="p-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-500 hover:bg-white hover:border-blue-400 hover:text-blue-600 transition-all">
+                      <RefreshCw size={18} />
+                    </button>
+                    <button onClick={() => setShowScheduling(true)} className="flex items-center gap-2 px-6 py-3 bg-indigo-50 border border-indigo-100 rounded-2xl text-xs font-black text-indigo-600 hover:bg-indigo-100 transition-all">
+                      <Clock size={16} /> الجدولة الآلية
+                    </button>
+                  </div>
                 </div>
               </header>
 
-              <div className="bg-white rounded-[48px] shadow-2xl shadow-blue-900/10 border border-slate-200/50 p-8 lg:p-14 space-y-12 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-80 h-80 bg-slate-50 rounded-full -mr-40 -mt-40 transition-transform group-hover:scale-110" />
+              {/* --- Main Configuration Grid --- */}
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 pb-2">
                 
-                <div className="flex flex-col md:flex-row items-start justify-between gap-6 relative z-10">
-                  <div className="space-y-2">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-900 text-white rounded-lg text-[9px] font-black uppercase tracking-widest">Operational Protocol</div>
-                    <h3 className="text-3x font-black text-slate-900 mt-1">توجيه المحرك الذكي</h3>
+                {/* Left: AI Mode & Confidence */}
+                <div className="flex flex-col bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden group hover:shadow-md transition-all">
+                  <div className="p-6 border-b border-slate-50 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600">
+                        <Zap size={18} />
+                      </div>
+                      <div className="space-y-0.5">
+                        <h3 className="text-sm font-black text-slate-900">بروتوكول التشغيل</h3>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Cognitive Processing Pattern</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex gap-3">
-                    <button onClick={loadSample} className="px-5 py-2.5 border-2 border-slate-100 rounded-2xl text-xs font-black text-slate-500 hover:bg-slate-50 hover:border-slate-200 transition-all">تعبئة نموذج ذكي</button>
-                    <button onClick={() => setShowScheduling(true)} className="px-5 py-2.5 bg-indigo-50 border-2 border-indigo-100 rounded-2xl text-xs font-black text-indigo-600 hover:bg-indigo-100 transition-all">الجدولة الآلية</button>
+
+                  <div className="p-6 space-y-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-2 gap-3">
+                      {[
+                        { id: 'predictive', l: 'تنبؤي', i: Sparkles, color: 'text-blue-500', bg: 'bg-blue-50' },
+                        { id: 'trend', l: 'اتجاهات', i: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+                        { id: 'descriptive', l: 'تحليلي', i: BarChart2, color: 'text-indigo-500', bg: 'bg-indigo-50' },
+                        { id: 'summarization', l: 'تلخيص', i: FileText, color: 'text-slate-500', bg: 'bg-slate-50' },
+                      ].map(m => (
+                        <button 
+                          key={m.id}
+                          onClick={() => setAiMode(m.id)}
+                          className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all duration-300 ${aiMode === m.id ? 'bg-slate-900 border-slate-900 text-white shadow-lg' : 'bg-slate-50 border-slate-50 text-slate-400 hover:border-slate-200 hover:bg-white'}`}
+                        >
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${aiMode === m.id ? 'bg-white/10' : m.bg}`}>
+                            <m.i size={16} className={aiMode === m.id ? 'text-white' : m.color} />
+                          </div>
+                          <span className="text-[10px] font-black">{m.l}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="pt-2 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                           عمق البحث <Info size={12} className="text-slate-300" />
+                        </span>
+                        <span className="text-xs font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg">{confidence}% Focus</span>
+                      </div>
+                      <div className="relative h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                        <div className="absolute top-0 right-0 h-full bg-blue-600 transition-all duration-500" style={{ width: `${confidence}%` }} />
+                        <input type="range" min={30} max={99} value={confidence} onChange={e => setConfidence(+e.target.value)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 relative z-10">
-                  <div className="space-y-10">
-                    <div className="space-y-4">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <Zap size={14} className="text-amber-500" /> نمط المعالجة المعرفية
-                      </label>
-                      <div className="grid grid-cols-2 gap-3">
-                        {[
-                          { id: 'predictive', l: 'تنبؤي', i: Sparkles },
-                          { id: 'trend', l: 'اتجاهات', i: TrendingUp },
-                          { id: 'descriptive', l: 'تحليلي', i: BarChart2 },
-                          { id: 'summarization', l: 'تلخيص', i: FileText },
-                        ].map(m => (
-                          <button 
-                            key={m.id}
-                            onClick={() => setAiMode(m.id)}
-                            className={`flex items-center gap-4 p-5 rounded-3xl border-2 transition-all duration-300 ${aiMode === m.id ? 'bg-slate-900 border-slate-900 text-white shadow-2xl -translate-y-1' : 'bg-slate-50 border-slate-50 text-slate-400 hover:border-slate-200'}`}
-                          >
-                            <m.i size={20} />
-                            <span className="text-xs font-black">{m.l}</span>
-                          </button>
-                        ))}
+                {/* Right: AI Intent / Prompt */}
+                <div className="flex flex-col bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden group hover:shadow-md transition-all">
+                  <div className="p-6 border-b border-slate-50 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-600">
+                        <MessageCircle size={18} />
                       </div>
-                    </div>
-                    <div className="space-y-5">
-                      <div className="flex items-center justify-between">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">عمق البحث والثقة</label>
-                        <span className="text-xs font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-lg">Accuracy: {confidence}%</span>
+                      <div className="space-y-0.5">
+                        <h3 className="text-sm font-black text-slate-900">أمر التشغيل</h3>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Strategic Intent Input</p>
                       </div>
-                      <input type="range" min={30} max={99} value={confidence} onChange={e => setConfidence(+e.target.value)} className="w-full h-3 bg-slate-100 rounded-full appearance-none cursor-pointer accent-blue-600" />
                     </div>
                   </div>
-
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                      <MessageCircle size={14} className="text-blue-500" /> أمر التشغيل الاستراتيجي
-                    </label>
+                  
+                  <div className="p-6 flex-1 flex flex-col">
                     <textarea 
                       value={prompt} 
                       onChange={e => setPrompt(e.target.value)}
-                      placeholder="صف هنا أهدافك، التساؤلات المعقدة، أو نوع الاستنتاجات التي تريد استخلاصها من البيانات المختارة..."
-                      className="w-full h-full min-h-[220px] bg-slate-50 border-2 border-slate-50 rounded-[40px] p-8 text-sm font-bold focus:bg-white focus:border-blue-500/20 focus:ring-[12px] focus:ring-blue-50 outline-none transition-all placeholder:text-slate-200 leading-relaxed shadow-inner"
+                      placeholder="صف هنا أهدافك، التساؤلات المعقدة، أو نوع الاستنتاجات التي تريد استخلاصها..."
+                      className="flex-1 w-full min-h-[160px] bg-slate-50 border-2 border-transparent rounded-2xl p-5 text-xs font-bold focus:bg-white focus:border-blue-500/20 outline-none transition-all placeholder:text-slate-300 leading-relaxed resize-none custom-scrollbar"
                     />
+                    <div className="mt-3 flex items-center justify-between">
+                       <p className="text-[9px] text-slate-400 font-bold italic">نصيحة: كن دقيقاً في وصف المتغيرات الاقتصادية.</p>
+                       <span className="text-[9px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md font-black">{prompt.length} / 500</span>
+                    </div>
                   </div>
                 </div>
+              </div>
 
-                <div className="space-y-5 relative z-10 pt-6 border-t border-slate-100">
-                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">توليد المخرجات (Multi-Output Matrix)</label>
-                   <div className="flex flex-wrap gap-3">
-                      {OUTPUT_CATEGORIES.map(c => {
-                        const isSelected = selectedContentTypes.includes(c.id);
-                        return (
-                          <button
-                            key={c.id}
-                            onClick={() => toggleContentType(c.id)}
-                            className={`px-5 py-3 rounded-2xl text-xs font-black transition-all border-2 flex items-center gap-2.5 ${isSelected ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-300'}`}
-                          >
-                            <c.icon size={16} className={isSelected ? 'text-white' : 'text-slate-300'} />
-                            {c.ar}
-                          </button>
-                        );
-                      })}
-                   </div>
+
+              {/* --- Output Matrix & Action --- */}
+              <div className="bg-white p-8 rounded-[40px] border border-slate-200/60 shadow-sm transition-all hover:shadow-md space-y-8">
+                <div className="space-y-2">
+                  <h3 className="text-lg font-black text-slate-900">مصفوفة المخرجات المتعددة</h3>
+                  <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Multi-Output Synthesis Matrix</p>
                 </div>
 
-                <div className="pt-8 relative z-10">
+                <div className="flex flex-wrap gap-3">
+                  {OUTPUT_CATEGORIES.map(c => {
+                    const isSelected = selectedContentTypes.includes(c.id);
+                    return (
+                      <button
+                        key={c.id}
+                        onClick={() => toggleContentType(c.id)}
+                        className={`group px-6 py-3.5 rounded-2xl text-[11px] font-black transition-all border-2 flex items-center gap-3 ${isSelected ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-400 hover:border-blue-300'}`}
+                      >
+                        <c.icon size={16} className={isSelected ? 'text-white' : 'text-slate-300 group-hover:text-blue-500'} />
+                        {c.ar}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="pt-4 border-t border-slate-100">
                   <button 
                     onClick={handleGenerate}
                     disabled={isGenerating || selectedDatasets.length === 0}
-                    className={`w-full py-8 rounded-[32px] text-xl font-black flex items-center justify-center gap-5 transition-all shadow-2xl ${isGenerating ? 'bg-slate-100 text-slate-300 cursor-wait' : 'bg-slate-900 text-white hover:bg-blue-600 hover:-translate-y-2 active:translate-y-0 shadow-blue-500/30'}`}
+                    className={`w-full py-8 rounded-[32px] text-xl font-black flex items-center justify-center gap-6 transition-all shadow-2xl ${isGenerating ? 'bg-slate-100 text-slate-300 cursor-wait' : 'bg-slate-900 text-white hover:bg-blue-600 hover:-translate-y-2 active:translate-y-0 shadow-blue-500/20'}`}
                   >
                     {isGenerating ? (
                       <>
-                        <RefreshCw size={28} className="animate-spin" />
-                        <span>Phase 3: Deep Synthesis...</span>
+                        <RefreshCw size={32} className="animate-spin" />
+                        <div className="text-right">
+                          <p className="text-lg">Phase 3: Deep Synthesis...</p>
+                          <p className="text-[10px] font-bold opacity-60">جاري تحليل {selectedDatasets.length} قاعدة بيانات</p>
+                        </div>
                       </>
                     ) : (
                       <>
-                        <Zap size={28} className="fill-blue-400" />
+                        <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center">
+                          <Zap size={28} className="fill-blue-400 text-blue-400" />
+                        </div>
                         <span>تفعيل المعالجة المعرفية</span>
                       </>
                     )}
@@ -572,18 +616,19 @@ const AIRadarDashboard = () => {
               </div>
 
               {isGenerating && (
-                <div className="animate-fadeIn space-y-6 max-w-2xl mx-auto">
-                   <div className="flex items-center gap-5 text-slate-900 font-black">
-                      <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-xl">
-                         <Activity size={24} className="animate-pulse" />
+                <div className="animate-fadeIn max-w-2xl mx-auto py-4">
+                   <div className="p-6 bg-white rounded-3xl border border-slate-100 shadow-xl flex items-center gap-6">
+                      <div className="w-16 h-16 bg-slate-950 rounded-[24px] flex items-center justify-center text-white shrink-0 shadow-lg relative overflow-hidden">
+                         <Activity size={28} className="animate-pulse relative z-10" />
+                         <div className="absolute inset-0 bg-blue-600/20 animate-pulse" />
                       </div>
-                      <div className="flex-1">
-                         <div className="flex justify-between items-end mb-2">
-                            <span className="text-sm font-black uppercase tracking-widest">Processing Collective IQ...</span>
-                            <span className="text-[10px] text-blue-600 font-black bg-blue-50 px-2 py-0.5 rounded">Syncing across {selectedDatasets.length} nodes</span>
+                      <div className="flex-1 space-y-3">
+                         <div className="flex justify-between items-end">
+                            <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Processing IQ...</span>
+                            <span className="text-[10px] text-blue-600 font-black bg-blue-50 px-2 py-0.5 rounded">SYNC: ACTIVE</span>
                          </div>
-                         <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-                            <div className="h-full bg-blue-600 animate-[loading_2s_ease-in-out_infinite]" />
+                         <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-l from-blue-600 to-indigo-600 animate-[loading_2s_ease-in-out_infinite]" />
                          </div>
                       </div>
                    </div>
@@ -592,6 +637,7 @@ const AIRadarDashboard = () => {
             </div>
           </div>
         </main>
+
 
         {/* ══════ LEFT: STRATEGIC INSIGHTS (Phase 4) ══════ */}
         <aside className={`w-full lg:w-80 xl:w-[450px] border-r border-slate-200 bg-white flex flex-col shrink-0 ${mobilePanel !== 'outputs' ? 'hidden lg:flex' : 'flex'}`}>

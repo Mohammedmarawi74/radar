@@ -18,7 +18,11 @@ import {
    Briefcase,
    FileText,
    BarChart3,
-   Landmark
+   Landmark,
+   ExternalLink,
+   Info,
+   SlidersHorizontal,
+   Layers
 } from 'lucide-react';
 
 interface Entity {
@@ -262,6 +266,92 @@ const SAUDI_ENTITIES: Entity[] = [
    }
 ];
 
+const EntityCard = ({ entity, toggleFollow }: { entity: Entity, toggleFollow: (id: string) => void, key?: React.Key }) => {
+   const [showDetails, setShowDetails] = useState(false);
+
+   return (
+      <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-300 p-5 group flex flex-col h-full">
+         <div className="flex items-start gap-4">
+            {/* Logo/Avatar */}
+            <div className="relative shrink-0">
+               <div className={`w-14 h-14 rounded-xl overflow-hidden shadow-sm transition-transform group-hover:scale-105 duration-300 ${entity.verificationLevel === 'official' ? 'ring-2 ring-blue-500/20' : 'ring-2 ring-slate-100'}`}>
+                  <img src={entity.avatar} alt={entity.name} className="w-full h-full object-cover" />
+               </div>
+               {entity.isVerified && (
+                  <div className={`absolute -bottom-1 -left-1 ${entity.verificationLevel === 'official' ? 'bg-blue-600' : 'bg-green-600'} text-white p-1 rounded-lg border-2 border-white shadow-sm`}>
+                     {entity.verificationLevel === 'official' ? <Shield size={10} className="fill-white" /> : <BadgeCheck size={10} className="fill-white" />}
+                  </div>
+               )}
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+               <div className="flex items-center gap-1.5 mb-1">
+                  <h3 className="text-sm font-black text-slate-900 truncate group-hover:text-blue-600 transition-colors">
+                     {entity.name}
+                  </h3>
+                  {entity.isVerified && <BadgeCheck size={14} className="text-blue-500 shrink-0" />}
+               </div>
+               <p className="text-[11px] font-bold text-slate-400 truncate mb-2">{entity.role}</p>
+               
+               {/* 1-line Truncated Description */}
+               <p className="text-[11px] text-slate-500 font-medium line-clamp-1 mb-3">
+                  {entity.description}
+               </p>
+            </div>
+
+            {/* Follow Button */}
+            <button
+               onClick={() => toggleFollow(entity.id)}
+               className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all ${entity.isFollowing
+                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                     : 'bg-slate-50 border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200'
+                  }`}
+            >
+               {entity.isFollowing ? <Check size={14} strokeWidth={3} /> : <UserPlus size={14} />}
+            </button>
+         </div>
+
+         {/* Secondary Content Bar */}
+         <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-50">
+            <div className="flex items-center gap-4">
+               <div className="flex items-center gap-1.5">
+                  <Users size={12} className="text-slate-300" />
+                  <span className="text-[10px] font-bold text-slate-500">{entity.stats.followers}</span>
+               </div>
+               <div className="flex items-center gap-1.5">
+                  <FileText size={12} className="text-slate-300" />
+                  <span className="text-[10px] font-bold text-slate-500">{entity.stats.posts}</span>
+               </div>
+            </div>
+            
+            <button 
+               onClick={() => setShowDetails(!showDetails)}
+               className="text-[10px] font-black text-blue-600 hover:underline flex items-center gap-1"
+            >
+               {showDetails ? 'أقل' : 'التفاصيل'}
+               <ChevronRight size={10} className={`transition-transform ${showDetails ? 'rotate-90' : ''}`} />
+            </button>
+         </div>
+
+         {/* Revealable Details */}
+         {showDetails && (
+            <div className="mt-4 p-3 bg-slate-50 rounded-xl space-y-3 animate-fadeIn">
+               <div className="flex flex-wrap gap-1.5">
+                  {entity.specialties?.map((s, i) => (
+                     <span key={i} className="text-[9px] font-bold bg-white text-slate-500 px-2 py-0.5 rounded-md border border-slate-100">{s}</span>
+                  ))}
+               </div>
+               <div className="flex items-center justify-between text-[10px] font-bold text-slate-400">
+                  <span className="flex items-center gap-1"><MapPin size={10} /> {entity.location.split('،')[0]}</span>
+                  {entity.website && <span className="flex items-center gap-1"><Globe size={10} /> {entity.website}</span>}
+               </div>
+            </div>
+         )}
+      </div>
+   );
+};
+
 const FollowersPage = () => {
    const [entities, setEntities] = useState<Entity[]>(SAUDI_ENTITIES);
    const [searchQuery, setSearchQuery] = useState('');
@@ -278,7 +368,6 @@ const FollowersPage = () => {
       const matchesSearch =
          entity.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
          entity.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-         entity.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
          (entity.nameEn?.toLowerCase().includes(searchQuery.toLowerCase())) ||
          (entity.specialties?.some(s => s.toLowerCase().includes(searchQuery.toLowerCase())));
 
@@ -302,328 +391,151 @@ const FollowersPage = () => {
       experts: entities.filter(e => e.type === 'expert' || e.type === 'analyst').length
    };
 
-   const getVerificationBadge = (entity: Entity) => {
-      if (entity.verificationLevel === 'official') {
-         return (
-            <div className="flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg shadow-blue-500/30">
-               <Shield size={12} className="fill-white" />
-               <span>جهة رسمية</span>
-            </div>
-         );
-      }
-      if (entity.verificationLevel === 'verified') {
-         return (
-            <div className="flex items-center gap-1.5 bg-green-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg shadow-green-500/30">
-               <BadgeCheck size={12} className="fill-white" />
-               <span>موثق</span>
-            </div>
-         );
-      }
-      return null;
-   };
-
-   const getImpactBadge = (impact: string) => {
-      const badges = {
-         critical: { color: 'bg-red-100 text-red-700 border-red-200', label: 'تأثير حرج', icon: '🔴' },
-         high: { color: 'bg-orange-100 text-orange-700 border-orange-200', label: 'تأثير عالي', icon: '🟠' },
-         medium: { color: 'bg-yellow-100 text-yellow-700 border-yellow-200', label: 'تأثير متوسط', icon: '🟡' },
-         low: { color: 'bg-gray-100 text-gray-600 border-gray-200', label: 'تأثير منخفض', icon: '⚪' }
-      };
-      const badge = badges[impact as keyof typeof badges];
-      return (
-         <span className={`${badge.color} px-2 py-1 rounded-lg text-[10px] font-bold border`}>
-            {badge.icon} {badge.label}
-         </span>
-      );
-   };
-
    return (
-      <div className="max-w-7xl mx-auto p-4 lg:p-8 animate-fadeIn">
-         {/* Premium Header Section */}
-         <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-3xl p-8 lg:p-12 mb-8 shadow-2xl">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl -ml-32 -mb-32"></div>
-
-            <div className="relative z-10">
-               <div className="flex items-center gap-3 mb-4">
-                  <div className="w-14 h-14 bg-white/20 backdrop-blur-xl text-white rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
-                     <Users size={28} strokeWidth={2.5} />
+      <div className="max-w-7xl mx-auto p-4 lg:p-8 animate-fadeIn space-y-8">
+         
+         {/* --- Compact Header --- */}
+         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200">
+            <div className="space-y-1">
+               <h1 className="text-2xl lg:text-3xl font-black text-slate-900 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                     <Users size={20} />
                   </div>
-                  <div>
-                     <h1 className="text-3xl lg:text-4xl font-black text-white tracking-tight">
-                        الجهات والخبراء
-                     </h1>
-                     <p className="text-blue-100 text-sm font-medium mt-1">اكتشف الجهات الرسمية والخبراء الموثوقين</p>
+                  المجتمع والخبراء
+               </h1>
+               <p className="text-sm font-medium text-slate-500">دليل الجهات الرسمية والمحللين الاستراتيجيين في المملكة</p>
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-3">
+               {[
+                  { l: 'إجمالي الجهات', v: stats.total, c: 'bg-slate-100 text-slate-600' },
+                  { l: 'أتابعها', v: stats.following, c: 'bg-emerald-50 text-emerald-700' },
+                  { l: 'جهات رسمية', v: stats.official, c: 'bg-blue-50 text-blue-700' },
+                  { l: 'خبراء', v: stats.experts, c: 'bg-purple-50 text-purple-700' },
+               ].map((s, i) => (
+                  <div key={i} className={`px-4 py-2 rounded-xl text-[11px] font-black flex items-center gap-2 border border-transparent shadow-sm ${s.c}`}>
+                     <span className="opacity-60">{s.l}</span>
+                     <span>{s.v}</span>
                   </div>
-               </div>
-
-               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-                  <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4">
-                     <div className="flex items-center gap-2 mb-2">
-                        <Landmark size={18} className="text-blue-200" />
-                        <p className="text-blue-100 text-xs font-bold uppercase tracking-wider">إجمالي الجهات</p>
-                     </div>
-                     <h3 className="text-3xl font-black text-white">{stats.total}</h3>
-                  </div>
-                  <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4">
-                     <div className="flex items-center gap-2 mb-2">
-                        <UserCheck size={18} className="text-green-200" />
-                        <p className="text-blue-100 text-xs font-bold uppercase tracking-wider">تتابعها</p>
-                     </div>
-                     <h3 className="text-3xl font-black text-white">{stats.following}</h3>
-                  </div>
-                  <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4">
-                     <div className="flex items-center gap-2 mb-2">
-                        <Shield size={18} className="text-yellow-200" />
-                        <p className="text-blue-100 text-xs font-bold uppercase tracking-wider">جهات رسمية</p>
-                     </div>
-                     <h3 className="text-3xl font-black text-white">{stats.official}</h3>
-                  </div>
-                  <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4">
-                     <div className="flex items-center gap-2 mb-2">
-                        <Award size={18} className="text-purple-200" />
-                        <p className="text-blue-100 text-xs font-bold uppercase tracking-wider">خبراء</p>
-                     </div>
-                     <h3 className="text-3xl font-black text-white">{stats.experts}</h3>
-                  </div>
-               </div>
+               ))}
             </div>
          </div>
 
-         {/* Search and Filters */}
-         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
-            <div className="flex flex-col lg:flex-row gap-4 mb-6">
-               <div className="relative flex-1">
-                  <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                     type="text"
-                     placeholder="ابحث عن جهة رسمية، خبير، أو تخصص..."
-                     value={searchQuery}
-                     onChange={(e) => setSearchQuery(e.target.value)}
-                     className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3.5 pr-12 pl-4 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                  />
-               </div>
-               <select
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value)}
-                  className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-medium text-gray-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all cursor-pointer"
-               >
-                  <option value="all">جميع الأنواع</option>
-                  <option value="ministry">وزارات</option>
-                  <option value="authority">هيئات</option>
-                  <option value="expert">خبراء</option>
-                  <option value="analyst">محللون</option>
-               </select>
-            </div>
-
-            <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
-               <button
-                  onClick={() => setActiveFilter('all')}
-                  className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeFilter === 'all'
-                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                     }`}
-               >
-                  الكل ({stats.total})
-               </button>
-               <button
-                  onClick={() => setActiveFilter('following')}
-                  className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeFilter === 'following'
-                        ? 'bg-green-600 text-white shadow-lg shadow-green-500/30'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                     }`}
-               >
-                  أتابعها ({stats.following})
-               </button>
-               <button
-                  onClick={() => setActiveFilter('official')}
-                  className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap flex items-center gap-2 ${activeFilter === 'official'
-                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                     }`}
-               >
-                  <Shield size={16} />
-                  جهات رسمية ({stats.official})
-               </button>
-               <button
-                  onClick={() => setActiveFilter('experts')}
-                  className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap flex items-center gap-2 ${activeFilter === 'experts'
-                        ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                     }`}
-               >
-                  <Award size={16} />
-                  خبراء ومحللون ({stats.experts})
-               </button>
-            </div>
-         </div>
-
-         {/* Grid of Entities */}
-         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredEntities.map(entity => (
-               <div
-                  key={entity.id}
-                  className="bg-white rounded-3xl border border-gray-100 shadow-lg hover:shadow-2xl hover:border-blue-200 transition-all duration-300 group overflow-hidden"
-               >
-                  {/* Cover Image */}
-                  {entity.coverImage && (
-                     <div className="h-32 overflow-hidden relative">
-                        <img
-                           src={entity.coverImage}
-                           alt={entity.name}
-                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+         <div className="flex flex-col lg:flex-row gap-8 items-start">
+            {/* --- Sticky Sidebar Sidebar --- */}
+            <aside className="w-full lg:w-72 shrink-0 lg:sticky lg:top-24 space-y-6">
+               <div className="bg-white rounded-3xl border border-slate-200/60 p-6 shadow-sm space-y-6">
+                  <div className="space-y-4">
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <Search size={14} className="text-blue-500" /> محرك البحث
+                     </label>
+                     <div className="relative">
+                        <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+                        <input
+                           type="text"
+                           placeholder="ابحث هنا..."
+                           value={searchQuery}
+                           onChange={(e) => setSearchQuery(e.target.value)}
+                           className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pr-10 pl-4 text-xs font-bold focus:bg-white focus:border-blue-500 outline-none transition-all"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-                        <div className="absolute top-4 right-4">
-                           {getVerificationBadge(entity)}
-                        </div>
                      </div>
-                  )}
+                  </div>
 
-                  <div className="p-6">
-                     <div className="flex items-start gap-4 mb-4">
-                        {/* Avatar */}
-                        <div className="relative shrink-0">
-                           <div className={`w-20 h-20 rounded-2xl overflow-hidden border-4 ${entity.verificationLevel === 'official' ? 'border-blue-500' :
-                                 entity.verificationLevel === 'verified' ? 'border-green-500' :
-                                    'border-gray-200'
-                              } shadow-xl group-hover:scale-105 transition-transform`}>
-                              <img src={entity.avatar} alt={entity.name} className="w-full h-full object-cover" />
-                           </div>
-                           {entity.isVerified && (
-                              <div className={`absolute -bottom-2 -left-2 ${entity.verificationLevel === 'official' ? 'bg-blue-600' : 'bg-green-600'
-                                 } text-white p-1.5 rounded-lg border-4 border-white shadow-lg`}>
-                                 {entity.verificationLevel === 'official' ? (
-                                    <Shield size={14} className="fill-white" />
-                                 ) : (
-                                    <BadgeCheck size={14} className="fill-white" />
-                                 )}
-                              </div>
-                           )}
-                        </div>
-
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
-                           <h3 className="text-xl font-black text-gray-900 mb-1 group-hover:text-blue-600 transition-colors line-clamp-1">
-                              {entity.name}
-                           </h3>
-                           {entity.nameEn && (
-                              <p className="text-xs text-gray-400 font-medium mb-2">{entity.nameEn}</p>
-                           )}
-                           <div className="flex items-center gap-2 mb-2">
-                              {entity.type === 'ministry' && <Building2 size={14} className="text-blue-500" />}
-                              {entity.type === 'authority' && <Landmark size={14} className="text-indigo-500" />}
-                              {entity.type === 'expert' && <Award size={14} className="text-purple-500" />}
-                              {entity.type === 'analyst' && <BarChart3 size={14} className="text-green-500" />}
-                              <p className="text-sm font-bold text-gray-600">{entity.role}</p>
-                           </div>
-                           {getImpactBadge(entity.impact)}
-                        </div>
-
-                        {/* Follow Button */}
-                        <button
-                           onClick={() => toggleFollow(entity.id)}
-                           className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all shrink-0 ${entity.isFollowing
-                                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700'
-                                 : 'bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50'
-                              }`}
-                        >
-                           {entity.isFollowing ? (
-                              <span className="flex items-center gap-2">
-                                 <Check size={16} strokeWidth={3} /> متابع
-                              </span>
-                           ) : (
-                              <span className="flex items-center gap-2">
-                                 <UserPlus size={16} /> تابع
-                              </span>
-                           )}
-                        </button>
-                     </div>
-
-                     {/* Description */}
-                     {entity.description && (
-                        <p className="text-sm text-gray-600 leading-relaxed mb-4 line-clamp-2">
-                           {entity.description}
-                        </p>
-                     )}
-
-                     {/* Specialties */}
-                     {entity.specialties && entity.specialties.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                           {entity.specialties.slice(0, 4).map((specialty, idx) => (
-                              <span
-                                 key={idx}
-                                 className="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold border border-blue-100"
-                              >
-                                 {specialty}
-                              </span>
-                           ))}
-                           {entity.specialties.length > 4 && (
-                              <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-lg text-xs font-bold">
-                                 +{entity.specialties.length - 4}
-                              </span>
-                           )}
-                        </div>
-                     )}
-
-                     {/* Stats and Info */}
-                     <div className="grid grid-cols-3 gap-3 mb-4">
-                        <div className="bg-gray-50 rounded-xl p-3 text-center border border-gray-100">
-                           <p className="text-xs text-gray-500 font-bold mb-1">متابعون</p>
-                           <p className="text-lg font-black text-gray-900">{entity.stats.followers}</p>
-                        </div>
-                        <div className="bg-gray-50 rounded-xl p-3 text-center border border-gray-100">
-                           <p className="text-xs text-gray-500 font-bold mb-1">منشورات</p>
-                           <p className="text-lg font-black text-gray-900">{entity.stats.posts.toLocaleString()}</p>
-                        </div>
-                        {entity.stats.datasets && (
-                           <div className="bg-gray-50 rounded-xl p-3 text-center border border-gray-100">
-                              <p className="text-xs text-gray-500 font-bold mb-1">بيانات</p>
-                              <p className="text-lg font-black text-gray-900">{entity.stats.datasets}</p>
-                           </div>
-                        )}
-                     </div>
-
-                     {/* Footer */}
-                     <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                           <MapPin size={14} className="text-gray-400" />
-                           <span className="font-medium">{entity.location}</span>
-                        </div>
-                        {entity.website && (
-                           <a
-                              href={`https://${entity.website}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1.5 text-blue-600 text-xs font-bold hover:underline"
+                  <div className="space-y-4">
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <Filter size={14} className="text-blue-500" /> التصنيف الرئيسي
+                     </label>
+                     <div className="flex flex-col gap-1.5">
+                        {[
+                           { id: 'all', l: 'الكل', i: Layers, count: stats.total },
+                           { id: 'following', l: 'أتابعها', i: UserCheck, count: stats.following },
+                           { id: 'official', l: 'جهات رسمية', i: Shield, count: stats.official },
+                           { id: 'experts', l: 'خبراء ومحللون', i: Award, count: stats.experts }
+                        ].map(f => (
+                           <button
+                              key={f.id}
+                              onClick={() => setActiveFilter(f.id as any)}
+                              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-black transition-all ${activeFilter === f.id ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10' : 'text-slate-500 hover:bg-slate-50'}`}
                            >
-                              <Globe size={14} />
-                              {entity.website}
-                           </a>
-                        )}
+                              <div className="flex items-center gap-3">
+                                 <f.i size={16} className={activeFilter === f.id ? 'text-white' : 'text-slate-300'} />
+                                 <span>{f.l}</span>
+                              </div>
+                              <span className={`text-[10px] px-1.5 rounded-md ${activeFilter === f.id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-400'}`}>{f.count}</span>
+                           </button>
+                        ))}
                      </div>
+                  </div>
 
-                     {entity.establishedYear && (
-                        <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
-                           <FileText size={12} />
-                           <span>تأسست عام {entity.establishedYear}</span>
-                        </div>
-                     )}
+                  <div className="space-y-4 pt-4 border-t border-slate-50">
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <SlidersHorizontal size={14} className="text-blue-500" /> نوع الجهة
+                     </label>
+                     <select
+                        value={typeFilter}
+                        onChange={(e) => setTypeFilter(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-600 focus:bg-white focus:border-blue-500 outline-none transition-all cursor-pointer"
+                     >
+                        <option value="all">جميع القطاعات</option>
+                        <option value="ministry">وزارات استراتيجية</option>
+                        <option value="authority">هيئات وطنية</option>
+                        <option value="expert">خبراء مستقلون</option>
+                        <option value="analyst">محللون ماليون</option>
+                     </select>
                   </div>
                </div>
-            ))}
+
+               <div className="p-6 bg-blue-600 rounded-3xl text-white shadow-xl shadow-blue-600/20 relative overflow-hidden group">
+                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                  <div className="relative z-10 space-y-2">
+                     <h4 className="text-sm font-black">هل أنت خبير؟</h4>
+                     <p className="text-[11px] font-medium opacity-80 leading-relaxed">انضم إلى قائمة الخبراء الموثقين في رادار لتصل تحليلاتك إلى آلاف المستثمرين.</p>
+                     <button className="pt-2 text-[11px] font-black underline flex items-center gap-1">تقديم طلب توثيق <ExternalLink size={10} /></button>
+                  </div>
+               </div>
+            </aside>
+
+            {/* --- Main Content Area --- */}
+            <div className="flex-1 space-y-6">
+               <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                     <h2 className="text-sm font-black text-slate-900">المستودع الرقمي</h2>
+                     <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md font-black">{filteredEntities.length} عنصر مفلتر</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                     <button className="p-2 text-slate-400 hover:text-blue-600 transition-all"><SlidersHorizontal size={14} /></button>
+                  </div>
+               </div>
+
+               {filteredEntities.length === 0 ? (
+                  <div className="py-32 text-center bg-white rounded-[40px] border border-slate-200/60 shadow-sm animate-fadeIn">
+                     <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Search size={32} className="text-slate-200" />
+                     </div>
+                     <h3 className="text-lg font-black text-slate-900 mb-1">لا توجد نتائج مطابقة</h3>
+                     <p className="text-xs text-slate-400 font-medium">حاول تعديل كلمات البحث أو الفلاتر المختارة</p>
+                  </div>
+               ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5">
+                     {filteredEntities.map(entity => (
+                        <EntityCard key={entity.id} entity={entity} toggleFollow={toggleFollow} />
+                     ))}
+                  </div>
+               )}
+            </div>
          </div>
 
-         {/* Empty State */}
-         {filteredEntities.length === 0 && (
-            <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200">
-               <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
-                  <Search size={40} />
-               </div>
-               <h3 className="text-2xl font-black text-gray-900 mb-2">لا توجد نتائج</h3>
-               <p className="text-gray-500">جرب البحث بكلمات أخرى أو تغيير الفلاتر</p>
-            </div>
-         )}
+         <style>{`
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+            @keyframes fadeIn {
+               from { opacity: 0; transform: translateY(10px); }
+               to { opacity: 1; transform: translateY(0); }
+            }
+            .animate-fadeIn {
+               animation: fadeIn 0.4s ease-out forwards;
+            }
+         `}</style>
       </div>
    );
 };
