@@ -83,7 +83,8 @@ import {
   Code,
   Users2,
   Settings2,
-  ChevronUp
+  ChevronUp,
+  Target
 } from 'lucide-react';
 import {
   UserRole,
@@ -117,6 +118,7 @@ import OfficialDashboardsPage from './components/OfficialDashboardsPage';
 import ExpertBuilderPage from './components/ExpertBuilderPage';
 import FavoritesPage from './components/FavoritesPage';
 import AIRadarDashboard from './components/AIRadarDashboard';
+import SmartRadarPage from './components/SmartRadarPage';
 
 // --- Safe Navigation Helper ---
 interface NavItemProps {
@@ -334,6 +336,7 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
               <NavItem to="/" icon={Home} end isCollapsed={isCollapsed}>الصفحة الرئيسية</NavItem>
               <NavItem to="/signals" icon={Zap} isCollapsed={isCollapsed}>إشارات السوق</NavItem>
               <NavItem to="/ai-dashboard" icon={Cpu} isCollapsed={isCollapsed}>لوحة الذكاء</NavItem>
+              <NavItem to="/smart-radar" icon={Target} isCollapsed={isCollapsed}>لوحات الرادار الذكية</NavItem>
               <NavItem to="/timeline" icon={Clock} isCollapsed={isCollapsed}>سجل التغييرات</NavItem>
               <NavItem to="/followers" icon={Users} isCollapsed={isCollapsed}>المجتمع</NavItem>
             </NavGroup>
@@ -475,6 +478,9 @@ const Breadcrumbs = () => {
     if (pathname.includes('/ai-dashboard')) {
       crumbs.push({ label: 'الذكاء الاصطناعي', path: '/ai-dashboard', icon: Sparkles });
       crumbs.push({ label: 'لوحة التحكم الذكية', path: '', icon: LayoutTemplate });
+    } else if (pathname.includes('/smart-radar')) {
+      crumbs.push({ label: 'المحور الرئيسي', path: '', icon: Target });
+      crumbs.push({ label: 'لوحات الرادار الذكية', path: '', icon: Target });
     } else if (pathname.includes('/signals')) {
       crumbs.push({ label: 'الذكاء الاصطناعي', path: '/ai-dashboard', icon: Sparkles });
       crumbs.push({ label: 'إشارات السوق', path: '', icon: Activity });
@@ -1163,6 +1169,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<HomeFeed feedItems={FEED_ITEMS} user={currentUser} onOpenWizard={() => setIsWizardOpen(true)} />} />
             <Route path="/ai-dashboard" element={<AIRadarDashboard />} />
+            <Route path="/smart-radar" element={<SmartRadarPage />} />
             <Route path="/dashboards" element={<OfficialDashboardsPage dashboards={officialDashboards} widgets={allWidgets} userRole={currentUser.role} />} />
             <Route path="/signals" element={<AISignalsPage />} />
             <Route path="/timeline" element={<TimelinePage events={TIMELINE_EVENTS} />} />
