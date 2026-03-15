@@ -581,16 +581,46 @@ export const FEED_ITEMS: FeedItem[] = [
   {
     id: 'f4',
     contentType: FeedContentType.DASHBOARD,
-    title: 'لوحة التعدين والمعادن 2025',
+    title: 'نظام رصد التعدين العالمي',
     author: { name: 'وزارة الصناعة', role: 'جهة رسمية', verified: true },
     timestamp: '2025-05-11T12:00:00',
     tags: ['Mining', 'Industry', 'Official Data'],
     engagement: { likes: 210, shares: 88, saves: 312 },
     payload: {
       dashboardId: 'odb3_mining',
-      widgetCount: 8,
-      views: 12500,
-      previewImage: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+      widgetCount: 12,
+      views: 18450,
+      previewImage: 'https://images.unsplash.com/photo-1579547621113-e4bb2a19bdd6?auto=format&fit=crop&w=1200&q=80'
+    }
+  },
+  {
+    id: 'f_dash_2',
+    contentType: FeedContentType.DASHBOARD,
+    title: 'مركز مراقبة الاقتصاد الرقمي',
+    author: { name: 'هيئة البيانات', role: 'مركز القرار', verified: true },
+    timestamp: '2025-05-13T14:20:00',
+    tags: ['Digital', 'Economy', 'Big Data'],
+    engagement: { likes: 560, shares: 120, saves: 450 },
+    payload: {
+      dashboardId: 'odb4_digital',
+      widgetCount: 15,
+      views: 32900,
+      previewImage: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80'
+    }
+  },
+  {
+    id: 'f_dash_3',
+    contentType: FeedContentType.DASHBOARD,
+    title: 'رادار التحول العمراني 2030',
+    author: { name: 'وزارة الإسكان', role: 'التطوير العقاري', verified: true },
+    timestamp: '2025-05-14T09:00:00',
+    tags: ['Housing', 'Urban', 'Construction'],
+    engagement: { likes: 890, shares: 340, saves: 1200 },
+    payload: {
+      dashboardId: 'odb5_urban',
+      widgetCount: 9,
+      views: 45000,
+      previewImage: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80'
     }
   },
   ...generateFeedBatch(75)

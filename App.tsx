@@ -415,13 +415,19 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
       <div className={`p-4 border-t border-slate-800 bg-slate-950/30 shrink-0 flex ${isCollapsed ? 'justify-center' : ''}`}>
         <Link 
           to={isAdminPath ? "/" : "/admin"}
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm ${isAdminPath ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700'}`}
+          className={`${isCollapsed ? 'w-12 h-12 justify-center px-0' : 'w-full px-4'} flex items-center gap-0 lg:gap-3 py-3 rounded-xl transition-all font-bold text-sm ${isAdminPath ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700'}`}
+          title={isCollapsed ? (isAdminPath ? 'العودة للمنصة' : 'لوحة التحكم') : ''}
         >
-          <div className={`p-1.5 rounded-lg ${isAdminPath ? 'bg-amber-400' : 'bg-slate-700'}`}>
-            {isAdminPath ? <Activity size={18} /> : <Settings size={18} />}
+          <div className={`p-1.5 rounded-lg ${isAdminPath ? 'bg-amber-400' : 'bg-slate-700'} flex items-center justify-center shrink-0`}>
+            {isAdminPath ? <Activity size={18} /> : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            )}
           </div>
           {!isCollapsed && (
-            <span>{isAdminPath ? 'العودة للمنصة' : 'لوحة التحكم'}</span>
+            <span className="truncate mr-3">{isAdminPath ? 'العودة للمنصة' : 'لوحة التحكم'}</span>
           )}
         </Link>
       </div>
