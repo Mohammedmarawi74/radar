@@ -85,7 +85,9 @@ import {
   Settings2,
   ChevronUp,
   Target,
-  Map as MapIcon
+  Map as MapIcon,
+  ChevronRight,
+  Ghost
 } from 'lucide-react';
 import {
   UserRole,
@@ -123,6 +125,12 @@ import SmartRadarPage from './components/SmartRadarPage';
 import TimelinePage from './components/TimelinePage';
 import InvestmentGeoRadar from './components/InvestmentGeoRadar';
 import { ToastProvider } from './components/Toast';
+import GuidedTours from './components/GuidedTours';
+import HelpCenterPage from './components/HelpCenterPage';
+import AdminNotificationsPage from './components/AdminNotificationsPage';
+import AdminOverviewPage from './components/AdminOverviewPage';
+import SmartComparisonsPage from './components/SmartComparisonsPage';
+import DataSourcesPage from './components/DataSourcesPage';
 
 // --- Safe Navigation Helper ---
 interface NavItemProps {
@@ -134,13 +142,25 @@ interface NavItemProps {
   badge?: React.ReactNode;
   isCollapsed?: boolean;
   important?: boolean;
+  id?: string;
   key?: React.Key;
 }
 
-const NavItem = ({ to, icon: Icon, children, end = false, className = '', badge = null, isCollapsed = false, important = false }: NavItemProps) => {
+const NavItem = ({ to, icon: Icon, children, end = false, className = '', badge = null, isCollapsed = false, important = false, id }: NavItemProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isActive = end ? location.pathname === to : location.pathname.startsWith(to) && (to === '/' ? location.pathname === '/' : true);
+  const isActive = useMemo(() => {
+    const currentFull = location.pathname + location.search;
+    if (end) return currentFull === to;
+    
+    // Exact match for routes with tabs
+    if (to.includes('?')) {
+      return currentFull === to;
+    }
+    
+    // Pathprefix match for standard routes
+    return location.pathname.startsWith(to) && (to === '/' ? location.pathname === '/' : true);
+  }, [location.pathname, location.search, to, end]);
 
   if (isCollapsed && !important) return null;
 
@@ -151,6 +171,7 @@ const NavItem = ({ to, icon: Icon, children, end = false, className = '', badge 
   return (
     <Link
       to={to}
+      id={id}
       className={`${baseClass} ${isActive ? activeClass : inactiveClass} ${className} ${isCollapsed ? 'justify-center px-0' : ''}`}
       title={isCollapsed && typeof children === 'string' ? children : ''}
     >
@@ -308,7 +329,8 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
     data: true,
     content: true,
     tools: true,
-    admin: true
+    admin: true,
+    notifications: true
   });
 
   const toggleSection = (key: keyof typeof sections) => {
@@ -318,7 +340,7 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
   return (
     <aside className={`${isCollapsed ? 'w-20' : 'w-[280px]'} ${isAdminPath ? 'bg-[#09090b] border-l-amber-500/30' : 'bg-slate-950 border-l-slate-800/50'} text-white h-screen fixed inset-y-0 right-0 hidden lg:flex flex-col shadow-2xl z-[100] overflow-hidden border-l transition-all duration-500 ease-in-out`}>
       {/* Brand & Toggle */}
-      <div className={`p-6 border-b border-white/5 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} ${isAdminPath ? 'bg-zinc-950/50' : 'bg-slate-950'} shrink-0 relative group/brand transition-colors duration-500`}>
+      <div id="sidebar-brand" className={`p-6 border-b border-white/5 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} ${isAdminPath ? 'bg-zinc-950/50' : 'bg-slate-950'} shrink-0 relative group/brand transition-colors duration-500`}>
         {!isCollapsed && (
           <div className="flex items-center gap-3 animate-fadeIn">
             <div className={`w-10 h-10 ${isAdminPath ? 'bg-gradient-to-br from-amber-500 to-orange-700 shadow-amber-500/20' : 'bg-gradient-to-br from-blue-600 to-indigo-700 shadow-blue-500/20'} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500`}>
@@ -349,62 +371,74 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
           <>
             {/* --- Standard Mode: Dashboard & Overview --- */}
             <NavGroup title="المحور الرئيسي" open={sections.overview} onToggle={() => toggleSection('overview')} isCollapsed={isCollapsed} icon={LayoutDashboard}>
-              <NavItem to="/" icon={Home} end isCollapsed={isCollapsed} important>الصفحة الرئيسية</NavItem>
-              <NavItem to="/signals" icon={Zap} isCollapsed={isCollapsed} important>إشارات السوق</NavItem>
-              <NavItem to="/smart-radar" icon={Target} isCollapsed={isCollapsed} important>لوحات الرادار الذكية</NavItem>
-              <NavItem to="/geo-radar" icon={MapIcon} isCollapsed={isCollapsed} important>الرادار الجغرافي</NavItem>
-              <NavItem to="/timeline" icon={Clock} isCollapsed={isCollapsed}>سجل التغييرات</NavItem>
-              <NavItem to="/followers" icon={Users} isCollapsed={isCollapsed}>المجتمع</NavItem>
+              <NavItem id="nav-home" to="/" icon={Home} end isCollapsed={isCollapsed} important>الصفحة الرئيسية</NavItem>
+              <NavItem id="nav-signals" to="/signals" icon={Zap} isCollapsed={isCollapsed} important>إشارات السوق</NavItem>
+              <NavItem id="nav-radar" to="/smart-radar" icon={Target} isCollapsed={isCollapsed} important>لوحات الرادار الذكية</NavItem>
+              <NavItem id="nav-geo-radar" to="/geo-radar" icon={MapIcon} isCollapsed={isCollapsed} important>الرادار الجغرافي</NavItem>
+              <NavItem id="nav-timeline" to="/timeline" icon={Clock} isCollapsed={isCollapsed}>سجل التغييرات</NavItem>
+              <NavItem id="nav-followers" to="/followers" icon={Users} isCollapsed={isCollapsed}>المجتمع</NavItem>
             </NavGroup>
 
             <div className="h-px bg-slate-800/50 mx-2 my-2"></div>
 
             {/* --- Standard Mode: Data & Analytics --- */}
             <NavGroup title="البيانات والتحليل" open={sections.data} onToggle={() => toggleSection('data')} isCollapsed={isCollapsed} icon={BarChart3}>
-              <NavItem to="/dashboards" icon={LayoutDashboard} isCollapsed={isCollapsed}>كل اللوحات</NavItem>
-              <NavItem to="/my-dashboards" icon={Layout} isCollapsed={isCollapsed}>لوحاتي الخاصة</NavItem>
-              <NavItem to="/sector-boards" icon={ListFilter} isCollapsed={isCollapsed}>لوحات حسب القطاع</NavItem>
-              <NavItem to="/industry" icon={Briefcase} isCollapsed={isCollapsed}>الصناعة</NavItem>
-              <NavItem to="/recommendations" icon={Lightbulb} isCollapsed={isCollapsed}>التوصيات الذكية</NavItem>
-              <NavItem to="/comparisons" icon={GitCompare} isCollapsed={isCollapsed}>المقارنات الذكية</NavItem>
-              <NavItem to="/patterns" icon={Fingerprint} isCollapsed={isCollapsed}>اكتشاف الأنماط</NavItem>
-              <NavItem to="/sources" icon={Database} isCollapsed={isCollapsed}>مصادر البيانات</NavItem>
-              <NavItem to="/stats" icon={TrendingUp} isCollapsed={isCollapsed}>إحصائيات المنصة</NavItem>
-              <NavItem to="/export" icon={Download} isCollapsed={isCollapsed}>تصدير البيانات</NavItem>
+              <NavItem id="nav-all-dashboards" to="/dashboards" icon={LayoutDashboard} isCollapsed={isCollapsed}>كل اللوحات</NavItem>
+              <NavItem id="nav-my-dashboards" to="/my-dashboards" icon={Layout} isCollapsed={isCollapsed}>لوحاتي الخاصة</NavItem>
+              <NavItem id="nav-sector-boards" to="/sector-boards" icon={ListFilter} isCollapsed={isCollapsed}>لوحات حسب القطاع</NavItem>
+              <NavItem id="nav-industry" to="/industry" icon={Briefcase} isCollapsed={isCollapsed}>الصناعة</NavItem>
+              <NavItem id="nav-recommendations" to="/recommendations" icon={Lightbulb} isCollapsed={isCollapsed}>التوصيات الذكية</NavItem>
+              <NavItem id="nav-comparisons" to="/comparisons" icon={GitCompare} isCollapsed={isCollapsed}>المقارنات الذكية</NavItem>
+              <NavItem id="nav-patterns" to="/patterns" icon={Fingerprint} isCollapsed={isCollapsed}>اكتشاف الأنماط</NavItem>
+              <NavItem id="nav-sources" to="/sources" icon={Database} isCollapsed={isCollapsed}>مصادر البيانات</NavItem>
+              <NavItem id="nav-stats" to="/stats" icon={TrendingUp} isCollapsed={isCollapsed}>إحصائيات المنصة</NavItem>
+              <NavItem id="nav-export" to="/export" icon={Download} isCollapsed={isCollapsed}>تصدير البيانات</NavItem>
             </NavGroup>
 
             {/* --- Standard Mode: Build Tools --- */}
             <NavGroup title="أدوات البناء" open={sections.tools} onToggle={() => toggleSection('tools')} isCollapsed={isCollapsed} icon={Settings}>
-              <NavItem to="/builder" icon={PieChart} isCollapsed={isCollapsed}>بناء اللوحات</NavItem>
-              <NavItem to="/indicators" icon={Library} isCollapsed={isCollapsed}>مكتبة المؤشرات</NavItem>
-              <NavItem to="/survey" icon={Microscope} isCollapsed={isCollapsed}>المسح البياني</NavItem>
-              <NavItem to="/expert-studio" icon={GraduationCap} isCollapsed={isCollapsed}>استوديو الخبراء</NavItem>
+              <NavItem id="nav-builder" to="/builder" icon={PieChart} isCollapsed={isCollapsed}>بناء اللوحات</NavItem>
+              <NavItem id="nav-indicators" to="/indicators" icon={Library} isCollapsed={isCollapsed}>مكتبة المؤشرات</NavItem>
+              <NavItem id="nav-survey" to="/survey" icon={Microscope} isCollapsed={isCollapsed}>المسح البياني</NavItem>
+              <NavItem id="nav-expert-studio" to="/expert-studio" icon={GraduationCap} isCollapsed={isCollapsed}>استوديو الخبراء</NavItem>
+              <NavItem id="nav-help" to="/help" icon={HelpCircle} isCollapsed={isCollapsed}>مركز المساعدة</NavItem>
             </NavGroup>
           </>
         ) : (
           <>
             {/* --- Admin Mode: Content Management --- */}
             <NavGroup title="إدارة المحتوى" open={sections.content} onToggle={() => toggleSection('content')} isCollapsed={isCollapsed} icon={FileText}>
-              <NavItem to="/editorial/review" icon={Eye} isCollapsed={isCollapsed} important>مراجعة المحتوى</NavItem>
-              <NavItem to="/campaigns" icon={Radio} isCollapsed={isCollapsed}>الحملات التفاعلية</NavItem>
-              <NavItem to="/moderation" icon={MessageSquare} isCollapsed={isCollapsed}>إشراف التعليقات</NavItem>
-              <NavItem to="/tags" icon={Tags} isCollapsed={isCollapsed}>إدارة الوسوم</NavItem>
-              <NavItem to="/media" icon={ImageIcon} isCollapsed={isCollapsed}>مكتبة الوسائط</NavItem>
-              <NavItem to="/create-post" icon={FilePlus} isCollapsed={isCollapsed} important>إنشاء منشور</NavItem>
-              <NavItem to="/my-posts" icon={FileText} isCollapsed={isCollapsed}>منشوراتي</NavItem>
-              <NavItem to="/design-studio" icon={Brush} isCollapsed={isCollapsed}>استوديو التصميم</NavItem>
+              <NavItem id="nav-review" to="/editorial/review" icon={Eye} isCollapsed={isCollapsed} important>مراجعة المحتوى</NavItem>
+              <NavItem id="nav-campaigns" to="/campaigns" icon={Radio} isCollapsed={isCollapsed}>الحملات التفاعلية</NavItem>
+              <NavItem id="nav-moderation" to="/moderation" icon={MessageSquare} isCollapsed={isCollapsed}>إشراف التعليقات</NavItem>
+              <NavItem id="nav-tags" to="/tags" icon={Tags} isCollapsed={isCollapsed}>إدارة الوسوم</NavItem>
+              <NavItem id="nav-media" to="/media" icon={ImageIcon} isCollapsed={isCollapsed}>مكتبة الوسائط</NavItem>
+              <NavItem id="nav-create-post" to="/create-post" icon={FilePlus} isCollapsed={isCollapsed} important>إنشاء منشور</NavItem>
+              <NavItem id="nav-my-posts" to="/my-posts" icon={FileText} isCollapsed={isCollapsed}>منشوراتي</NavItem>
+              <NavItem id="nav-design-studio" to="/design-studio" icon={Brush} isCollapsed={isCollapsed}>استوديو التصميم</NavItem>
             </NavGroup>
 
-            {/* --- Admin Mode: Admin Sections --- */}
             {isAdmin && (
               <>
                 <div className="h-px bg-slate-800/50 mx-2 my-2"></div>
+                
+                {/* --- Admin Mode: Notification Management (New) --- */}
+                <NavGroup title="إدارة الإشعارات" open={sections.notifications} onToggle={() => toggleSection('notifications')} isCollapsed={isCollapsed} icon={Bell}>
+                  <NavItem id="nav-admin-notifications" to="/admin/notifications?tab=integrations" icon={Bell} isCollapsed={isCollapsed} important>لوحة التحكم بالتنبيهات</NavItem>
+                  <NavItem id="nav-notification-templates" to="/admin/notifications?tab=templates" icon={LayoutTemplate} isCollapsed={isCollapsed}>قوالب الإشعارات</NavItem>
+                  <NavItem id="nav-notification-analytics" to="/admin/notifications?tab=analytics" icon={BarChart3} isCollapsed={isCollapsed}>الإحصائيات والتقارير</NavItem>
+                  <NavItem id="nav-notification-audit" to="/admin/notifications?tab=audit" icon={History} isCollapsed={isCollapsed}>سجل العمليات</NavItem>
+                </NavGroup>
+
+                <div className="h-px bg-slate-800/20 mx-3 my-2"></div>
+
+                {/* --- Admin Mode: Admin Sections --- */}
                 <NavGroup title="الإدارة العامة" open={sections.admin} onToggle={() => toggleSection('admin')} isCollapsed={isCollapsed} icon={ShieldAlert}>
-                  <NavItem to="/admin" icon={LayoutDashboard} isCollapsed={isCollapsed} important>لوحة التحكم الإدارية</NavItem>
-                  <NavItem to="/ai-dashboard" icon={Cpu} isCollapsed={isCollapsed} important>لوحة الذكاء</NavItem>
-                  <NavItem to="/admin/users" icon={Users2} isCollapsed={isCollapsed} important>إدارة المستخدمين</NavItem>
-                  <NavItem to="/admin/activity" icon={History} isCollapsed={isCollapsed}>سجل العمليات</NavItem>
-                  <NavItem to="/admin/settings" icon={Settings2} isCollapsed={isCollapsed}>إعدادات النظام</NavItem>
+                  <NavItem id="nav-admin" to="/admin" icon={LayoutDashboard} isCollapsed={isCollapsed} important>لوحة التحكم الإدارية</NavItem>
+                  <NavItem id="nav-ai-dashboard" to="/ai-dashboard" icon={Cpu} isCollapsed={isCollapsed} important>لوحة الذكاء</NavItem>
+                  <NavItem id="nav-admin-users" to="/admin/users" icon={Users2} isCollapsed={isCollapsed} important>إدارة المستخدمين</NavItem>
+                  <NavItem id="nav-admin-activity" to="/admin/activity" icon={History} isCollapsed={isCollapsed}>سجل العمليات</NavItem>
+                  <NavItem id="nav-admin-settings" to="/admin/settings" icon={Settings2} isCollapsed={isCollapsed}>إعدادات النظام</NavItem>
                   <div className="h-px bg-slate-800/20 mx-3 my-2"></div>
                   <NavItem to="/data-review" icon={Shield} isCollapsed={isCollapsed}>مراجعة البيانات</NavItem>
                   <NavItem to="/reports" icon={FileBarChart} isCollapsed={isCollapsed}>التقارير المخصصة</NavItem>
@@ -444,47 +478,68 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
 const MOCK_NOTIFICATIONS = [
   {
     id: 1,
-    title: "تنبيه ذكاء اصطناعي",
-    desc: "تم اكتشاف حركة غير اعتيادية في أسهم قطاع التكنولوجيا.",
-    time: "منذ 5 دقائق",
+    title: "فرصة تقنية عاجلة",
+    desc: "تم اكتشاف حركة سيولة استثنائية في أسهم قطاع التكنولوجيا (AAPL, MSFT) تشير لانفجار سعري وشيك.",
+    time: "متوفر الآن",
     type: 'ai',
+    priority: 'critical',
     unread: true,
+    path: '/signals',
     icon: Sparkles,
-    color: 'text-blue-500',
-    bg: 'bg-blue-50'
+    color: 'text-rose-500',
+    bg: 'bg-rose-50'
   },
   {
     id: 2,
     title: "تقرير سوق جديد",
-    desc: "نشر الخبير محمد تقريراً جديداً حول العملات الرقمية.",
+    desc: "نشر الخبير محمد تقريراً جديداً حول العملات الرقمية وتحليل البيتكوين للمرحلة القادمة.",
     time: "منذ ساعة",
     type: 'expert',
+    priority: 'high',
     unread: true,
+    path: '/expert-studio',
     icon: LayoutTemplate,
+    color: 'text-blue-500',
+    bg: 'bg-blue-50'
+  },
+  {
+    id: 3,
+    title: "تحديث أمني للنظام",
+    desc: "سيتم إجراء صيانة دورية لمنصة التداول غداً في الساعة 3 صباحاً بتوقيت مكة المكرمة.",
+    time: "منذ 3 ساعات",
+    type: 'system',
+    priority: 'medium',
+    unread: false,
+    path: '/timeline',
+    icon: ShieldCheck,
+    color: 'text-emerald-500',
+    bg: 'bg-emerald-50'
+  },
+  {
+    id: 4,
+    title: "مؤتمر المستثمرين السنوي",
+    desc: "لا تفوت فرصة الحضور الافتراضي لمؤتمر رادار المستثمر السنوي لمناقشة مستقبل السوق السعودي.",
+    time: "منذ 5 ساعات",
+    type: 'event',
+    priority: 'medium',
+    unread: false,
+    path: '/followers',
+    icon: Calendar,
     color: 'text-amber-500',
     bg: 'bg-amber-50'
   },
   {
-    id: 3,
-    title: "تعديل في القواعد",
-    desc: "تم تحديث شروط الاستخدام والخصوصية للمنصة.",
-    time: "منذ 3 ساعات",
-    type: 'system',
-    unread: false,
-    icon: ShieldCheck,
-    color: 'text-green-500',
-    bg: 'bg-green-50'
-  },
-  {
-    id: 4,
-    title: "موعد لوحة البيانات",
-    desc: "تذكير: موعد تحديث بيانات لوحة التحكم غداً الساعة 9 صباحاً.",
-    time: "منذ يوم",
-    type: 'events',
-    unread: false,
-    icon: Clock,
-    color: 'text-slate-500',
-    bg: 'bg-slate-50'
+    id: 5,
+    title: "تحليل سيولة استثنائي",
+    desc: "تحذير: تم رصد خروج سيولة كبيرة من قطاع البنوك قد يؤثر على المؤشر العام في الجلسات القادمة.",
+    time: "منذ 8 ساعات",
+    type: 'analysis',
+    priority: 'critical',
+    unread: true,
+    path: '/smart-radar',
+    icon: Activity,
+    color: 'text-purple-500',
+    bg: 'bg-purple-50'
   }
 ];
 
@@ -522,6 +577,11 @@ const Breadcrumbs = () => {
     } else if (pathname.includes('/favorites')) {
       crumbs.push({ label: 'المستخدم', path: '', icon: UserIcon });
       crumbs.push({ label: 'المفضلة', path: '', icon: Bookmark });
+    } else if (pathname.includes('/admin')) {
+      crumbs.push({ label: 'لوحة التحكم الإدارية', path: '/admin', icon: ShieldAlert });
+      if (pathname === '/admin/notifications') {
+        crumbs.push({ label: 'إدارة التنبيهات', path: '', icon: Bell });
+      }
     } else {
       crumbs.push({ label: 'لوحة التحكم', path: '', icon: LayoutTemplate });
     }
@@ -628,24 +688,37 @@ const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange
           </div>
         </div>
 
-        {/* --- Section 2: Centered Global Search --- */}
-        <div className="flex-1 max-w-2xl hidden md:block group">
-          <div className="relative">
-            <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-              <Search className="w-4.5 h-4.5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-            </div>
-            <input
-              type="text"
-              className="block w-full py-3 pr-12 pl-16 text-sm text-slate-900 bg-slate-100/50 border border-slate-200/50 rounded-[18px] focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 focus:bg-white transition-all placeholder-slate-400 shadow-sm hover:border-slate-300"
-              placeholder="ابحث عن أي شيء في المنصة... (تقارير، مستخدمين، بيانات)"
-            />
-            <div className="absolute inset-y-0 left-0 flex items-center pl-4">
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-white border border-slate-200 rounded-lg shadow-sm">
-                <Command size={11} className="text-slate-400" />
-                <span className="text-[10px] font-black text-slate-400 tracking-wider">K</span>
+        {/* --- Section 2: Navigation & Search --- */}
+        <div className="flex-1 flex items-center gap-4 max-w-4xl hidden md:flex">
+          {/* Main Navigation Links */}
+          <nav className="flex items-center bg-slate-100/50 p-1 rounded-2xl border border-slate-200/30">
+            <Link to="/" className="px-4 py-2 text-xs font-black text-slate-600 hover:text-blue-600 transition-all">البحث</Link>
+            <div className="w-px h-4 bg-slate-300 mx-1 opacity-40"></div>
+            <Link to="/sources" className="px-4 py-2 text-xs font-black text-slate-600 hover:text-blue-600 transition-all">البيانات</Link>
+            <div className="w-px h-4 bg-slate-300 mx-1 opacity-40"></div>
+            <Link to="/indicators" className="px-4 py-2 text-xs font-black text-slate-600 hover:text-blue-600 transition-all">المؤشرات</Link>
+            <div className="w-px h-4 bg-slate-300 mx-1 opacity-40"></div>
+            <Link to="/dashboards" className="px-4 py-2 text-xs font-black text-slate-600 hover:text-blue-600 transition-all">اللوحات</Link>
+            <div className="w-px h-4 bg-slate-300 mx-1 opacity-40"></div>
+            <Link to="/create-post" className="px-4 py-2 text-xs font-black text-slate-600 hover:text-blue-600 transition-all">إنشاء</Link>
+          </nav>
+
+          {/* Search Box */}
+          <div className="flex-1 group">
+            <div className="relative">
+              <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                <Search className="w-4.5 h-4.5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
               </div>
+              <input
+                id="header-search"
+                type="text"
+                className="block w-full py-2.5 pr-12 pl-16 text-sm text-slate-900 bg-slate-100/50 border border-slate-200/50 rounded-[18px] focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 focus:bg-white transition-all placeholder-slate-400 shadow-sm hover:border-slate-300"
+                placeholder="ابحث..."
+              />
             </div>
           </div>
+
+          <GuidedTours />
         </div>
 
         {/* --- Section 3: User Actions & Profile --- */}
@@ -653,8 +726,7 @@ const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange
           
           <div className="flex items-center bg-slate-100/50 p-1.5 rounded-2xl border border-slate-200/30">
             {/* Favorites */}
-            <Link 
-              to="/favorites"
+            <Link to="/favorites"
               className="p-2.5 text-slate-500 hover:text-blue-600 hover:bg-white rounded-xl transition-all"
               title="مفضلتي"
             >
@@ -679,26 +751,66 @@ const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange
 
               {/* Notifications Panel */}
               {isNotificationsOpen && (
-                <div className="absolute left-[-20px] lg:left-0 mt-5 w-[340px] lg:w-[400px] bg-white rounded-[28px] shadow-[0_30px_70px_-15px_rgba(0,0,0,0.15)] border border-slate-200 overflow-hidden animate-scaleIn origin-top-left z-[110]">
-                  <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                    <h3 className="text-sm font-black text-slate-900">مركز الإشعارات</h3>
-                    <button onClick={markAllAsRead} className="text-[11px] font-bold text-blue-600 hover:bg-blue-50 px-2 py-1 rounded-lg transition-all">تحديد الكل كقروء</button>
-                  </div>
-                  <div className="max-h-[420px] overflow-y-auto custom-scrollbar">
-                    {notifications.map((n) => (
-                      <div key={n.id} className={`p-4 hover:bg-slate-50 transition-all cursor-pointer flex gap-4 ${n.unread ? 'bg-blue-50/20' : ''}`}>
-                        <div className={`w-11 h-11 ${n.bg} rounded-xl flex items-center justify-center shrink-0 border border-white`}><n.icon size={18} className={n.color} /></div>
-                        <div className="flex-1 text-right">
-                          <div className="flex items-center justify-between mb-0.5">
-                            <h4 className="text-[13px] font-black text-slate-900 truncate">{n.title}</h4>
-                            <span className="text-[9px] font-bold text-slate-400">{n.time}</span>
-                          </div>
-                          <p className="text-[11px] font-bold text-slate-500 leading-relaxed line-clamp-1">{n.desc}</p>
-                        </div>
+                <div className="absolute left-0 lg:left-0 mt-5 w-[360px] lg:w-[420px] bg-white rounded-[32px] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.18)] border border-slate-200 overflow-hidden animate-scaleIn origin-top-left z-[110]">
+                  <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white relative">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-lg"><Bell size={20} /></div>
+                      <div>
+                        <h3 className="text-sm font-black text-slate-900">مركز التنبيهات الذكي</h3>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Investor Radar Notifications</p>
                       </div>
-                    ))}
+                    </div>
+                    <button onClick={markAllAsRead} className="text-[11px] font-black text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-xl transition-all border border-blue-50 hover:border-blue-100 shadow-sm shadow-blue-500/5">تحديد الكل كقروء</button>
                   </div>
-                  <div className="p-3 bg-slate-50/50 border-t border-slate-100 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-blue-600 transition-colors">عرض جميع التنبيهات</div>
+                  <div className="max-h-[460px] overflow-y-auto custom-scrollbar bg-slate-50/30">
+                    {notifications.length > 0 ? notifications.map((n) => (
+                      <Link 
+                        to={n.path || '#'} 
+                        key={n.id} 
+                        onClick={() => setIsNotificationsOpen(false)}
+                        className={`p-5 m-2 mb-3 rounded-3xl border transition-all flex gap-4 relative overflow-hidden group/item ${n.unread ? 'bg-white border-blue-200 shadow-xl shadow-blue-500/5' : 'bg-white/50 border-slate-100 opacity-80'}`}
+                      >
+                        {/* Status Pulse for Unread */}
+                        {n.unread && (
+                          <div className="absolute top-4 left-4">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                            </span>
+                          </div>
+                        )}
+
+                        <div className={`w-14 h-14 ${n.bg} rounded-2xl flex items-center justify-center shrink-0 border-2 border-white shadow-sm transition-transform group-hover/item:scale-110`}>
+                          <n.icon size={22} className={n.color} />
+                        </div>
+                        <div className="flex-1 text-right">
+                          <div className="flex items-center justify-between mb-1">
+                            <h4 className={`text-[13px] font-black ${n.unread ? 'text-slate-900' : 'text-slate-600'} transition-colors`}>{n.title}</h4>
+                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">{n.time}</span>
+                          </div>
+                          <p className="text-[11px] font-medium text-slate-500 leading-relaxed mb-3 line-clamp-2">{n.desc}</p>
+                          
+                          <div className="flex items-center justify-between">
+                            <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase ${n.priority === 'critical' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-slate-100 text-slate-500'}`}>
+                              {n.priority || 'Normal'}
+                            </span>
+                            <div className="flex items-center gap-1 text-[10px] font-black text-blue-600 group-hover/item:translate-x-[-4px] transition-transform">
+                               <span>استكشف الآن</span>
+                               <ChevronRight size={14} className="rotate-180" />
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    )) : (
+                      <div className="p-20 text-center space-y-4">
+                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300"><Ghost size={32} /></div>
+                         <p className="text-xs font-black text-slate-400 uppercase">لا توجد تنبيهات جديدة حالياً</p>
+                      </div>
+                    )}
+                  </div>
+                  <Link to="/timeline" onClick={() => setIsNotificationsOpen(false)} className="p-4 bg-white border-t border-slate-100 text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] cursor-pointer hover:text-blue-600 hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+                    <History size={14} /> عرض جميع التنبيهات في السجل
+                  </Link>
                 </div>
               )}
             </div>
@@ -707,6 +819,7 @@ const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange
           {/* User Profile Hook */}
           <div className="relative" ref={menuRef}>
             <button 
+              id="user-profile-button"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="flex items-center gap-3 p-1.5 hover:bg-white rounded-2xl transition-all border border-transparent hover:border-slate-100 hover:shadow-lg hover:shadow-slate-100/50"
             >
@@ -731,6 +844,7 @@ const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange
                   <MenuItem icon={UserIcon} label="الملف الشخصي" to="/profile" />
                   <MenuItem icon={Settings} label="الإعدادات" to="/profile?tab=settings" />
                   <MenuItem icon={CreditCard} label="الاشتراكات" />
+                  <MenuItem icon={HelpCircle} label="الدعم الفني" to="/help" />
                   <div className="h-px bg-slate-100 mx-3 my-2"></div>
                   <MenuItem icon={LogOut} label="تسجيل الخروج" danger />
                 </div>
@@ -1155,6 +1269,7 @@ const App = () => {
             <Route path="/dashboards" element={<OfficialDashboardsPage dashboards={officialDashboards} widgets={allWidgets} userRole={currentUser.role} />} />
             <Route path="/signals" element={<AISignalsPage />} />
             <Route path="/timeline" element={<TimelinePage events={TIMELINE_EVENTS} />} />
+            <Route path="/help" element={<HelpCenterPage />} />
             <Route path="/followers" element={<FollowersPage />} />
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/favorites" element={<FavoritesPage />} />
@@ -1180,8 +1295,11 @@ const App = () => {
             <Route path="/builder" element={<div className="p-10 text-center text-gray-400">Dashboard Builder (Analyst+)</div>} />
             <Route path="/queries" element={<div className="p-10 text-center text-gray-400">SQL/Visual Queries (Analyst+)</div>} />
             <Route path="/analysis" element={<div className="p-10 text-center text-gray-400">Data Analysis Tools (Analyst+)</div>} />
+            <Route path="/comparisons" element={<SmartComparisonsPage />} />
+            <Route path="/sources" element={<DataSourcesPage />} />
             <Route path="/verification" element={<div className="p-10 text-center text-gray-400">Data Verification (Expert+)</div>} />
-            <Route path="/admin" element={<div className="p-10 text-center text-gray-400">Admin Dashboard</div>} />
+            <Route path="/admin" element={<AdminOverviewPage />} />
+            <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
 
             <Route path="*" element={<div className="p-10 text-center text-gray-400">جاري العمل على هذه الصفحة...</div>} />
           </Routes>
