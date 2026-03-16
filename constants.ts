@@ -26,7 +26,8 @@ export const TIMELINE_EVENTS: TimelineEvent[] = [
     sourceName: 'الهيئة العامة للإحصاء',
     delta: { value: '5.1%', isPositive: true, label: 'النمو السنوي' },
     tags: ['Economy', 'GDP', 'المؤشرات الوطنية'],
-    relatedWidgetId: 'w1'
+    relatedWidgetId: 'w1',
+    impactExplanation: 'هذا يعني أن الاقتصاد ينمو بشكل صحي، مما قد ينعكس إيجابياً على سوق الأسهم والفرص الاستثمارية في القطاعات المرتبطة.'
   },
   {
     id: 'e2',
@@ -38,7 +39,8 @@ export const TIMELINE_EVENTS: TimelineEvent[] = [
     sourceName: 'وزارة الاستثمار',
     delta: { value: '12%', isPositive: true, label: 'QoQ' },
     tags: ['Investment', 'FDI', 'تقرير الاستثمار'],
-    relatedWidgetId: 'w2'
+    relatedWidgetId: 'w2',
+    impactExplanation: 'زيادة الاستثمار الأجنبي تعني ثقة أكبر في الاقتصاد المحلي وخلق فرص عمل جديدة في القطاعات المستهدفة.'
   },
   {
     id: 'e3',
@@ -49,7 +51,8 @@ export const TIMELINE_EVENTS: TimelineEvent[] = [
     impactScore: 45,
     sourceName: 'رادار المستثمر (AI)',
     tags: ['Real Estate', 'Finance'],
-    relatedWidgetId: 'w5'
+    relatedWidgetId: 'w5',
+    impactExplanation: 'استقرار الفائدة يقلل من تكلفة الاقتراض، مما يحفز الطلب على العقارات السكنية ويزيد من نشاط شركات التطوير العقاري.'
   },
   {
     id: 'e4',
@@ -60,6 +63,7 @@ export const TIMELINE_EVENTS: TimelineEvent[] = [
     impactScore: 30,
     sourceName: 'الجمارك',
     tags: ['Trade', 'Exports'],
+    impactExplanation: 'تنوع الصادرات غير النفطية يقلل الاعتماد على النفط ويعزز الميزان التجاري للمملكة.'
   },
   {
     id: 'e5',
@@ -71,7 +75,8 @@ export const TIMELINE_EVENTS: TimelineEvent[] = [
     sourceName: 'الهيئة العامة للإحصاء',
     delta: { value: '-0.2%', isPositive: true, label: 'تصحيح' },
     tags: ['Labor', 'Unemployment'],
-    relatedWidgetId: 'w3'
+    relatedWidgetId: 'w3',
+    impactExplanation: 'تحسن معدلات البطالة يعكس نجاح برامج التوطين ويزيد من القوة الشرائية للأفراد.'
   }
 ];
 

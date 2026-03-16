@@ -52,6 +52,7 @@ export interface TimelineEvent {
   };
   tags: string[]; // Related Radars or Sectors
   relatedWidgetId?: string;
+  impactExplanation?: string;
 }
 
 export interface Dataset {

@@ -119,6 +119,8 @@ import ExpertBuilderPage from './components/ExpertBuilderPage';
 import FavoritesPage from './components/FavoritesPage';
 import AIRadarDashboard from './components/AIRadarDashboard';
 import SmartRadarPage from './components/SmartRadarPage';
+import TimelinePage from './components/TimelinePage';
+import { ToastProvider } from './components/Toast';
 
 // --- Safe Navigation Helper ---
 interface NavItemProps {
@@ -1022,60 +1024,6 @@ const SignalsPage = ({ events }: { events: TimelineEvent[] }) => {
   )
 }
 
-// --- Page: Timeline ---
-const TimelinePage = ({ events }: { events: TimelineEvent[] }) => {
-  const [filterType, setFilterType] = useState<string>('ALL');
-
-  const filteredEvents = useMemo(() => {
-    if (filterType === 'ALL') return events;
-    return events.filter(e => e.type === filterType);
-  }, [events, filterType]);
-
-  const filterOptions = [
-    { id: 'ALL', label: 'الكل' },
-    { id: TimelineEventType.NEW_DATA, label: 'بيانات' },
-    { id: TimelineEventType.SIGNAL, label: 'إشارات' },
-    { id: TimelineEventType.INSIGHT, label: 'رؤى' },
-    { id: TimelineEventType.REVISION, label: 'تعديلات' },
-  ];
-
-  return (
-    <div className="max-w-7xl mx-auto p-4 lg:p-8">
-      <div className="mb-6 lg:mb-8">
-        <h2 className="text-xl lg:text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
-          <Clock className="text-blue-600" />
-          سجل التغييرات
-        </h2>
-        <p className="text-sm lg:text-base text-gray-500 mt-2 lg:text-lg">
-          تابع آخر التحديثات والإشارات الاقتصادية لحظة بلحظة.
-        </p>
-      </div>
-
-      <div className="flex overflow-x-auto no-scrollbar pb-2 items-center gap-2 mb-6 lg:mb-8 bg-white p-2 rounded-xl shadow-sm border border-gray-100 lg:w-fit sticky top-[60px] lg:top-[72px] z-30 mx-[-16px] px-4 lg:static lg:mx-0 lg:px-2">
-        {filterOptions.map(opt => (
-          <button
-            key={opt.id}
-            onClick={() => setFilterType(opt.id)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${filterType === opt.id
-              ? 'bg-slate-800 text-white shadow-md'
-              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border border-gray-200 lg:border-none'
-              }`}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="space-y-4 lg:space-y-6 relative before:absolute before:inset-0 before:mr-6 before:-ml-px before:w-0.5 before:bg-gradient-to-b before:from-gray-200 before:to-transparent before:hidden md:before:block pb-4">
-        {filteredEvents.map((event) => (
-          <div key={event.id} className="relative animate-fadeIn">
-            <TimelineCard event={event} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 // --- Main App Component ---
 const App = () => {
@@ -1244,7 +1192,9 @@ const App = () => {
 
 const RootApp = () => (
   <Router>
-    <App />
+    <ToastProvider>
+      <App />
+    </ToastProvider>
   </Router>
 )
 
