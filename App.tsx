@@ -121,6 +121,7 @@ import AIRadarDashboard from './components/AIRadarDashboard';
 import SmartRadarPage from './components/SmartRadarPage';
 import TimelinePage from './components/TimelinePage';
 import { ToastProvider } from './components/Toast';
+import GuidedTours from './components/GuidedTours';
 
 // --- Safe Navigation Helper ---
 interface NavItemProps {
@@ -132,10 +133,11 @@ interface NavItemProps {
   badge?: React.ReactNode;
   isCollapsed?: boolean;
   important?: boolean;
+  id?: string;
   key?: React.Key;
 }
 
-const NavItem = ({ to, icon: Icon, children, end = false, className = '', badge = null, isCollapsed = false, important = false }: NavItemProps) => {
+const NavItem = ({ to, icon: Icon, children, end = false, className = '', badge = null, isCollapsed = false, important = false, id }: NavItemProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isActive = end ? location.pathname === to : location.pathname.startsWith(to) && (to === '/' ? location.pathname === '/' : true);
@@ -149,6 +151,7 @@ const NavItem = ({ to, icon: Icon, children, end = false, className = '', badge 
   return (
     <Link
       to={to}
+      id={id}
       className={`${baseClass} ${isActive ? activeClass : inactiveClass} ${className} ${isCollapsed ? 'justify-center px-0' : ''}`}
       title={isCollapsed && typeof children === 'string' ? children : ''}
     >
@@ -316,7 +319,7 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
   return (
     <aside className={`${isCollapsed ? 'w-20' : 'w-[280px]'} ${isAdminPath ? 'bg-[#09090b] border-l-amber-500/30' : 'bg-slate-950 border-l-slate-800/50'} text-white h-screen fixed inset-y-0 right-0 hidden lg:flex flex-col shadow-2xl z-[100] overflow-hidden border-l transition-all duration-500 ease-in-out`}>
       {/* Brand & Toggle */}
-      <div className={`p-6 border-b border-white/5 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} ${isAdminPath ? 'bg-zinc-950/50' : 'bg-slate-950'} shrink-0 relative group/brand transition-colors duration-500`}>
+      <div id="sidebar-brand" className={`p-6 border-b border-white/5 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} ${isAdminPath ? 'bg-zinc-950/50' : 'bg-slate-950'} shrink-0 relative group/brand transition-colors duration-500`}>
         {!isCollapsed && (
           <div className="flex items-center gap-3 animate-fadeIn">
             <div className={`w-10 h-10 ${isAdminPath ? 'bg-gradient-to-br from-amber-500 to-orange-700 shadow-amber-500/20' : 'bg-gradient-to-br from-blue-600 to-indigo-700 shadow-blue-500/20'} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500`}>
@@ -347,49 +350,49 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
           <>
             {/* --- Standard Mode: Dashboard & Overview --- */}
             <NavGroup title="المحور الرئيسي" open={sections.overview} onToggle={() => toggleSection('overview')} isCollapsed={isCollapsed} icon={LayoutDashboard}>
-              <NavItem to="/" icon={Home} end isCollapsed={isCollapsed} important>الصفحة الرئيسية</NavItem>
-              <NavItem to="/signals" icon={Zap} isCollapsed={isCollapsed} important>إشارات السوق</NavItem>
-              <NavItem to="/smart-radar" icon={Target} isCollapsed={isCollapsed} important>لوحات الرادار الذكية</NavItem>
-              <NavItem to="/timeline" icon={Clock} isCollapsed={isCollapsed}>سجل التغييرات</NavItem>
-              <NavItem to="/followers" icon={Users} isCollapsed={isCollapsed}>المجتمع</NavItem>
+              <NavItem id="nav-home" to="/" icon={Home} end isCollapsed={isCollapsed} important>الصفحة الرئيسية</NavItem>
+              <NavItem id="nav-signals" to="/signals" icon={Zap} isCollapsed={isCollapsed} important>إشارات السوق</NavItem>
+              <NavItem id="nav-radar" to="/smart-radar" icon={Target} isCollapsed={isCollapsed} important>لوحات الرادار الذكية</NavItem>
+              <NavItem id="nav-timeline" to="/timeline" icon={Clock} isCollapsed={isCollapsed}>سجل التغييرات</NavItem>
+              <NavItem id="nav-followers" to="/followers" icon={Users} isCollapsed={isCollapsed}>المجتمع</NavItem>
             </NavGroup>
 
             <div className="h-px bg-slate-800/50 mx-2 my-2"></div>
 
             {/* --- Standard Mode: Data & Analytics --- */}
             <NavGroup title="البيانات والتحليل" open={sections.data} onToggle={() => toggleSection('data')} isCollapsed={isCollapsed} icon={BarChart3}>
-              <NavItem to="/dashboards" icon={LayoutDashboard} isCollapsed={isCollapsed}>كل اللوحات</NavItem>
-              <NavItem to="/my-dashboards" icon={Layout} isCollapsed={isCollapsed}>لوحاتي الخاصة</NavItem>
-              <NavItem to="/sector-boards" icon={ListFilter} isCollapsed={isCollapsed}>لوحات حسب القطاع</NavItem>
-              <NavItem to="/industry" icon={Briefcase} isCollapsed={isCollapsed}>الصناعة</NavItem>
-              <NavItem to="/recommendations" icon={Lightbulb} isCollapsed={isCollapsed}>التوصيات الذكية</NavItem>
-              <NavItem to="/comparisons" icon={GitCompare} isCollapsed={isCollapsed}>المقارنات الذكية</NavItem>
-              <NavItem to="/patterns" icon={Fingerprint} isCollapsed={isCollapsed}>اكتشاف الأنماط</NavItem>
-              <NavItem to="/sources" icon={Database} isCollapsed={isCollapsed}>مصادر البيانات</NavItem>
-              <NavItem to="/stats" icon={TrendingUp} isCollapsed={isCollapsed}>إحصائيات المنصة</NavItem>
-              <NavItem to="/export" icon={Download} isCollapsed={isCollapsed}>تصدير البيانات</NavItem>
+              <NavItem id="nav-all-dashboards" to="/dashboards" icon={LayoutDashboard} isCollapsed={isCollapsed}>كل اللوحات</NavItem>
+              <NavItem id="nav-my-dashboards" to="/my-dashboards" icon={Layout} isCollapsed={isCollapsed}>لوحاتي الخاصة</NavItem>
+              <NavItem id="nav-sector-boards" to="/sector-boards" icon={ListFilter} isCollapsed={isCollapsed}>لوحات حسب القطاع</NavItem>
+              <NavItem id="nav-industry" to="/industry" icon={Briefcase} isCollapsed={isCollapsed}>الصناعة</NavItem>
+              <NavItem id="nav-recommendations" to="/recommendations" icon={Lightbulb} isCollapsed={isCollapsed}>التوصيات الذكية</NavItem>
+              <NavItem id="nav-comparisons" to="/comparisons" icon={GitCompare} isCollapsed={isCollapsed}>المقارنات الذكية</NavItem>
+              <NavItem id="nav-patterns" to="/patterns" icon={Fingerprint} isCollapsed={isCollapsed}>اكتشاف الأنماط</NavItem>
+              <NavItem id="nav-sources" to="/sources" icon={Database} isCollapsed={isCollapsed}>مصادر البيانات</NavItem>
+              <NavItem id="nav-stats" to="/stats" icon={TrendingUp} isCollapsed={isCollapsed}>إحصائيات المنصة</NavItem>
+              <NavItem id="nav-export" to="/export" icon={Download} isCollapsed={isCollapsed}>تصدير البيانات</NavItem>
             </NavGroup>
 
             {/* --- Standard Mode: Build Tools --- */}
             <NavGroup title="أدوات البناء" open={sections.tools} onToggle={() => toggleSection('tools')} isCollapsed={isCollapsed} icon={Settings}>
-              <NavItem to="/builder" icon={PieChart} isCollapsed={isCollapsed}>بناء اللوحات</NavItem>
-              <NavItem to="/indicators" icon={Library} isCollapsed={isCollapsed}>مكتبة المؤشرات</NavItem>
-              <NavItem to="/survey" icon={Microscope} isCollapsed={isCollapsed}>المسح البياني</NavItem>
-              <NavItem to="/expert-studio" icon={GraduationCap} isCollapsed={isCollapsed}>استوديو الخبراء</NavItem>
+              <NavItem id="nav-builder" to="/builder" icon={PieChart} isCollapsed={isCollapsed}>بناء اللوحات</NavItem>
+              <NavItem id="nav-indicators" to="/indicators" icon={Library} isCollapsed={isCollapsed}>مكتبة المؤشرات</NavItem>
+              <NavItem id="nav-survey" to="/survey" icon={Microscope} isCollapsed={isCollapsed}>المسح البياني</NavItem>
+              <NavItem id="nav-expert-studio" to="/expert-studio" icon={GraduationCap} isCollapsed={isCollapsed}>استوديو الخبراء</NavItem>
             </NavGroup>
           </>
         ) : (
           <>
             {/* --- Admin Mode: Content Management --- */}
             <NavGroup title="إدارة المحتوى" open={sections.content} onToggle={() => toggleSection('content')} isCollapsed={isCollapsed} icon={FileText}>
-              <NavItem to="/editorial/review" icon={Eye} isCollapsed={isCollapsed} important>مراجعة المحتوى</NavItem>
-              <NavItem to="/campaigns" icon={Radio} isCollapsed={isCollapsed}>الحملات التفاعلية</NavItem>
-              <NavItem to="/moderation" icon={MessageSquare} isCollapsed={isCollapsed}>إشراف التعليقات</NavItem>
-              <NavItem to="/tags" icon={Tags} isCollapsed={isCollapsed}>إدارة الوسوم</NavItem>
-              <NavItem to="/media" icon={ImageIcon} isCollapsed={isCollapsed}>مكتبة الوسائط</NavItem>
-              <NavItem to="/create-post" icon={FilePlus} isCollapsed={isCollapsed} important>إنشاء منشور</NavItem>
-              <NavItem to="/my-posts" icon={FileText} isCollapsed={isCollapsed}>منشوراتي</NavItem>
-              <NavItem to="/design-studio" icon={Brush} isCollapsed={isCollapsed}>استوديو التصميم</NavItem>
+              <NavItem id="nav-review" to="/editorial/review" icon={Eye} isCollapsed={isCollapsed} important>مراجعة المحتوى</NavItem>
+              <NavItem id="nav-campaigns" to="/campaigns" icon={Radio} isCollapsed={isCollapsed}>الحملات التفاعلية</NavItem>
+              <NavItem id="nav-moderation" to="/moderation" icon={MessageSquare} isCollapsed={isCollapsed}>إشراف التعليقات</NavItem>
+              <NavItem id="nav-tags" to="/tags" icon={Tags} isCollapsed={isCollapsed}>إدارة الوسوم</NavItem>
+              <NavItem id="nav-media" to="/media" icon={ImageIcon} isCollapsed={isCollapsed}>مكتبة الوسائط</NavItem>
+              <NavItem id="nav-create-post" to="/create-post" icon={FilePlus} isCollapsed={isCollapsed} important>إنشاء منشور</NavItem>
+              <NavItem id="nav-my-posts" to="/my-posts" icon={FileText} isCollapsed={isCollapsed}>منشوراتي</NavItem>
+              <NavItem id="nav-design-studio" to="/design-studio" icon={Brush} isCollapsed={isCollapsed}>استوديو التصميم</NavItem>
             </NavGroup>
 
             {/* --- Admin Mode: Admin Sections --- */}
@@ -397,11 +400,11 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
               <>
                 <div className="h-px bg-slate-800/50 mx-2 my-2"></div>
                 <NavGroup title="الإدارة العامة" open={sections.admin} onToggle={() => toggleSection('admin')} isCollapsed={isCollapsed} icon={ShieldAlert}>
-                  <NavItem to="/admin" icon={LayoutDashboard} isCollapsed={isCollapsed} important>لوحة التحكم الإدارية</NavItem>
-                  <NavItem to="/ai-dashboard" icon={Cpu} isCollapsed={isCollapsed} important>لوحة الذكاء</NavItem>
-                  <NavItem to="/admin/users" icon={Users2} isCollapsed={isCollapsed} important>إدارة المستخدمين</NavItem>
-                  <NavItem to="/admin/activity" icon={History} isCollapsed={isCollapsed}>سجل العمليات</NavItem>
-                  <NavItem to="/admin/settings" icon={Settings2} isCollapsed={isCollapsed}>إعدادات النظام</NavItem>
+                  <NavItem id="nav-admin" to="/admin" icon={LayoutDashboard} isCollapsed={isCollapsed} important>لوحة التحكم الإدارية</NavItem>
+                  <NavItem id="nav-ai-dashboard" to="/ai-dashboard" icon={Cpu} isCollapsed={isCollapsed} important>لوحة الذكاء</NavItem>
+                  <NavItem id="nav-admin-users" to="/admin/users" icon={Users2} isCollapsed={isCollapsed} important>إدارة المستخدمين</NavItem>
+                  <NavItem id="nav-admin-activity" to="/admin/activity" icon={History} isCollapsed={isCollapsed}>سجل العمليات</NavItem>
+                  <NavItem id="nav-admin-settings" to="/admin/settings" icon={Settings2} isCollapsed={isCollapsed}>إعدادات النظام</NavItem>
                   <div className="h-px bg-slate-800/20 mx-3 my-2"></div>
                   <NavItem to="/data-review" icon={Shield} isCollapsed={isCollapsed}>مراجعة البيانات</NavItem>
                   <NavItem to="/reports" icon={FileBarChart} isCollapsed={isCollapsed}>التقارير المخصصة</NavItem>
@@ -625,24 +628,37 @@ const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange
           </div>
         </div>
 
-        {/* --- Section 2: Centered Global Search --- */}
-        <div className="flex-1 max-w-2xl hidden md:block group">
-          <div className="relative">
-            <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-              <Search className="w-4.5 h-4.5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-            </div>
-            <input
-              type="text"
-              className="block w-full py-3 pr-12 pl-16 text-sm text-slate-900 bg-slate-100/50 border border-slate-200/50 rounded-[18px] focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 focus:bg-white transition-all placeholder-slate-400 shadow-sm hover:border-slate-300"
-              placeholder="ابحث عن أي شيء في المنصة... (تقارير، مستخدمين، بيانات)"
-            />
-            <div className="absolute inset-y-0 left-0 flex items-center pl-4">
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-white border border-slate-200 rounded-lg shadow-sm">
-                <Command size={11} className="text-slate-400" />
-                <span className="text-[10px] font-black text-slate-400 tracking-wider">K</span>
+        {/* --- Section 2: Navigation & Search --- */}
+        <div className="flex-1 flex items-center gap-4 max-w-4xl hidden md:flex">
+          {/* Main Navigation Links */}
+          <nav className="flex items-center bg-slate-100/50 p-1 rounded-2xl border border-slate-200/30">
+            <Link to="/" className="px-4 py-2 text-xs font-black text-slate-600 hover:text-blue-600 transition-all">البحث</Link>
+            <div className="w-px h-4 bg-slate-300 mx-1 opacity-40"></div>
+            <Link to="/sources" className="px-4 py-2 text-xs font-black text-slate-600 hover:text-blue-600 transition-all">البيانات</Link>
+            <div className="w-px h-4 bg-slate-300 mx-1 opacity-40"></div>
+            <Link to="/indicators" className="px-4 py-2 text-xs font-black text-slate-600 hover:text-blue-600 transition-all">المؤشرات</Link>
+            <div className="w-px h-4 bg-slate-300 mx-1 opacity-40"></div>
+            <Link to="/dashboards" className="px-4 py-2 text-xs font-black text-slate-600 hover:text-blue-600 transition-all">اللوحات</Link>
+            <div className="w-px h-4 bg-slate-300 mx-1 opacity-40"></div>
+            <Link to="/create-post" className="px-4 py-2 text-xs font-black text-slate-600 hover:text-blue-600 transition-all">إنشاء</Link>
+          </nav>
+
+          {/* Search Box */}
+          <div className="flex-1 group">
+            <div className="relative">
+              <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                <Search className="w-4.5 h-4.5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
               </div>
+              <input
+                id="header-search"
+                type="text"
+                className="block w-full py-2.5 pr-12 pl-16 text-sm text-slate-900 bg-slate-100/50 border border-slate-200/50 rounded-[18px] focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 focus:bg-white transition-all placeholder-slate-400 shadow-sm hover:border-slate-300"
+                placeholder="ابحث..."
+              />
             </div>
           </div>
+
+          <GuidedTours />
         </div>
 
         {/* --- Section 3: User Actions & Profile --- */}
@@ -704,6 +720,7 @@ const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange
           {/* User Profile Hook */}
           <div className="relative" ref={menuRef}>
             <button 
+              id="user-profile-button"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="flex items-center gap-3 p-1.5 hover:bg-white rounded-2xl transition-all border border-transparent hover:border-slate-100 hover:shadow-lg hover:shadow-slate-100/50"
             >
