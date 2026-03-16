@@ -10,8 +10,8 @@
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+// import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from 'react-leaflet';
+// import 'leaflet/dist/leaflet.css';
 import {
   MapPin,
   Layers,
@@ -498,72 +498,23 @@ const SaudiArabiaMap = ({
   }
 
   return (
-    <div className="relative w-full h-[500px] bg-gradient-to-br from-slate-50 to-slate-100 rounded-[32px] border border-slate-200 overflow-hidden shadow-inner">
-      <MapContainer
-        center={saudiCenter}
-        zoom={6}
-        minZoom={5}
-        maxZoom={10}
-        scrollWheelZoom={true}
-        className="w-full h-full rounded-[32px]"
-        style={{ background: 'transparent' }}
-        zoomControl={false}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        
-        {REGIONS.map((region) => (
-          <CircleMarker
-            key={region.id}
-            center={[region.center.lat, region.center.lng] as [number, number]}
-            radius={selectedRegion === region.id ? 25 : 15}
-            pathOptions={{
-              color: selectedRegion === region.id ? '#3b82f6' : '#64748b',
-              fillColor: selectedRegion === region.id ? '#3b82f6' : '#94a3b8',
-              fillOpacity: selectedRegion === region.id ? 0.4 : 0.2,
-              weight: selectedRegion === region.id ? 3 : 1
-            }}
-            eventHandlers={{
-              click: () => onRegionClick(region.id)
-            }}
-          />
-        ))}
+    <div className="relative w-full h-[500px] bg-gradient-to-br from-slate-50 to-slate-100 rounded-[32px] border border-slate-200 overflow-hidden shadow-inner flex items-center justify-center">
+      {/* Placeholder until react-leaflet is properly installed */}
+      <div className="text-center p-8">
+        <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <MapPin size={40} className="text-blue-600" />
+        </div>
+        <h3 className="text-xl font-black text-slate-900 mb-2">خريطة الاستثمار التفاعلية</h3>
+        <p className="text-slate-600 font-bold mb-4">قريباً: توزيع المشاريع الاستثمارية على خريطة المملكة</p>
+        <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
+          <span className="px-3 py-1 bg-slate-200 rounded-full">🗺️ خريطة تفاعلية</span>
+          <span className="px-3 py-1 bg-slate-200 rounded-full">📍 مواقع المشاريع</span>
+          <span className="px-3 py-1 bg-slate-200 rounded-full">📊 إحصائيات منطقة</span>
+        </div>
+      </div>
 
-        {projects.map((project) => {
-          const sector = SECTORS.find(s => s.id === project.sector);
-          if (!sector || !activeLayers.includes(project.sector)) return null;
-          
-          const markerSize = project.investmentSize === 'mega' ? 32 : project.investmentSize === 'large' ? 28 : 24;
-          const icon = createCustomIcon(sector.color, markerSize);
-          
-          return (
-            <Marker
-              key={project.id}
-              position={[project.coordinates.lat, project.coordinates.lng] as [number, number]}
-              icon={icon}
-              eventHandlers={{
-                click: () => onProjectClick(project)
-              }}
-            >
-              <Popup>
-                <div className="p-2 min-w-[200px] text-right" dir="rtl">
-                  <h3 className="font-bold text-slate-900 mb-1">{project.name}</h3>
-                  <p className="text-xs text-slate-500 mb-2">{sector.label}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-600">{project.investmentValue.toLocaleString()}M</span>
-                    <span className="text-xs font-bold text-emerald-600">{project.jobsCreated} وظيفة</span>
-                  </div>
-                </div>
-              </Popup>
-            </Marker>
-          );
-        })}
-      </MapContainer>
-
-      {/* Map Legend */}
-      <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-2xl p-4 border border-slate-200 shadow-lg z-[1000]">
+      {/* Map Legend - Temporarily Hidden */}
+      {/* <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-2xl p-4 border border-slate-200 shadow-lg z-[1000]">
         <h4 className="text-xs font-bold text-slate-700 mb-3 flex items-center gap-2">
           <Layers size={14} />
           حجم الاستثمار
@@ -583,10 +534,10 @@ const SaudiArabiaMap = ({
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
-      {/* Active Layers Indicator */}
-      <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-2xl p-3 border border-slate-200 shadow-lg z-[1000]">
+      {/* Active Layers Indicator - Temporarily Hidden */}
+      {/* <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-2xl p-3 border border-slate-200 shadow-lg z-[1000]">
         <div className="flex items-center gap-2 flex-wrap">
           {SECTORS.filter(s => activeLayers.includes(s.id)).map((sector) => {
             const Icon = sector.icon;
@@ -602,10 +553,10 @@ const SaudiArabiaMap = ({
             );
           })}
         </div>
-      </div>
+      </div> */}
 
-      {/* Zoom Controls */}
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 bg-white rounded-xl shadow-lg border border-slate-200 z-[1000] overflow-hidden">
+      {/* Zoom Controls - Temporarily Hidden */}
+      {/* <div className="absolute left-4 top-1/2 -translate-y-1/2 bg-white rounded-xl shadow-lg border border-slate-200 z-[1000] overflow-hidden">
         <button
           className="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-slate-50 border-b border-slate-200"
           onClick={() => {
@@ -624,7 +575,7 @@ const SaudiArabiaMap = ({
         >
           <span className="text-xl font-bold">−</span>
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };
