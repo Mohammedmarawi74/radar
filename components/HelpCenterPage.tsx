@@ -25,7 +25,8 @@ import {
   Sparkles,
   Library,
   Pin,
-  FileText
+  FileText,
+  X, Bot, ShieldCheck, Headphones
 } from 'lucide-react';
 
 // --- Types ---
@@ -421,6 +422,12 @@ const HelpCenterPage = () => {
   const [activeTab, setActiveTab ] = useState<'kb' | 'support' | 'tickets'>('kb');
   const [openSections, setOpenSections] = useState<string[]>(['getting-started', 'features']);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatStep, setChatStep] = useState<'welcome' | 'chatting'>('welcome');
+  const [messages, setMessages] = useState<{role: 'bot' | 'user', text: string}[]>([
+    { role: 'bot', text: 'مرحباً بك! أنا مساعد رادار الذكي. كيف يمكنني مساعدتك اليوم؟' }
+  ]);
+  const [newMessage, setNewMessage] = useState('');
   const contentRef = useRef<HTMLDivElement>(null);
 
   // Scroll to content area when state changes
@@ -743,7 +750,12 @@ const HelpCenterPage = () => {
                          <p className="text-[10px] text-blue-100 font-bold">تحدث مع أحد خبراء المنصة الآن للحصول على مساعدة مخصصة.</p>
                       </div>
                    </div>
-                   <button className="px-8 py-3 bg-white text-blue-600 rounded-xl font-black text-sm hover:shadow-xl transition-all">تحدث معنا الآن</button>
+                   <button 
+                     onClick={() => { setIsChatOpen(true); setChatStep('welcome'); }}
+                     className="px-8 py-3 bg-white text-blue-600 rounded-xl font-black text-sm hover:shadow-xl transition-all"
+                   >
+                     تحدث معنا الآن
+                   </button>
                 </div>
              </div>
            )}
@@ -794,12 +806,17 @@ const HelpCenterPage = () => {
                       <p className="text-[11px] font-bold text-slate-400 leading-relaxed">راسلنا مباشرة على بريد الدعم الرسمي</p>
                       <p className="text-sm font-black text-blue-600">support@radar.io</p>
                    </div>
-                   <div className="p-8 bg-white border border-slate-100 rounded-[35px] text-center space-y-4 shadow-xl shadow-blue-500/5">
-                      <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto"><MessageSquare size={24}/></div>
-                      <h4 className="font-black text-slate-900 uppercase tracking-tight">المحادثة الفورية</h4>
-                      <p className="text-[11px] font-bold text-slate-400 leading-relaxed">متاح طوال أيام الأسبوع للباقات الاحترافية</p>
-                      <button className="px-6 py-2 bg-indigo-600 text-white rounded-xl text-[10px] font-black">ابدأ الدردشة</button>
-                   </div>
+                   <div className="p-8 bg-white border border-slate-100 rounded-[35px] text-center space-y-4 shadow-xl shadow-blue-500/5 hover:-translate-y-1 transition-all">
+                       <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto"><MessageSquare size={24}/></div>
+                       <h4 className="font-black text-slate-900 uppercase tracking-tight">المحادثة الفورية</h4>
+                       <p className="text-[11px] font-bold text-slate-400 leading-relaxed">متاح طوال أيام الأسبوع للباقات الاحترافية</p>
+                       <button 
+                         onClick={() => { setIsChatOpen(true); setChatStep('welcome'); }}
+                         className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] font-black hover:bg-indigo-700 transition-all shadow-md"
+                       >
+                         ابدأ الدردشة الآن
+                       </button>
+                    </div>
                    <div className="p-8 bg-white border border-slate-100 rounded-[35px] text-center space-y-4">
                       <div className="w-14 h-14 bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center mx-auto"><ExternalLink size={24}/></div>
                       <h4 className="font-black text-slate-900 uppercase tracking-tight">قنوات التواصل</h4>
@@ -870,17 +887,118 @@ const HelpCenterPage = () => {
         </main>
       </div>
 
-      {/* Floating CTA for Help Center */}
-      <div className="fixed bottom-10 right-10 group z-[100] hidden lg:block">
-         <div className="absolute bottom-full right-0 mb-4 scale-0 group-hover:scale-100 transition-transform origin-bottom-right">
-            <div className="bg-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-100 font-black text-xs text-blue-600 whitespace-nowrap">
-               بدء محادثة فورية مع الخبراء
-            </div>
-         </div>
-         <button className="p-5 bg-blue-600 text-white rounded-[24px] shadow-2xl shadow-blue-500/30 hover:bg-blue-700 hover:scale-110 transition-all">
-            <MessageSquare size={28} />
-         </button>
-      </div>
+      {/* Modern Live Chat Modal */}
+      {isChatOpen && (
+        <div className="fixed inset-0 z-[1000] flex items-end justify-end p-6 pointer-events-none">
+           <div className="w-full max-w-[420px] h-[600px] bg-white rounded-[32px] shadow-2xl border border-slate-100 flex flex-col pointer-events-auto animate-slideUp overflow-hidden">
+              {/* Chat Header */}
+              <div className="bg-gradient-to-r from-blue-700 to-indigo-800 p-6 text-white shrink-0 relative">
+                 <button 
+                   onClick={() => setIsChatOpen(false)}
+                   className="absolute top-6 left-6 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all"
+                 >
+                    <X size={16} />
+                 </button>
+                 <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/10">
+                       <Bot size={24} className="text-white" />
+                    </div>
+                    <div>
+                       <h4 className="font-black text-base">مساعد رادار الذكي</h4>
+                       <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                          <span className="text-[10px] text-blue-100 font-bold uppercase tracking-tight">متصل الآن</span>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+
+              {chatStep === 'welcome' ? (
+                <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-6 animate-fadeIn">
+                   <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                      <ShieldCheck size={40} />
+                   </div>
+                   <div>
+                      <h3 className="text-xl font-black text-slate-900">كيف يمكننا مساعدتك؟</h3>
+                      <p className="text-sm text-slate-500 font-bold mt-2 leading-relaxed">فريقنا متاح دائماً للإجابة على استفساراتك المعقدة وحل المشكلات التقنية.</p>
+                   </div>
+                   <div className="w-full space-y-3 pt-4">
+                      <button 
+                        onClick={() => setChatStep('chatting')}
+                        className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-blue-500/20 hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
+                      >
+                         <MessageSquare size={18} />
+                         بدء محادثة مباشرة
+                      </button>
+                      <button className="w-full py-4 bg-slate-50 text-slate-600 rounded-2xl font-black text-sm border border-slate-100 hover:bg-slate-100 transition-all">
+                         استعراض الأسئلة الأكثر شيوعاً
+                      </button>
+                   </div>
+                </div>
+              ) : (
+                <>
+                  {/* Messages Area */}
+                  <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-slate-50/30">
+                     {messages.map((msg, i) => (
+                       <div key={i} className={`flex ${msg.role === 'user' ? 'justify-start' : 'justify-end'}`}>
+                          <div className={`max-w-[80%] p-4 rounded-2xl text-sm font-bold shadow-sm ${
+                            msg.role === 'user' 
+                              ? 'bg-blue-600 text-white rounded-tr-none' 
+                              : 'bg-white border border-slate-100 text-slate-800 rounded-tl-none'
+                          }`}>
+                             {msg.text}
+                          </div>
+                       </div>
+                     ))}
+                  </div>
+
+                  {/* Input Area */}
+                  <div className="p-4 bg-white border-t border-slate-100">
+                     <div className="relative">
+                        <textarea 
+                           className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-12 pr-4 py-3 text-sm font-bold focus:bg-white focus:ring-4 focus:ring-blue-500/5 transition-all outline-none resize-none"
+                           placeholder="اكتب رسالتك هنا..."
+                           rows={2}
+                           value={newMessage}
+                           onChange={(e) => setNewMessage(e.target.value)}
+                           onKeyDown={(e) => {
+                             if(e.key === 'Enter' && !e.shiftKey) {
+                               e.preventDefault();
+                               if(newMessage.trim()) {
+                                 setMessages([...messages, { role: 'user', text: newMessage }]);
+                                 setNewMessage('');
+                                 // Simple mock bot response
+                                 setTimeout(() => {
+                                   setMessages(prev => [...prev, { role: 'bot', text: 'شكراً لتواصلك! جاري تحويلك لأحد خبرائنا في قسم الاستثمار...' }]);
+                                 }, 1000);
+                               }
+                             }
+                           }}
+                        />
+                        <button 
+                          className="absolute bottom-2 left-2 w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20"
+                          onClick={() => {
+                            if(newMessage.trim()) {
+                              setMessages([...messages, { role: 'user', text: newMessage }]);
+                              setNewMessage('');
+                              setTimeout(() => {
+                                setMessages(prev => [...prev, { role: 'bot', text: 'شكراً لتواصلك! جاري تحويلك لأحد خبرائنا في قسم الاستثمار...' }]);
+                              }, 1000);
+                            }
+                          }}
+                        >
+                           <Send size={18} className="translate-x-0.5" />
+                        </button>
+                     </div>
+                     <p className="text-[9px] text-slate-400 font-bold text-center mt-3">
+                        من خلال البدء، أنت توافق على <span className="text-blue-500 underline">شروط خدمة</span> رادار.
+                     </p>
+                  </div>
+                </>
+              )}
+           </div>
+        </div>
+      )}
     </div>
   );
 };
