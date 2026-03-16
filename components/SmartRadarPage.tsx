@@ -159,8 +159,13 @@ const UnservedDemandTab = () => (
                 paddingAngle={5}
                 dataKey="value"
               >
-                {COLORS.map((color, index) => (
-                  <Cell key={`cell-${index}`} fill={color} />
+                {[
+                  { name: 'توصيل طلبات', value: 400 },
+                  { name: 'خدمات صحية', value: 300 },
+                  { name: 'صيانة منزلية', value: 300 },
+                  { name: 'استشارات قانونية', value: 200 }
+                ].map((entry, index) => (
+                  <Cell key={`cell-${entry.name}-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
               <RechartsTooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />

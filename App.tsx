@@ -84,7 +84,8 @@ import {
   Users2,
   Settings2,
   ChevronUp,
-  Target
+  Target,
+  Map as MapIcon
 } from 'lucide-react';
 import {
   UserRole,
@@ -120,6 +121,7 @@ import FavoritesPage from './components/FavoritesPage';
 import AIRadarDashboard from './components/AIRadarDashboard';
 import SmartRadarPage from './components/SmartRadarPage';
 import TimelinePage from './components/TimelinePage';
+import InvestmentGeoRadar from './components/InvestmentGeoRadar';
 import { ToastProvider } from './components/Toast';
 
 // --- Safe Navigation Helper ---
@@ -350,6 +352,7 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
               <NavItem to="/" icon={Home} end isCollapsed={isCollapsed} important>الصفحة الرئيسية</NavItem>
               <NavItem to="/signals" icon={Zap} isCollapsed={isCollapsed} important>إشارات السوق</NavItem>
               <NavItem to="/smart-radar" icon={Target} isCollapsed={isCollapsed} important>لوحات الرادار الذكية</NavItem>
+              <NavItem to="/geo-radar" icon={MapIcon} isCollapsed={isCollapsed} important>الرادار الجغرافي</NavItem>
               <NavItem to="/timeline" icon={Clock} isCollapsed={isCollapsed}>سجل التغييرات</NavItem>
               <NavItem to="/followers" icon={Users} isCollapsed={isCollapsed}>المجتمع</NavItem>
             </NavGroup>
@@ -1148,6 +1151,7 @@ const App = () => {
             <Route path="/" element={<HomeFeed feedItems={FEED_ITEMS} user={currentUser} onOpenWizard={() => setIsWizardOpen(true)} />} />
             <Route path="/ai-dashboard" element={<AIRadarDashboard />} />
             <Route path="/smart-radar" element={<SmartRadarPage />} />
+            <Route path="/geo-radar" element={<InvestmentGeoRadar />} />
             <Route path="/dashboards" element={<OfficialDashboardsPage dashboards={officialDashboards} widgets={allWidgets} userRole={currentUser.role} />} />
             <Route path="/signals" element={<AISignalsPage />} />
             <Route path="/timeline" element={<TimelinePage events={TIMELINE_EVENTS} />} />
