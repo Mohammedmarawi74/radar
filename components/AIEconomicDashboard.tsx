@@ -6,7 +6,7 @@ import {
   BarChart3, PieChart, Layers, Target, Star, Lightbulb, Eye,
   Briefcase, Building2, Globe, Wallet, Oil, Home, GraduationCap,
   Plane, Heart, Smile, Frown, Minus, ChevronRight, Search, Filter,
-  ExternalLink, Share2, Save, Printer, X
+  ExternalLink, Share2, Save, Printer, X, Copy
 } from 'lucide-react';
 import { useToast } from './Toast';
 
@@ -48,6 +48,17 @@ interface EconomicEvent {
   type: 'report' | 'indicator' | 'announcement' | 'policy';
 }
 
+interface EconomicNews {
+  id: string;
+  title: string;
+  description: string;
+  source: string;
+  sourceLogo: string;
+  publishedDate: string;
+  link: string;
+  category: 'economy' | 'markets' | 'energy' | 'policy' | 'technology' | 'general';
+}
+
 const AIEconomicDashboard = () => {
   const [dateRange, setDateRange] = useState('month');
   const [showAIAnalysis, setShowAIAnalysis] = useState(true);
@@ -58,8 +69,161 @@ const AIEconomicDashboard = () => {
   const [showExportModal, setShowExportModal] = useState(false);
   const [selectedSector, setSelectedSector] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'growth' | 'activity'>('growth');
+  const [newsFilter, setNewsFilter] = useState<string>('all');
+  const [newsSearch, setNewsSearch] = useState('');
+  const [showNewsModal, setShowNewsModal] = useState(false);
+  const [selectedNews, setSelectedNews] = useState<EconomicNews | null>(null);
+  const [newsLastUpdated, setNewsLastUpdated] = useState(new Date());
 
   const { showToast } = useToast();
+
+  // Mock RSS Economic News Data
+  const economicNews: EconomicNews[] = [
+    {
+      id: 'n1',
+      title: 'البنك المركزي السعودي يبقي على أسعار الفائدة دون تغيير',
+      description: 'قرر البنك المركزي السعودي الإبقاء على سعر الريبو الأساسي عند 6.00% في اجتماعه الأخير، متماشياً مع توقعات المحللين وسط استقرار معدلات التضخم.',
+      source: 'Reuters',
+      sourceLogo: '📰',
+      publishedDate: '2024-01-15T09:30:00',
+      link: 'https://reuters.com',
+      category: 'economy'
+    },
+    {
+      id: 'n2',
+      title: 'صندوق النقد الدولي يرفع توقعات نمو الاقتصاد السعودي',
+      description: 'رفع صندوق النقد الدولي توقعاته لنمو الاقتصاد السعودي في 2024 إلى 3.2% مدفوعاً بالنمو القوي للقطاع غير النفطي والإصلاحات الهيكلية.',
+      source: 'IMF',
+      sourceLogo: '🏦',
+      publishedDate: '2024-01-15T08:00:00',
+      link: 'https://imf.org',
+      category: 'economy'
+    },
+    {
+      id: 'n3',
+      title: 'أسعار النفط ترتفع 3% بعد بيانات المخزونات الأمريكية',
+      description: 'ارتفعت أسعار النفط الخام بنسبة 3% بعد ظهور بيانات رسمية أمريكية انخفاضاً غير متوقع في مخزونات الخام الأسبوعية.',
+      source: 'Bloomberg',
+      sourceLogo: '📊',
+      publishedDate: '2024-01-15T07:15:00',
+      link: 'https://bloomberg.com',
+      category: 'energy'
+    },
+    {
+      id: 'n4',
+      title: 'التضخم في منطقة اليورو يتباطأ إلى 2.4% في ديسمبر',
+      description: 'تباطأ معدل التضخم السنوي في منطقة اليورو إلى 2.4% في ديسمبر من 2.9% في نوفمبر، مما يعزز آمال خفض أسعار الفائدة.',
+      source: 'CNBC',
+      sourceLogo: '📈',
+      publishedDate: '2024-01-14T14:00:00',
+      link: 'https://cnbc.com',
+      category: 'markets'
+    },
+    {
+      id: 'n5',
+      title: 'السعودية تطلق مبادرة جديدة لجذب الاستثمارات التقنية',
+      description: 'أطلقت وزارة الاستثمار السعودية مبادرة جديدة تهدف لجذب 100 مليار ريال من الاستثمارات الأجنبية في قطاع التقنية خلال 5 سنوات.',
+      source: 'Arab News',
+      sourceLogo: '📰',
+      publishedDate: '2024-01-14T11:30:00',
+      link: 'https://arabnews.com',
+      category: 'technology'
+    },
+    {
+      id: 'n6',
+      title: 'البنك الدولي: الاقتصاد العالمي يتجنب الركود لكن النمو ضعيف',
+      description: 'أعلن البنك الدولي أن الاقتصاد العالمي تجنب الركود لكن النمو يبقى ضعيفاً عند 2.9% في 2024 وسط تحديات جيوسياسية ومالية.',
+      source: 'World Bank',
+      sourceLogo: '🌍',
+      publishedDate: '2024-01-14T10:00:00',
+      link: 'https://worldbank.org',
+      category: 'economy'
+    },
+    {
+      id: 'n7',
+      title: 'أسواق الأسهم الخليجية تسجل مكاسب جماعية في بداية الأسبوع',
+      description: 'أغلقت أسواق الأسهم الخليجية على ارتفاع جماعي في تداولات اليوم بقيادة قطاعي البنوك والبتروكيماويات.',
+      source: 'Al Arabiya',
+      sourceLogo: '📺',
+      publishedDate: '2024-01-14T09:00:00',
+      link: 'https://alarabiya.net',
+      category: 'markets'
+    },
+    {
+      id: 'n8',
+      title: 'أوبك+ تبقي على سياسة الإنتاج دون تغيير',
+      description: 'قررت دول أوبك+ الإبقاء على مستويات الإنتاج الحالية دون تغيير في اجتماعها الأخير وسط استقرار أسعار النفط.',
+      source: 'Reuters',
+      sourceLogo: '📰',
+      publishedDate: '2024-01-13T16:00:00',
+      link: 'https://reuters.com',
+      category: 'energy'
+    },
+    {
+      id: 'n9',
+      title: 'وزارة المالية تعلن عن فائض في الميزانية الربع سنوية',
+      description: 'أعلنت وزارة المالية السعودية عن تحقيق فائض في الميزانية الربع سنوية بقيمة 12 مليار ريال مدفوعاً بارتفاع الإيرادات غير النفطية.',
+      source: 'SPA',
+      sourceLogo: '🇸🇦',
+      publishedDate: '2024-01-13T13:00:00',
+      link: 'https://spa.gov.sa',
+      category: 'policy'
+    },
+    {
+      id: 'n10',
+      title: 'الذكاء الاصطناعي يساهم بـ 150 مليار دولار في الاقتصاد السعودي',
+      description: 'تقرير جديد يتوقع أن يساهم الذكاء الاصطناعي بنحو 150 مليار دولار في الاقتصاد السعودي بحلول 2030 ضمن رؤية المملكة.',
+      source: 'Forbes',
+      sourceLogo: '💼',
+      publishedDate: '2024-01-13T10:30:00',
+      link: 'https://forbes.com',
+      category: 'technology'
+    }
+  ];
+
+  // Handler functions for news
+  const handleNewsClick = (news: EconomicNews) => {
+    setSelectedNews(news);
+    setShowNewsModal(true);
+  };
+
+  const handleRefreshNews = () => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setIsRefreshing(false);
+      setNewsLastUpdated(new Date());
+      showToast('تم تحديث الأخبار بنجاح', 'success');
+    }, 1000);
+  };
+
+  const getMinutesAgo = (date: Date) => {
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - date.getTime()) / 60000);
+    if (diff < 1) return 'الآن';
+    if (diff < 60) return `منذ ${diff} دقيقة`;
+    const hours = Math.floor(diff / 60);
+    if (hours < 24) return `منذ ${hours} ساعة`;
+    return `منذ ${Math.floor(hours / 24)} يوم`;
+  };
+
+  const getCategoryBadge = (category: string) => {
+    const categories: { [key: string]: { label: string; color: string } } = {
+      economy: { label: 'اقتصاد', color: 'bg-blue-50 text-blue-700' },
+      markets: { label: 'أسواق', color: 'bg-emerald-50 text-emerald-700' },
+      energy: { label: 'طاقة', color: 'bg-amber-50 text-amber-700' },
+      policy: { label: 'سياسة', color: 'bg-purple-50 text-purple-700' },
+      technology: { label: 'تقنية', color: 'bg-cyan-50 text-cyan-700' },
+      general: { label: 'عام', color: 'bg-slate-50 text-slate-700' }
+    };
+    return categories[category] || categories.general;
+  };
+
+  const filteredNews = economicNews.filter(news => {
+    const matchesFilter = newsFilter === 'all' || news.category === newsFilter;
+    const matchesSearch = news.title.toLowerCase().includes(newsSearch.toLowerCase()) ||
+                         news.description.toLowerCase().includes(newsSearch.toLowerCase());
+    return matchesFilter && matchesSearch;
+  }).slice(0, 10);
 
   // Functional Handlers
   const handleRefresh = () => {
@@ -736,6 +900,113 @@ const AIEconomicDashboard = () => {
             </div>
           </section>
 
+          {/* Economic Intelligence Feed */}
+          <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                  <Globe size={20} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-slate-900">نشرة الأخبار الاقتصادية</h2>
+                  <p className="text-xs text-slate-500 font-bold">آخر التحديثات الاقتصادية من مصادر موثوقة عالمياً</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                  <Clock size={12} />
+                  آخر تحديث: {getMinutesAgo(newsLastUpdated)}
+                </span>
+                <button
+                  onClick={handleRefreshNews}
+                  disabled={isRefreshing}
+                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+                  title="تحديث الأخبار"
+                >
+                  <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
+                </button>
+              </div>
+            </div>
+
+            {/* Search and Filter */}
+            <div className="flex flex-wrap gap-3 mb-6">
+              <div className="relative flex-1 min-w-[200px]">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <input
+                  type="text"
+                  value={newsSearch}
+                  onChange={(e) => setNewsSearch(e.target.value)}
+                  placeholder="ابحث في الأخبار..."
+                  className="w-full pl-4 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all"
+                />
+              </div>
+              <select
+                value={newsFilter}
+                onChange={(e) => setNewsFilter(e.target.value)}
+                className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 transition-all"
+              >
+                <option value="all">الكل</option>
+                <option value="economy">اقتصاد</option>
+                <option value="markets">أسواق</option>
+                <option value="energy">طاقة</option>
+                <option value="policy">سياسة</option>
+                <option value="technology">تقنية</option>
+              </select>
+            </div>
+
+            {/* News List */}
+            <div className="space-y-3">
+              {filteredNews.length > 0 ? (
+                filteredNews.map((news) => (
+                  <div
+                    key={news.id}
+                    onClick={() => handleNewsClick(news)}
+                    className="group p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 transition-all cursor-pointer"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="text-2xl shrink-0">{news.sourceLogo}</div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className={`px-2 py-0.5 text-[9px] font-black rounded-full ${getCategoryBadge(news.category).color}`}>
+                            {getCategoryBadge(news.category).label}
+                          </span>
+                          <span className="text-[10px] font-bold text-slate-500 flex items-center gap-1">
+                            <span className="font-bold text-slate-700">{news.source}</span>
+                            <span>•</span>
+                            {getMinutesAgo(new Date(news.publishedDate))}
+                          </span>
+                        </div>
+                        <h3 className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors mb-1 line-clamp-2">
+                          {news.title}
+                        </h3>
+                        <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">
+                          {news.description}
+                        </p>
+                      </div>
+                      <ChevronRight size={18} className="text-slate-300 group-hover:text-blue-500 transition-colors shrink-0" />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <Info size={40} className="mx-auto text-slate-300 mb-3" />
+                  <p className="text-sm font-bold text-slate-500">لا توجد أخبار مطابقة</p>
+                  <p className="text-xs text-slate-400 mt-1">جرب تغيير معايير البحث أو الفلترة</p>
+                </div>
+              )}
+            </div>
+
+            {/* View More Button */}
+            {filteredNews.length >= 10 && (
+              <div className="mt-6 text-center">
+                <button className="px-6 py-3 bg-blue-50 text-blue-600 rounded-xl text-sm font-bold hover:bg-blue-100 transition-colors flex items-center gap-2 mx-auto">
+                  عرض المزيد من التحديثات
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
+          </section>
+
           {/* 7. Economic Event Calendar */}
           <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
             <div className="flex items-center justify-between mb-6">
@@ -790,56 +1061,6 @@ const AIEconomicDashboard = () => {
         {/* Sidebar - 1 column */}
         <div className="space-y-6">
           
-          {/* 6. AI Market Insights */}
-          <section className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 shadow-xl">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white">
-                <Lightbulb size={20} />
-              </div>
-              <div>
-                <h2 className="text-lg font-black text-white">رؤى السوق AI</h2>
-                <p className="text-xs text-slate-400 font-bold">تحليلات ذكية مدعومة بالذكاء الاصطناعي</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {aiInsights.map((insight) => (
-                <div key={insight.id} className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/10 hover:bg-white/15 transition-all cursor-pointer">
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                      insight.category === 'opportunity' ? 'bg-emerald-500/20 text-emerald-400' :
-                      insight.category === 'risk' ? 'bg-rose-500/20 text-rose-400' :
-                      'bg-blue-500/20 text-blue-400'
-                    }`}>
-                      <insight.icon size={16} />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs font-bold text-white mb-1 leading-snug">{insight.title}</p>
-                      <div className="flex items-center gap-2">
-                        <span className={`px-1.5 py-0.5 text-[8px] font-black rounded ${getCategoryColor(insight.category)}`}>
-                          {insight.category === 'opportunity' ? 'فرصة' : insight.category === 'risk' ? 'خطر' : 'مراقبة'}
-                        </span>
-                        <span className={`px-1.5 py-0.5 text-[8px] font-black rounded ${getImpactColor(insight.impact)}`}>
-                          {insight.impact === 'high' ? 'عالي' : insight.impact === 'medium' ? 'متوسط' : 'منخفض'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-slate-300 leading-relaxed mb-3">{insight.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[9px] text-slate-400 font-bold">موثوقية AI</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500 rounded-full" style={{ width: `${insight.confidence}%` }}></div>
-                      </div>
-                      <span className="text-[9px] font-black text-blue-400">{insight.confidence}%</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
           {/* 8. Data Ecosystem Health Monitor */}
           <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
             <div className="flex items-center gap-3 mb-6">
@@ -1241,6 +1462,113 @@ const AIEconomicDashboard = () => {
                 </div>
                 <ExternalLink size={20} className="text-slate-400" />
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* News Detail Modal */}
+      {showNewsModal && selectedNews && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn" onClick={() => setShowNewsModal(false)}>
+          <div
+            className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-slideUp max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="relative bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
+              <button
+                onClick={() => setShowNewsModal(false)}
+                className="absolute top-4 left-4 w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+              >
+                <X size={20} />
+              </button>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="text-3xl">{selectedNews.sourceLogo}</div>
+                <div>
+                  <p className="text-sm font-bold text-blue-100">{selectedNews.source}</p>
+                  <p className="text-xs text-blue-200 flex items-center gap-1">
+                    <Clock size={12} />
+                    {getMinutesAgo(new Date(selectedNews.publishedDate))}
+                  </p>
+                </div>
+              </div>
+              <span className={`inline-block px-3 py-1 text-[10px] font-black rounded-full ${getCategoryBadge(selectedNews.category).color}`}>
+                {getCategoryBadge(selectedNews.category).label}
+              </span>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-6">
+              {/* Title */}
+              <div>
+                <h2 className="text-xl font-black text-slate-900 leading-snug mb-3">
+                  {selectedNews.title}
+                </h2>
+              </div>
+
+              {/* Description */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  {selectedNews.description}
+                </p>
+              </div>
+
+              {/* Meta Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                  <p className="text-[9px] font-bold text-blue-500 uppercase mb-1">المصدر</p>
+                  <p className="text-sm font-black text-slate-900 flex items-center gap-2">
+                    <span className="text-xl">{selectedNews.sourceLogo}</span>
+                    {selectedNews.source}
+                  </p>
+                </div>
+                <div className="p-4 bg-purple-50 rounded-xl border border-purple-100">
+                  <p className="text-[9px] font-bold text-purple-500 uppercase mb-1">تاريخ النشر</p>
+                  <p className="text-sm font-black text-slate-900 flex items-center gap-2">
+                    <Calendar size={16} className="text-purple-600" />
+                    {new Date(selectedNews.publishedDate).toLocaleDateString('ar-SA', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-4 border-t border-slate-100">
+                <a
+                  href={selectedNews.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <ExternalLink size={18} />
+                  قراءة المقال كاملاً
+                </a>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(selectedNews.link);
+                    showToast('تم نسخ رابط المقال', 'success');
+                  }}
+                  className="px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Copy size={18} />
+                  نسخ الرابط
+                </button>
+              </div>
+
+              {/* Disclaimer */}
+              <div className="p-4 bg-amber-50 rounded-xl border border-amber-100">
+                <div className="flex items-start gap-2">
+                  <Info size={16} className="text-amber-600 shrink-0 mt-0.5" />
+                  <p className="text-[10px] text-amber-800 leading-relaxed">
+                    هذا الخبر تم تجميعه تلقائياً من مصادر خارجية. المحتوى والآراء المعروضة هي مسؤولية المصدر الأصلي ولا تعكس بالضرورة آراء المنصة.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
