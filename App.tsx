@@ -129,6 +129,7 @@ import AdminNotificationsPage from './components/AdminNotificationsPage';
 import AdminOverviewPage from './components/AdminOverviewPage';
 import SmartComparisonsPage from './components/SmartComparisonsPage';
 import DataSourcesPage from './components/DataSourcesPage';
+import AIEconomicDashboard from './components/AIEconomicDashboard';
 
 // --- Safe Navigation Helper ---
 interface NavItemProps {
@@ -388,6 +389,7 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
               <NavItem id="nav-comparisons" to="/comparisons" icon={GitCompare} isCollapsed={isCollapsed}>المقارنات الذكية</NavItem>
               <NavItem id="nav-patterns" to="/patterns" icon={Fingerprint} isCollapsed={isCollapsed}>اكتشاف الأنماط</NavItem>
               <NavItem id="nav-sources" to="/sources" icon={Database} isCollapsed={isCollapsed}>مصادر البيانات</NavItem>
+              <NavItem id="nav-economic" to="/economic-dashboard" icon={TrendingUp} isCollapsed={isCollapsed}>الملخص الاقتصادي</NavItem>
               <NavItem id="nav-stats" to="/stats" icon={TrendingUp} isCollapsed={isCollapsed}>إحصائيات المنصة</NavItem>
               <NavItem id="nav-export" to="/export" icon={Download} isCollapsed={isCollapsed}>تصدير البيانات</NavItem>
             </NavGroup>
@@ -1293,6 +1295,7 @@ const App = () => {
             <Route path="/analysis" element={<div className="p-10 text-center text-gray-400">Data Analysis Tools (Analyst+)</div>} />
             <Route path="/comparisons" element={<SmartComparisonsPage />} />
             <Route path="/sources" element={<DataSourcesPage />} />
+            <Route path="/economic-dashboard" element={<AIEconomicDashboard />} />
             <Route path="/verification" element={<div className="p-10 text-center text-gray-400">Data Verification (Expert+)</div>} />
             <Route path="/admin" element={<AdminOverviewPage />} />
             <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
