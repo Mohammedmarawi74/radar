@@ -122,6 +122,7 @@ import SmartRadarPage from './components/SmartRadarPage';
 import TimelinePage from './components/TimelinePage';
 import { ToastProvider } from './components/Toast';
 import GuidedTours from './components/GuidedTours';
+import HelpCenterPage from './components/HelpCenterPage';
 
 // --- Safe Navigation Helper ---
 interface NavItemProps {
@@ -379,6 +380,7 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
               <NavItem id="nav-indicators" to="/indicators" icon={Library} isCollapsed={isCollapsed}>مكتبة المؤشرات</NavItem>
               <NavItem id="nav-survey" to="/survey" icon={Microscope} isCollapsed={isCollapsed}>المسح البياني</NavItem>
               <NavItem id="nav-expert-studio" to="/expert-studio" icon={GraduationCap} isCollapsed={isCollapsed}>استوديو الخبراء</NavItem>
+              <NavItem id="nav-help" to="/help" icon={HelpCircle} isCollapsed={isCollapsed}>مركز المساعدة</NavItem>
             </NavGroup>
           </>
         ) : (
@@ -745,6 +747,7 @@ const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange
                   <MenuItem icon={UserIcon} label="الملف الشخصي" to="/profile" />
                   <MenuItem icon={Settings} label="الإعدادات" to="/profile?tab=settings" />
                   <MenuItem icon={CreditCard} label="الاشتراكات" />
+                  <MenuItem icon={HelpCircle} label="الدعم الفني" to="/help" />
                   <div className="h-px bg-slate-100 mx-3 my-2"></div>
                   <MenuItem icon={LogOut} label="تسجيل الخروج" danger />
                 </div>
@@ -1168,6 +1171,7 @@ const App = () => {
             <Route path="/dashboards" element={<OfficialDashboardsPage dashboards={officialDashboards} widgets={allWidgets} userRole={currentUser.role} />} />
             <Route path="/signals" element={<AISignalsPage />} />
             <Route path="/timeline" element={<TimelinePage events={TIMELINE_EVENTS} />} />
+            <Route path="/help" element={<HelpCenterPage />} />
             <Route path="/followers" element={<FollowersPage />} />
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/favorites" element={<FavoritesPage />} />
