@@ -12,6 +12,39 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Leaflet Map Styles */
+.leaflet-container {
+  font-family: 'IBM Plex Sans Arabic', sans-serif !important;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 16px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.leaflet-popup-content {
+  margin: 12px !important;
+  line-height: 1.6 !important;
+}
+
+.leaflet-popup-tip {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.custom-div-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.custom-div-icon > div {
+  transition: transform 0.2s ease-out !important;
+}
+
+.custom-div-icon:hover > div {
+  transform: scale(1.2) !important;
+  z-index: 1000 !important;
+}
+
 /* Custom Animations */
 @keyframes fadeIn {
   from {
@@ -56,6 +89,17 @@ body {
   }
 }
 
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-out;
 }
@@ -70,6 +114,10 @@ body {
 
 .animate-swing {
   animation: swing 0.5s ease-in-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* Custom Scrollbar */

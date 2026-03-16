@@ -12,9 +12,11 @@
     "@google/genai": "^1.33.0",
     "driver.js": "^1.4.0",
     "jose": "5.2.3",
+    "leaflet": "^1.9.4",
     "lucide-react": "^0.561.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.10.1",
     "recharts": "^3.5.1"
   },

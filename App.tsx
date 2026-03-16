@@ -85,6 +85,7 @@ import {
   Settings2,
   ChevronUp,
   Target,
+  Map as MapIcon,
   ChevronRight,
   Ghost
 } from 'lucide-react';
@@ -122,6 +123,7 @@ import FavoritesPage from './components/FavoritesPage';
 import AIRadarDashboard from './components/AIRadarDashboard';
 import SmartRadarPage from './components/SmartRadarPage';
 import TimelinePage from './components/TimelinePage';
+import InvestmentGeoRadar from './components/InvestmentGeoRadar';
 import { ToastProvider } from './components/Toast';
 import GuidedTours from './components/GuidedTours';
 import HelpCenterPage from './components/HelpCenterPage';
@@ -373,6 +375,7 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
               <NavItem id="nav-home" to="/" icon={Home} end isCollapsed={isCollapsed} important>الصفحة الرئيسية</NavItem>
               <NavItem id="nav-signals" to="/signals" icon={Zap} isCollapsed={isCollapsed} important>إشارات السوق</NavItem>
               <NavItem id="nav-radar" to="/smart-radar" icon={Target} isCollapsed={isCollapsed} important>لوحات الرادار الذكية</NavItem>
+              <NavItem id="nav-geo-radar" to="/geo-radar" icon={MapIcon} isCollapsed={isCollapsed} important>الرادار الجغرافي</NavItem>
               <NavItem id="nav-timeline" to="/timeline" icon={Clock} isCollapsed={isCollapsed}>سجل التغييرات</NavItem>
               <NavItem id="nav-followers" to="/followers" icon={Users} isCollapsed={isCollapsed}>المجتمع</NavItem>
             </NavGroup>
@@ -1264,6 +1267,7 @@ const App = () => {
             <Route path="/" element={<HomeFeed feedItems={FEED_ITEMS} user={currentUser} onOpenWizard={() => setIsWizardOpen(true)} />} />
             <Route path="/ai-dashboard" element={<AIRadarDashboard />} />
             <Route path="/smart-radar" element={<SmartRadarPage />} />
+            <Route path="/geo-radar" element={<InvestmentGeoRadar />} />
             <Route path="/dashboards" element={<OfficialDashboardsPage dashboards={officialDashboards} widgets={allWidgets} userRole={currentUser.role} />} />
             <Route path="/signals" element={<AISignalsPage />} />
             <Route path="/timeline" element={<TimelinePage events={TIMELINE_EVENTS} />} />
