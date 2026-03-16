@@ -127,6 +127,8 @@ import GuidedTours from './components/GuidedTours';
 import HelpCenterPage from './components/HelpCenterPage';
 import AdminNotificationsPage from './components/AdminNotificationsPage';
 import AdminOverviewPage from './components/AdminOverviewPage';
+import SmartComparisonsPage from './components/SmartComparisonsPage';
+import DataSourcesPage from './components/DataSourcesPage';
 
 // --- Safe Navigation Helper ---
 interface NavItemProps {
@@ -1289,6 +1291,8 @@ const App = () => {
             <Route path="/builder" element={<div className="p-10 text-center text-gray-400">Dashboard Builder (Analyst+)</div>} />
             <Route path="/queries" element={<div className="p-10 text-center text-gray-400">SQL/Visual Queries (Analyst+)</div>} />
             <Route path="/analysis" element={<div className="p-10 text-center text-gray-400">Data Analysis Tools (Analyst+)</div>} />
+            <Route path="/comparisons" element={<SmartComparisonsPage />} />
+            <Route path="/sources" element={<DataSourcesPage />} />
             <Route path="/verification" element={<div className="p-10 text-center text-gray-400">Data Verification (Expert+)</div>} />
             <Route path="/admin" element={<AdminOverviewPage />} />
             <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
