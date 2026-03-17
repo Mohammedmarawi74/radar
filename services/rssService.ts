@@ -30,10 +30,16 @@ const RSS_SOURCES = [
     isArabic: true
   },
   { 
-    name: 'الشرق الأوسط (اقتصاد)', 
-    url: 'https://aawsat.com/feed/rss/economy', 
+    name: 'Saudi Gazette', 
+    url: 'https://saudigazette.com.sa/rssFeed/74', 
     logo: '📰',
-    isArabic: true
+    isArabic: false
+  },
+  { 
+    name: 'Arab News', 
+    url: 'https://www.arabnews.com/rss.xml', 
+    logo: '🗞️',
+    isArabic: false
   },
   { 
     name: 'العربية السعودية', 
@@ -48,15 +54,9 @@ const RSS_SOURCES = [
     isArabic: false
   },
   { 
-    name: 'Saudi Gazette', 
-    url: 'https://saudigazette.com.sa/rssFeed/74', 
-    logo: '📰',
-    isArabic: false
-  },
-  { 
-    name: 'Arab News', 
-    url: 'https://www.arabnews.com/rss.xml', 
-    logo: '🗞️',
+    name: 'Gulf Business', 
+    url: 'https://gulfbusiness.com/feed/', 
+    logo: '💼',
     isArabic: false
   },
   { 
@@ -116,6 +116,16 @@ const FALLBACK_NEWS: RSSNewsItem[] = [
   }
 ];
 
+const SAUDI_KEYWORDS = [
+  'saudi', 'ksa', 'riyadh', 'jeddah', 'neom', 'vision 2030', 'aramco', 'public investment fund', 'pif',
+  'السعودية', 'المملكة', 'الرياض', 'جدة', 'نيوم', 'رؤية 2030', 'أرامكو', 'صندوق الاستثمارات العامة', 'تداول'
+];
+
+const isSaudiRelated = (title: string, description: string): boolean => {
+  const content = (title + ' ' + description).toLowerCase();
+  return SAUDI_KEYWORDS.some(keyword => content.includes(keyword.toLowerCase()));
+};
+
 export const fetchSaudiEconomicNews = async (): Promise<RSSNewsItem[]> => {
   const allNews: RSSNewsItem[] = [];
   const processedLinks = new Set<string>();
@@ -135,25 +145,35 @@ export const fetchSaudiEconomicNews = async (): Promise<RSSNewsItem[]> => {
       items.forEach((item, index) => {
         const title = item.querySelector("title")?.textContent || "";
         const link = item.querySelector("link")?.textContent || "";
-        const description = item.querySelector("description")?.textContent || "";
+        const description = item.querySelector("description")?.textContent || 
+                           item.querySelector("content\\:encoded")?.textContent || "";
         const pubDate = item.querySelector("pubDate")?.textContent || "";
         const category = item.querySelector("category")?.textContent || "Economy";
         
-        // More robust media extraction
-        let media = item.querySelector("enclosure")?.getAttribute("url") || "";
-        if (!media) {
-           const mediaContent = Array.from(item.children).find(child => child.tagName.toLowerCase().includes('content') && child.getAttribute('url'));
-           media = mediaContent?.getAttribute('url') || "";
-        }
+        // Clean the description for filtering
+        const cleanedDescription = cleanHTML(description);
 
-        if (!processedLinks.has(link) && title) {
+        if (!processedLinks.has(link) && title && isSaudiRelated(title, cleanedDescription)) {
           processedLinks.add(link);
           const isUrgent = title.includes("عاجل") || title.toLowerCase().includes("breaking");
+          
+          // More robust media extraction
+          let media = item.querySelector("enclosure")?.getAttribute("url") || "";
+          if (!media) {
+             const mediaContent = Array.from(item.children).find(child => child.tagName.toLowerCase().includes('content') && child.getAttribute('url'));
+             media = mediaContent?.getAttribute('url') || "";
+          }
+          
+          // Try to find image in description if not found elsewhere
+          if (!media) {
+            const imgMatch = description.match(/<img[^>]+src="([^">]+)"/);
+            if (imgMatch) media = imgMatch[1];
+          }
 
           sourceItems.push({
             id: `${source.name}-${index}-${Date.now()}`,
             title: title.trim(),
-            description: cleanHTML(description),
+            description: cleanedDescription.substring(0, 500), // Cap description length
             source: source.name,
             sourceLogo: source.logo,
             publishedDate: new Date(pubDate).toISOString(),
@@ -183,19 +203,34 @@ export const fetchSaudiEconomicNews = async (): Promise<RSSNewsItem[]> => {
     console.error("Critical error in fetching RSS:", error);
   }
 
-  // If no news fetched, return fallback items
   if (allNews.length === 0) {
     return FALLBACK_NEWS;
   }
 
+  // De-duplicate by title (sometimes same news has different URLs)
+  const uniqueNews: RSSNewsItem[] = [];
+  const seenTitles = new Set<string>();
+  
+  allNews.forEach(item => {
+    const normalizedTitle = item.title.toLowerCase().trim();
+    if (!seenTitles.has(normalizedTitle)) {
+      seenTitles.add(normalizedTitle);
+      uniqueNews.push(item);
+    }
+  });
+
   // Sort by date descending
-  return allNews.sort((a, b) => new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime());
+  return uniqueNews.sort((a, b) => new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime());
 };
 
 const cleanHTML = (html: string): string => {
+  if (!html) return "";
   const tmp = document.createElement("DIV");
   tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || "";
+  // Remove scripts and styles if any
+  const scripts = tmp.querySelectorAll('script, style');
+  scripts.forEach(s => s.remove());
+  return (tmp.textContent || tmp.innerText || "").trim();
 };
 
 const normalizeCategory = (category: string): string => {
@@ -204,5 +239,6 @@ const normalizeCategory = (category: string): string => {
   if (cat.includes('gover') || cat.includes('حكوم')) return 'government';
   if (cat.includes('energy') || cat.includes('طاقة')) return 'energy';
   if (cat.includes('finan') || cat.includes('مال')) return 'finance';
+  if (cat.includes('stock') || cat.includes('أسهم')) return 'finance';
   return 'economy';
 };

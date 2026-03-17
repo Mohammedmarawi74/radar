@@ -120,6 +120,8 @@ import UserProfile from './components/UserProfile';
 import FollowersPage from './components/FollowersPage';
 import AISignalsPage from './components/AISignalsPage';
 import OfficialDashboardsPage from './components/OfficialDashboardsPage';
+import DatasetExplorerPage from './components/DatasetExplorerPage';
+// Removed OfficialPanelsPage import
 import ExpertBuilderPage from './components/ExpertBuilderPage';
 import FavoritesPage from './components/FavoritesPage';
 import AIRadarDashboard from './components/AIRadarDashboard';
@@ -380,7 +382,7 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
             <NavGroup title="المحور الرئيسي" open={sections.overview} onToggle={() => toggleSection('overview')} isCollapsed={isCollapsed} icon={LayoutDashboard}>
               <NavItem id="nav-home" to="/" icon={Home} end isCollapsed={isCollapsed} important>الصفحة الرئيسية</NavItem>
               <NavItem id="nav-signals" to="/signals" icon={Zap} isCollapsed={isCollapsed} important>إشارات السوق</NavItem>
-              <NavItem id="nav-radar" to="/smart-radar" icon={Target} isCollapsed={isCollapsed} important>لوحات الرادار الذكية</NavItem>
+              <NavItem id="nav-radar" to="/smart-radar" icon={Target} isCollapsed={isCollapsed} important>أدوات التحليل الذكي</NavItem>
               <NavItem id="nav-geo-radar" to="/geo-radar" icon={MapIcon} isCollapsed={isCollapsed} important>الرادار الجغرافي</NavItem>
               <NavItem id="nav-simulator" to="/simulator" icon={Calculator} isCollapsed={isCollapsed} important>محاكي الاستثمار</NavItem>
               <NavItem id="nav-timeline" to="/timeline" icon={Clock} isCollapsed={isCollapsed}>سجل التغييرات</NavItem>
@@ -391,7 +393,8 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
 
             {/* --- Standard Mode: Data & Analytics --- */}
             <NavGroup title="البيانات والتحليل" open={sections.data} onToggle={() => toggleSection('data')} isCollapsed={isCollapsed} icon={BarChart3}>
-              <NavItem id="nav-all-dashboards" to="/dashboards" icon={LayoutDashboard} isCollapsed={isCollapsed}>كل اللوحات</NavItem>
+              <NavItem id="nav-smart-radar" to="/dashboards?tab=smart" icon={Sparkles} isCollapsed={isCollapsed} important>لوحات الرادار الذكية</NavItem>
+              <NavItem id="nav-official-radar" to="/dashboards?tab=official" icon={LayoutTemplate} isCollapsed={isCollapsed}>لوحات الرادار الرسمية</NavItem>
               <NavItem id="nav-my-dashboards" to="/my-dashboards" icon={Layout} isCollapsed={isCollapsed}>لوحاتي الخاصة</NavItem>
               <NavItem id="nav-sector-boards" to="/sector-boards" icon={ListFilter} isCollapsed={isCollapsed}>لوحات حسب القطاع</NavItem>
               <NavItem id="nav-industry" to="/industry" icon={Briefcase} isCollapsed={isCollapsed}>الصناعة</NavItem>
@@ -1278,8 +1281,9 @@ const App = () => {
             <Route path="/ai-dashboard" element={<AIRadarDashboard />} />
             <Route path="/smart-radar" element={<SmartRadarPage />} />
             <Route path="/geo-radar" element={<InvestmentGeoRadar />} />
-            <Route path="/simulator" element={<InvestmentSimulator />} />
             <Route path="/dashboards" element={<OfficialDashboardsPage dashboards={officialDashboards} widgets={allWidgets} userRole={currentUser.role} />} />
+            <Route path="/dataset-explorer/:angleId" element={<DatasetExplorerPage />} />
+            {/* Removed official-panels route */}
             <Route path="/signals" element={<AISignalsPage />} />
             <Route path="/timeline" element={<TimelinePage events={TIMELINE_EVENTS} />} />
             <Route path="/help" element={<HelpCenterPage />} />

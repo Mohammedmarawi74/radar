@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
     LayoutGrid,
     List,
@@ -37,10 +37,20 @@ import {
     Landmark,
     Home,
     CheckCircle2,
-    Smartphone
+    Smartphone,
+    LayoutTemplate
 } from 'lucide-react';
+import { DATA_ANGLES } from '../constants/dataAngles';
 import { Dashboard, Widget, UserRole } from '../types';
 import WidgetCard from './WidgetCard';
+import Hero from './panel/Hero';
+import DatasetTabs from './panel/DatasetTabs';
+import PanelSidebar from './panel/Sidebar';
+import DatasetContent from './panel/DatasetContent';
+import DashboardEmbed from './panel/DashboardEmbed';
+import CommentsSection from './panel/CommentsSection';
+import ReviewsSection from './panel/ReviewsSection';
+import { ChevronLeft } from 'lucide-react';
 
 // ============================================
 // MOCK DATA - بيانات تجريبية موسعة ومثراة
@@ -148,6 +158,22 @@ const MOCK_DASHBOARDS: ExtendedDashboard[] = [
     })
 ];
 
+const getColorClasses = (color: string) => {
+  const mapping: any = {
+    blue: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-100', iconBg: 'bg-blue-500/10', iconText: 'text-blue-400' },
+    green: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-100', iconBg: 'bg-green-500/10', iconText: 'text-green-400' },
+    amber: { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100', iconBg: 'bg-amber-500/10', iconText: 'text-amber-400' },
+    indigo: { bg: 'bg-indigo-50', text: 'text-indigo-600', border: 'border-indigo-100', iconBg: 'bg-indigo-500/10', iconText: 'text-indigo-400' },
+    emerald: { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100', iconBg: 'bg-emerald-500/10', iconText: 'text-emerald-400' },
+    rose: { bg: 'bg-rose-50', text: 'text-rose-600', border: 'border-rose-100', iconBg: 'bg-rose-500/10', iconText: 'text-rose-400' },
+    purple: { bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-100', iconBg: 'bg-purple-500/10', iconText: 'text-purple-400' },
+    cyan: { bg: 'bg-cyan-50', text: 'text-cyan-600', border: 'border-cyan-100', iconBg: 'bg-cyan-500/10', iconText: 'text-cyan-400' },
+    orange: { bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-100', iconBg: 'bg-orange-500/10', iconText: 'text-orange-400' },
+    slate: { bg: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-100', iconBg: 'bg-slate-500/10', iconText: 'text-slate-400' },
+  };
+  return mapping[color] || mapping.blue;
+};
+
 // ============================================
 // COMPONENTS
 // ============================================
@@ -161,11 +187,15 @@ interface OfficialDashboardsPageProps {
 }
 
 const OfficialDashboardsPage: React.FC<OfficialDashboardsPageProps> = ({ widgets, userRole }) => {
+    const [searchParams] = useSearchParams();
+    const activeTab = searchParams.get('tab') || 'smart';
+    const navigate = useNavigate();
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
     const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('all');
     const [favorites, setFavorites] = useState<string[]>(['odb1', 'odb3_mining']);
     const [selectedDash, setSelectedDash] = useState<ExtendedDashboard | null>(null);
+    const [activePanelTab, setActivePanelTab] = useState('dataset');
 
     // Filter Logic
     const filteredDashboards = useMemo(() => {
@@ -182,6 +212,62 @@ const OfficialDashboardsPage: React.FC<OfficialDashboardsPageProps> = ({ widgets
             prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
         );
     };
+    
+    if (selectedDash) {
+        const isFullWidthTab = activePanelTab === 'dashboard';
+        
+        return (
+            <div className="min-h-screen bg-transparent font-sans text-right animate-fadeIn" dir="rtl">
+                <div className="bg-white border-b border-gray-100 sticky top-0 z-[60] py-4 px-6 shadow-sm">
+                    <button 
+                        onClick={() => setSelectedDash(null)}
+                        className="flex items-center gap-2 text-gov-blue font-black hover:bg-gray-50 px-4 py-2 rounded-xl transition-all"
+                    >
+                        <ChevronLeft size={20} />
+                        العودة إلى كل اللوحات
+                    </button>
+                </div>
+                <main>
+                    <Hero />
+                    
+                    <DatasetTabs 
+                        activeTab={activePanelTab} 
+                        onTabChange={setActivePanelTab} 
+                    />
+
+                    <div className="container mx-auto px-4 py-8">
+                        <div className={`flex flex-col ${isFullWidthTab ? '' : 'lg:flex-row'} gap-8`}>
+                            
+                            {/* Main Content Area */}
+                            <div className={`w-full ${isFullWidthTab ? '' : 'lg:w-2/3'} order-2 lg:order-1`}>
+                               {activePanelTab === 'dataset' ? (
+                                 <DatasetContent />
+                               ) : activePanelTab === 'dashboard' ? (
+                                 <DashboardEmbed />
+                               ) : activePanelTab === 'comments' ? (
+                                 <CommentsSection />
+                               ) : activePanelTab === 'reviews' ? (
+                                 <ReviewsSection />
+                               ) : (
+                                 <div className="p-12 text-center text-gray-400 bg-white rounded-xl border border-gray-200">
+                                    <p className="text-lg">المحتوى قيد التطوير لهذا التبويب</p>
+                                 </div>
+                               )}
+                            </div>
+
+                            {/* Sidebar (Only shown if NOT full width tab) */}
+                            {!isFullWidthTab && (
+                                <aside className="w-full lg:w-1/3 order-1 lg:order-2">
+                                    <PanelSidebar />
+                                </aside>
+                            )}
+
+                        </div>
+                    </div>
+                </main>
+            </div>
+        );
+    }
 
     // --- RENDERERS ---
 
@@ -363,9 +449,8 @@ const OfficialDashboardsPage: React.FC<OfficialDashboardsPageProps> = ({ widgets
                     </button>
 
                     <div className={`w-12 h-12 mx-auto rounded-full bg-${dash.color}-50 flex items-center justify-center text-${dash.color}-600 mb-3 group-hover:scale-110 transition-transform`}>
-                        {activeCategory === 'real_estate' ? <Building2 size={20} /> :
-                            activeCategory === 'energy' ? <Zap size={20} /> :
-                                <PieChart size={20} />}
+                        {/* Simplified icon logic for compact view, using BarChart2 as a default */}
+                        <BarChart2 size={20} />
                     </div>
 
                     <h3 className="font-bold text-gray-900 text-sm mb-1 line-clamp-2 min-h-[2.5rem]">
@@ -388,43 +473,98 @@ const OfficialDashboardsPage: React.FC<OfficialDashboardsPageProps> = ({ widgets
     );
 
     return (
-        <div className="max-w-7xl mx-auto p-4 lg:p-8 min-h-screen">
+        <div className="min-h-screen bg-slate-50/30 pb-20 font-sans text-right" dir="rtl">
+            {/* --- NEW DATA ANGLES SECTION --- */}
+            {activeTab === 'smart' && (
+              <div className="bg-slate-900 pt-16 pb-24 px-6 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
+                <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-600/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/3" />
 
-            {/* Page Header */}
-            <div className="mb-8 relative overflow-hidden bg-slate-900 text-white rounded-[2.5rem] p-8 lg:p-12 shadow-2xl ring-1 ring-white/10">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl -mr-32 -mt-32"></div>
-                <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl -ml-32 -mb-32"></div>
+                <div className="container mx-auto relative z-10 text-center">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase text-blue-400 tracking-widest backdrop-blur-md mb-8">
+                        <Sparkles size={14} className="animate-pulse" />
+                        نظام زوايا البيانات الذكي
+                    </div>
+                    <h1 className="text-4xl lg:text-6xl font-black text-white mb-6 tracking-tight">
+                        استكشف الاقتصاد <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">بزاوية مختلفة</span>
+                    </h1>
+                    <p className="text-slate-400 text-lg lg:text-xl font-bold max-w-3xl mx-auto leading-relaxed mb-16">
+                        نحوّل البيانات الجافة إلى رؤى استراتيجية. اختر زاوية التحليل التي تهمك واستعرض البيانات المجمعة من كافة المصادر الرسمية.
+                    </p>
 
-                <div className="relative z-10">
-                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
-                        <div>
-                            <h1 className="text-3xl lg:text-5xl font-black mb-4 tracking-tight">
-                                اللوحات الرسمية
-                            </h1>
-                            <p className="text-slate-300 text-lg max-w-2xl leading-relaxed font-light">
-                                المرجع الموحد للمؤشرات والبيانات. اكتشف الرؤى الاقتصادية من خلال لوحات تفاعلية تشرح نفسها.
-                            </p>
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                        {DATA_ANGLES.map((angle) => {
+                            const Icon = angle.icon;
+                            const colors = getColorClasses(angle.color);
+                            return (
+                                <div
+                                    key={angle.id}
+                                    onClick={() => navigate(`/dataset-explorer/${angle.id}`)}
+                                    className="group relative bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-[32px] hover:bg-white/10 hover:border-blue-400/50 hover:-translate-y-2 transition-all duration-500 cursor-pointer text-right flex flex-col items-start min-h-[240px]"
+                                >
+                                    <div className={`p-4 ${colors.iconBg} ${colors.iconText} rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-500`}>
+                                        <Icon size={32} />
+                                    </div>
 
-                        <div className="flex items-center gap-3">
-                            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-center min-w-[100px] hover:bg-white/20 transition-colors cursor-default">
-                                <p className="text-2xl font-black">{MOCK_DASHBOARDS.length}</p>
-                                <p className="text-xs text-slate-300 uppercase tracking-widest">لوحة</p>
-                            </div>
-                            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-center min-w-[100px] hover:bg-white/20 transition-colors cursor-default">
-                                <p className="text-2xl font-black">1.2M</p>
-                                <p className="text-xs text-slate-300 uppercase tracking-widest">مؤشر</p>
-                            </div>
-                        </div>
+                                    {angle.badge && (
+                                        <span className={`absolute top-6 left-6 px-2 py-0.5 rounded-lg ${colors.iconBg} ${colors.iconText} text-[8px] font-black uppercase tracking-tighter border border-white/10`}>
+                                            {angle.badge}
+                                        </span>
+                                    )}
+
+                                    <h3 className="text-lg font-black text-white mb-3 group-hover:text-blue-400 transition-colors">
+                                        {angle.title}
+                                    </h3>
+                                    <p className="text-xs text-slate-400 font-bold leading-relaxed line-clamp-3">
+                                        {angle.shortDescription}
+                                    </p>
+
+                                    <div className="mt-auto pt-6 flex items-center gap-2 text-blue-400 text-[10px] font-black opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
+                                        استكشاف الجداول والخرائط
+                                        <ArrowUpRight size={14} />
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
-            </div>
+              </div>
+            )}
 
-            {/* Controls Toolbar */}
-            <div className="sticky top-[70px] z-30 bg-white/80 backdrop-blur-xl rounded-2xl border border-gray-100 shadow-sm p-2 mb-8 flex flex-col lg:flex-row gap-4 items-center justify-between transition-all">
+            {/* --- EXISTING DASHBOARDS LIST (MOVED DOWN) --- */}
+            {activeTab === 'official' && (
+              <div className="container mx-auto px-6 -mt-12 relative z-20">
+                {/* Controls Toolbar */}
+                <div className="bg-white/90 backdrop-blur-xl rounded-[32px] border border-slate-100 shadow-2xl p-3 mb-10 flex flex-col lg:flex-row gap-4 items-center justify-between">
+                    <div className="flex items-center gap-3 px-4">
+                        <div className="w-10 h-10 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-600">
+                           <LayoutTemplate size={20} />
+                        </div>
+                        <div>
+                           <h2 className="text-sm font-black text-slate-900">اللوحات المتكاملة</h2>
+                           <p className="text-[10px] text-slate-400 font-bold">لوحات تحليلية جاهزة للعرض المباشر</p>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 max-w-md w-full relative">
+                        <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="ابحث عن لوحة محددة..."
+                            className="w-full bg-slate-50 border border-slate-100 rounded-2xl pr-12 pl-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none font-bold"
+                        />
+                    </div>
+
+                    <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl">
+                        <button onClick={() => setViewMode('grid')} className={`p-2 rounded-xl ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400'}`}><LayoutGrid size={18} /></button>
+                        <button onClick={() => setViewMode('list')} className={`p-2 rounded-xl ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400'}`}><List size={18} /></button>
+                    </div>
+                </div>
 
                 {/* Categories */}
-                <div className="flex items-center gap-1 overflow-x-auto w-full lg:w-auto p-1 no-scrollbar">
+                <div className="flex items-center gap-1 overflow-x-auto w-full p-1 no-scrollbar mb-8">
                     {DASHBOARD_CATEGORIES.map(cat => (
                         <button
                             key={cat.id}
@@ -439,133 +579,27 @@ const OfficialDashboardsPage: React.FC<OfficialDashboardsPageProps> = ({ widgets
                     ))}
                 </div>
 
-                {/* Search & View Toggle */}
-                <div className="flex items-center gap-2 w-full lg:w-auto">
-                    <div className="relative flex-1 lg:w-64">
-                        <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="بحث في المؤشرات واللوحات..."
-                            className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-4 pr-10 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all hover:bg-white"
-                        />
-                    </div>
-
-                    <div className="flex bg-gray-100 p-1 rounded-xl shrink-0 border border-gray-200">
-                        <button
-                            onClick={() => setViewMode('grid')}
-                            className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white shadow text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
-                            title="شبكة تفاعلية"
-                        >
-                            <LayoutGrid size={18} />
-                        </button>
-                        <button
-                            onClick={() => setViewMode('list')}
-                            className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white shadow text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
-                            title="قائمة بيانات"
-                        >
-                            <List size={18} />
-                        </button>
-                        <button
-                            onClick={() => setViewMode('compact')}
-                            className={`p-2 rounded-lg transition-all ${viewMode === 'compact' ? 'bg-white shadow text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
-                            title="عرض مكثف"
-                        >
-                            <Layers size={18} />
-                        </button>
-                    </div>
+                {/* Content */}
+                <div className="animate-fadeIn min-h-[500px]">
+                    {filteredDashboards.length > 0 ? (
+                        <>
+                            {viewMode === 'grid' && renderGridView()}
+                            {viewMode === 'list' && renderListView()}
+                            {viewMode === 'compact' && renderCompactView()}
+                        </>
+                    ) : (
+                        <div className="text-center py-20 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200">
+                            <div className="inline-block p-6 bg-white rounded-full shadow-sm mb-4">
+                                <Search size={40} className="text-gray-300" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">لا توجد نتائج مطابقة</h3>
+                            <p className="text-gray-500 max-w-sm mx-auto">لم نعثر على لوحات تطابق بحثك. جرب البحث عن "الناتج المحلي" أو "التضخم".</p>
+                        </div>
+                    )}
                 </div>
-            </div>
-
-            {/* Content */}
-            <div className="animate-fadeIn min-h-[500px]">
-                {filteredDashboards.length > 0 ? (
-                    <>
-                        {viewMode === 'grid' && renderGridView()}
-                        {viewMode === 'list' && renderListView()}
-                        {viewMode === 'compact' && renderCompactView()}
-                    </>
-                ) : (
-                    <div className="text-center py-20 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200">
-                        <div className="inline-block p-6 bg-white rounded-full shadow-sm mb-4">
-                            <Search size={40} className="text-gray-300" />
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">لا توجد نتائج مطابقة</h3>
-                        <p className="text-gray-500 max-w-sm mx-auto">لم نعثر على لوحات تطابق بحثك. جرب البحث عن "الناتج المحلي" أو "التضخم".</p>
-                    </div>
-                )}
-            </div>
-
-            {/* Dashboard Modal (Placeholder - Visual Enhancement) */}
-            {selectedDash && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fadeIn">
-                    <div className="bg-white rounded-[2rem] w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl animate-scaleIn flex flex-col md:flex-row">
-
-                        {/* Sidebar Info */}
-                        <div className="w-full md:w-80 bg-slate-50 p-8 border-l border-gray-100 flex flex-col order-2 md:order-1">
-                            <div className={`w-14 h-14 rounded-2xl bg-${selectedDash.color}-100 flex items-center justify-center text-${selectedDash.color}-600 mb-6`}>
-                                <BarChart2 size={28} />
-                            </div>
-
-                            <h2 className="text-2xl font-bold text-gray-900 mb-4 leading-tight">{selectedDash.name}</h2>
-                            <p className="text-gray-500 text-sm leading-relaxed mb-6">{selectedDash.description}</p>
-
-                            <div className="space-y-4 mb-8">
-                                <div>
-                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">التصنيف</p>
-                                    <span className="inline-block px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-xs font-bold">
-                                        {DASHBOARD_CATEGORIES.find(c => c.id === selectedDash.category)?.label}
-                                    </span>
-                                </div>
-                                <div>
-                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">تكرار البيانات</p>
-                                    <span className="inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold">
-                                        {selectedDash.dataFreq === 'daily' ? 'يومي' : 'شهري'}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="mt-auto pt-6 border-t border-gray-200">
-                                <button className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20 mb-3 flex items-center justify-center gap-2">
-                                    فتح اللوحة الكاملة <ArrowUpRight size={18} />
-                                </button>
-                                <button onClick={() => setSelectedDash(null)} className="w-full py-3 text-gray-500 hover:text-gray-800 font-bold">
-                                    إلغاء
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Main Content Preview */}
-                        <div className="flex-1 p-8 bg-white relative order-1 md:order-2 flex flex-col items-center justify-center">
-                            <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.4]"></div>
-
-                            <div className="relative text-center max-w-lg">
-                                <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
-                                    <PieChart size={40} className="text-blue-400" />
-                                </div>
-                                <h3 className="text-2xl font-bold text-gray-900 mb-2">معاينة تفاعلية</h3>
-                                <p className="text-gray-500 mb-8">
-                                    تحتوي هذه اللوحة على {selectedDash.keyMetrics.length} مؤشرات رئيسية، بما في ذلك
-                                    <span className="font-bold text-gray-800 mx-1">
-                                        {selectedDash.keyMetrics.join('، ')}
-                                    </span>.
-                                </p>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="h-32 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center">
-                                        <span className="text-xs text-gray-400 font-bold">CHART 1</span>
-                                    </div>
-                                    <div className="h-32 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center">
-                                        <span className="text-xs text-gray-400 font-bold">CHART 2</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
+              </div>
             )}
-
+            {/* Dashboard details are now handled via full panel view return */}
         </div>
     );
 };

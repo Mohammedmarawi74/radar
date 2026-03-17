@@ -146,32 +146,32 @@ const AIEconomicDashboard = () => {
           <div className="flex-1 space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 text-blue-400 rounded-full text-[9px] font-black uppercase tracking-widest backdrop-blur-md">
               <Globe size={12} className="animate-pulse" />
-              مرصد رادار الاقتصادي
+              مرصد رادار الاقتصادي السعودي
             </div>
             
             <h1 className="text-2xl lg:text-3xl font-black text-white tracking-tight">
-              الملخص الاقتصادي
+              الملخص الاقتصادي للمملكة
             </h1>
             
             <p className="max-w-xl text-sm text-slate-400 font-bold leading-relaxed">
-              نافذتكم المباشرة على نبض الاقتصاد العالمي وكافة التحركات المالية وتوجهات السوق من مصادر موثوقة.
+              تغطية شاملة ومباشرة لنبض الاقتصاد السعودي، نجمع لك الأخبار من 10 مصادر رسمية واقتصادية موثوقة مع تحليل ذكي للمستجدات.
             </p>
           </div>
           
           <div className="flex items-center gap-6 bg-white/5 p-4 rounded-2xl backdrop-blur-md border border-white/5">
             <div className="flex flex-col items-center px-2">
-              <span className="text-white text-lg font-black">10+</span>
-              <span className="text-[9px] text-slate-500 font-black uppercase">مصدر عالمي</span>
+              <span className="text-white text-lg font-black">10</span>
+              <span className="text-[9px] text-slate-500 font-black uppercase">مصدر سعودي</span>
             </div>
             <div className="w-px h-8 bg-white/10" />
             <div className="flex flex-col items-center px-2">
-              <span className="text-white text-lg font-black">24h</span>
+              <span className="text-white text-lg font-black">15m</span>
               <span className="text-[9px] text-slate-500 font-black uppercase">تحديث</span>
             </div>
             <div className="w-px h-8 bg-white/10" />
             <div className="flex flex-col items-center px-2">
-              <span className="text-white text-lg font-black">AI</span>
-              <span className="text-[9px] text-slate-500 font-black uppercase">تنقية</span>
+              <span className="text-white text-lg font-black">Safe</span>
+              <span className="text-[9px] text-slate-500 font-black uppercase">رسمي</span>
             </div>
           </div>
         </div>
@@ -269,74 +269,105 @@ const AIEconomicDashboard = () => {
         </div>
 
         {/* News List */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           {isInitialLoading && newsList.length === 0 ? (
-            <div className="text-center py-20 bg-blue-50/30 rounded-[40px] border border-dashed border-blue-200 animate-pulse">
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+            <div className="text-center py-20 bg-blue-50/10 rounded-[40px] border border-dashed border-blue-200/50 animate-pulse">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border border-blue-50">
                 <RefreshCw size={32} className="text-blue-500 animate-spin" />
               </div>
-              <p className="text-lg font-black text-slate-900">جاري جلب آخر الأخبار الاقتصادية...</p>
-              <p className="text-sm text-slate-400 font-bold mt-2">نتصل الآن بالمصادر العالمية لتزويدك بأحدث البيانات</p>
+              <p className="text-lg font-black text-slate-900">جاري استقطاب الأخبار السعودية...</p>
+              <p className="text-sm text-slate-400 font-bold mt-2">نحلل الآن 10 مصادر اقتصادية موثوقة وننقي المحتوى ذو الصلة بالمملكة</p>
             </div>
           ) : displayedNews.length > 0 ? (
-            displayedNews.map((news) => (
-              <div
-                key={news.id}
-                onClick={() => handleNewsClick(news)}
-                className="group p-6 bg-white rounded-[24px] border border-slate-100 hover:border-blue-200 hover:bg-blue-50/30 hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-pointer relative overflow-hidden"
-              >
-                <div className="flex items-start gap-6">
-                  <div className="w-16 h-16 bg-blue-50/50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform shadow-inner border border-blue-100/50">
-                    {React.createElement(getCategoryTheme(news.category).icon, { size: 32 })}
-                  </div>
-                  <div className="flex-1 text-right">
-                    <div className="flex flex-wrap items-center gap-3 mb-3">
-                      {news.isUrgent && (
-                        <span className="px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-wider bg-red-100 text-red-600 animate-pulse border border-red-200 shadow-sm flex items-center gap-1.5">
-                          <AlertCircle size={10} />
-                          عاجل
+            <div className="grid grid-cols-1 gap-6">
+              {displayedNews.map((news) => (
+                <div
+                  key={news.id}
+                  onClick={() => handleNewsClick(news)}
+                  className="group relative bg-white rounded-[28px] border border-slate-100 p-6 hover:border-blue-400/30 hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-500 cursor-pointer overflow-hidden"
+                >
+                  {/* Hover Accent Background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-indigo-50/0 group-hover:from-blue-50/50 group-hover:to-indigo-50/30 transition-all duration-500" />
+                  
+                  <div className="relative z-10 flex flex-col md:flex-row gap-6">
+                    {/* Media Thumbnail (Optional) */}
+                    {news.media && (
+                      <div className="md:w-48 lg:w-56 h-36 shrink-0 rounded-2xl overflow-hidden border border-slate-100 shadow-sm bg-slate-50">
+                        <img 
+                          src={news.media} 
+                          alt="" 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                          onError={(e) => (e.currentTarget.style.display = 'none')}
+                        />
+                      </div>
+                    )}
+                    
+                    <div className="flex-1 space-y-3">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-xl group-hover:bg-white transition-colors duration-300">
+                          <span className="text-lg">{news.sourceLogo || '📰'}</span>
+                          <span className="text-[11px] font-black text-slate-700">{news.source}</span>
+                        </div>
+                        
+                        {news.isUrgent && (
+                          <span className="px-3 py-1 bg-red-50 text-red-600 text-[9px] font-black rounded-lg border border-red-100 animate-pulse flex items-center gap-1">
+                            <Zap size={10} fill="currentColor" />
+                            عاجل
+                          </span>
+                        )}
+                        
+                        <span className={`px-3 py-1 text-[9px] font-black rounded-lg border ${getCategoryTheme(news.category).color} border-current opacity-80 uppercase tracking-wider`}>
+                          {getCategoryTheme(news.category).label}
                         </span>
-                      )}
-                      <span className={`flex items-center gap-1.5 px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-wider ${getCategoryTheme(news.category).color}`}>
-                        {React.createElement(getCategoryTheme(news.category).icon, { size: 12 })}
-                        {getCategoryTheme(news.category).label}
-                      </span>
-                      <button 
-                        onClick={(e) => toggleSaveNews(e, news.id)}
-                        className={`mr-auto p-2 rounded-xl transition-all ${
-                          savedNewsIds.has(news.id) 
-                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
-                            : 'bg-slate-100 text-slate-400 hover:text-blue-600 hover:bg-blue-50'
-                        }`}
-                      >
-                        {savedNewsIds.has(news.id) ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
-                      </button>
+                        
+                        <div className="mr-auto flex items-center gap-3">
+                           <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                              <Calendar size={12} />
+                              {getMinutesAgo(new Date(news.publishedDate))}
+                           </span>
+                           <button 
+                            onClick={(e) => toggleSaveNews(e, news.id)}
+                            className={`p-2 rounded-xl transition-all ${
+                              savedNewsIds.has(news.id) 
+                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20 scale-110' 
+                                : 'bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-blue-100'
+                            }`}
+                           >
+                            {savedNewsIds.has(news.id) ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
+                           </button>
+                        </div>
+                      </div>
+
+                      <h3 className="text-lg lg:text-xl font-black text-slate-900 leading-snug group-hover:text-blue-700 transition-colors duration-300">
+                        {news.title}
+                      </h3>
+                      
+                      <p className="text-sm text-slate-500 font-medium leading-relaxed line-clamp-2 lg:line-clamp-3">
+                        {news.description}
+                      </p>
+                      
+                      <div className="flex items-center justify-between pt-2">
+                        <div className="flex items-center gap-2 text-[10px] font-black text-blue-600">
+                           <Sparkles size={14} className="animate-bounce" />
+                           تحليل رادار الذكي متوفر
+                        </div>
+                        <div className="flex items-center gap-2 text-blue-600 font-black text-xs group-hover:gap-3 transition-all duration-300">
+                          اقرأ المزيد
+                          <ChevronRight size={16} />
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-[11px] font-bold text-slate-400 flex items-center gap-2">
-                        <span className="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg">{news.source}</span>
-                        <span>•</span>
-                        {getMinutesAgo(new Date(news.publishedDate))}
-                      </span>
-                    <h3 className="text-[17px] font-black text-slate-900 group-hover:text-blue-600 transition-colors mb-2 leading-tight">
-                      {news.title}
-                    </h3>
-                    <p className="text-sm text-slate-500 font-medium leading-relaxed line-clamp-2">
-                      {news.description}
-                    </p>
-                  </div>
-                  <div className="self-center p-2 bg-slate-50 rounded-full group-hover:bg-blue-600 group-hover:text-white transition-all">
-                    <ChevronRight size={20} />
                   </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </div>
           ) : (
             <div className="text-center py-20 bg-slate-50 rounded-[40px] border border-dashed border-slate-200">
               <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
                 <Search size={32} className="text-slate-200" />
               </div>
-              <p className="text-lg font-black text-slate-900">لا توجد أخبار مطابقة</p>
-              <p className="text-sm text-slate-400 font-bold mt-2">جرب تغيير معايير البحث أو اختيار تصنيف آخر</p>
+              <p className="text-lg font-black text-slate-900">لا توجد أخبار سعودية مطابقة</p>
+              <p className="text-sm text-slate-400 font-bold mt-2">جرب البحث بكلمات أخرى أو تغيير التصنيف</p>
             </div>
           )}
         </div>
