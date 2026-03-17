@@ -77,16 +77,16 @@ const TimelinePage: React.FC<TimelinePageProps> = ({ events }) => {
 
     filteredEvents.slice(0, visibleCount).forEach(event => {
       const date = new Date(event.timestamp);
-      let groupKey = 'أقدم';
+      const isToday = date.toDateString() === today.toDateString();
+      const isYesterday = date.toDateString() === yesterday.toDateString();
       
-      if (date >= today) {
+      let groupKey = '';
+      if (isToday) {
         groupKey = 'اليوم';
-      } else if (date >= yesterday) {
+      } else if (isYesterday) {
         groupKey = 'الأمس';
-      } else if (date >= lastWeek) {
-        groupKey = 'الأسبوع الماضي';
       } else {
-        groupKey = date.toLocaleDateString('ar-SA', { month: 'long', year: 'numeric' });
+        groupKey = date.toLocaleDateString('ar-SA', { day: 'numeric', month: 'long', year: 'numeric' });
       }
 
       if (!groups[groupKey]) groups[groupKey] = [];

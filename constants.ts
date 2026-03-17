@@ -21,7 +21,7 @@ export const TIMELINE_EVENTS: TimelineEvent[] = [
     type: TimelineEventType.SIGNAL,
     title: 'تجاوز معدل نمو الناتج المحلي التوقعات',
     summary: 'أظهرت البيانات الأولية للربع الأول نمواً ملحوظاً في الأنشطة غير النفطية متجاوزة حاجز التوقعات السابقة.',
-    timestamp: '2025-05-12T08:30:00',
+    timestamp: new Date().toISOString(), // Today
     impactScore: 85,
     sourceName: 'الهيئة العامة للإحصاء',
     delta: { value: '5.1%', isPositive: true, label: 'النمو السنوي' },
@@ -30,17 +30,40 @@ export const TIMELINE_EVENTS: TimelineEvent[] = [
     impactExplanation: 'هذا يعني أن الاقتصاد ينمو بشكل صحي، مما قد ينعكس إيجابياً على سوق الأسهم والفرص الاستثمارية في القطاعات المرتبطة.'
   },
   {
+    id: 'e1-2',
+    type: TimelineEventType.UPDATE,
+    title: 'تحديث مؤشر الثقة الاستهلاكية',
+    summary: 'ارتفاع ملحوظ في مؤشر الثقة الاستهلاكية للشهر الحالي مدفوعاً باستقرار أسعار السلع الأساسية.',
+    timestamp: new Date().toISOString(), // Today
+    impactScore: 75,
+    sourceName: 'وزارة التجارة',
+    delta: { value: '3.2', isPositive: true, label: 'مؤشر الثقة' },
+    tags: ['Retail', 'Consumer'],
+    impactExplanation: 'ارتفاع الثقة يترجم عادة إلى زيادة في الإنفاق الاستهلاكي، مما يعزز أداء شركات التجزئة والخدمات.'
+  },
+  {
     id: 'e2',
     type: TimelineEventType.UPDATE,
     title: 'تحديث بيانات الاستثمار الأجنبي',
     summary: 'تم نشر التقرير الفصلي لتدفقات الاستثمار الأجنبي المباشر مع تفاصيل جديدة حول القطاعات الصناعية.',
-    timestamp: '2025-05-11T09:15:00',
+    timestamp: new Date(Date.now() - 86400000).toISOString(), // Yesterday
     impactScore: 60,
     sourceName: 'وزارة الاستثمار',
     delta: { value: '12%', isPositive: true, label: 'QoQ' },
     tags: ['Investment', 'FDI', 'تقرير الاستثمار'],
     relatedWidgetId: 'w2',
     impactExplanation: 'زيادة الاستثمار الأجنبي تعني ثقة أكبر في الاقتصاد المحلي وخلق فرص عمل جديدة في القطاعات المستهدفة.'
+  },
+  {
+    id: 'e2-2',
+    type: TimelineEventType.SIGNAL,
+    title: 'إشارة: تدفقات سيولة لقطاع السياحة',
+    summary: 'رصد زيادة في حجم التمويل الموجه للمشاريع السياحية المتوسطة في منطقة العلا وجدة التاريخية.',
+    timestamp: new Date(Date.now() - 86400000).toISOString(), // Yesterday
+    impactScore: 68,
+    sourceName: 'صندوق التنمية السياحي',
+    tags: ['Tourism', 'SMEs'],
+    impactExplanation: 'هذه التدفقات تعجل من وتيرة إنجاز المشاريع السياحية وتفتح آفاقاً جديدة للمستثمرين المحليين في قطاع الضيافة.'
   },
   {
     id: 'e3',
