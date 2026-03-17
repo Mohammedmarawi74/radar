@@ -1,8 +1,10 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { HashRouter as Router, Routes, Route, useLocation, useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { InvestmentSimulator } from './components/simulator/InvestmentSimulator';
 import {
   LayoutDashboard,
+  Calculator,
   PieChart,
   Settings,
   Database,
@@ -376,6 +378,7 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
               <NavItem id="nav-signals" to="/signals" icon={Zap} isCollapsed={isCollapsed} important>إشارات السوق</NavItem>
               <NavItem id="nav-radar" to="/smart-radar" icon={Target} isCollapsed={isCollapsed} important>لوحات الرادار الذكية</NavItem>
               <NavItem id="nav-geo-radar" to="/geo-radar" icon={MapIcon} isCollapsed={isCollapsed} important>الرادار الجغرافي</NavItem>
+              <NavItem id="nav-simulator" to="/simulator" icon={Calculator} isCollapsed={isCollapsed} important>محاكي الاستثمار</NavItem>
               <NavItem id="nav-timeline" to="/timeline" icon={Clock} isCollapsed={isCollapsed}>سجل التغييرات</NavItem>
               <NavItem id="nav-followers" to="/followers" icon={Users} isCollapsed={isCollapsed}>المجتمع</NavItem>
             </NavGroup>
@@ -584,6 +587,9 @@ const Breadcrumbs = () => {
       if (pathname === '/admin/notifications') {
         crumbs.push({ label: 'إدارة التنبيهات', path: '', icon: Bell });
       }
+    } else if (pathname.includes('/simulator')) {
+      crumbs.push({ label: 'المحور الرئيسي', path: '', icon: Target });
+      crumbs.push({ label: 'محاكي الاستثمار', path: '', icon: Calculator });
     } else {
       crumbs.push({ label: 'لوحة التحكم', path: '', icon: LayoutTemplate });
     }
@@ -1268,6 +1274,7 @@ const App = () => {
             <Route path="/ai-dashboard" element={<AIRadarDashboard />} />
             <Route path="/smart-radar" element={<SmartRadarPage />} />
             <Route path="/geo-radar" element={<InvestmentGeoRadar />} />
+            <Route path="/simulator" element={<InvestmentSimulator />} />
             <Route path="/dashboards" element={<OfficialDashboardsPage dashboards={officialDashboards} widgets={allWidgets} userRole={currentUser.role} />} />
             <Route path="/signals" element={<AISignalsPage />} />
             <Route path="/timeline" element={<TimelinePage events={TIMELINE_EVENTS} />} />
