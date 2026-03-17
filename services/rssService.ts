@@ -1,0 +1,165 @@
+/**
+ * RSS News Feed Service for Saudi Economic News
+ * This service handles fetching, parsing, and normalizing news from various Saudi economic sources.
+ */
+
+export interface RSSNewsItem {
+  id: string;
+  title: string;
+  description: string;
+  source: string;
+  sourceLogo: string;
+  publishedDate: string;
+  link: string;
+  category: string;
+  media?: string;
+  isUrgent?: boolean;
+}
+
+const RSS_SOURCES = [
+  { 
+    name: 'الاقتصادية', 
+    url: 'https://www.aleqt.com/feed/rss2.0', 
+    logo: '💹',
+    isArabic: true
+  },
+  { 
+    name: 'أرقام', 
+    url: 'https://www.argaam.com/ar/rss/news', 
+    logo: '📊',
+    isArabic: true
+  },
+  { 
+    name: 'الشرق الأوسط (اقتصاد)', 
+    url: 'https://aawsat.com/feed/rss/economy', 
+    logo: '📰',
+    isArabic: true
+  },
+  { 
+    name: 'العربية السعودية', 
+    url: 'https://www.alarabiya.net/.mrss/ar/saudi-arabia.xml', 
+    logo: '📺',
+    isArabic: true
+  },
+  { 
+    name: 'MENAFN', 
+    url: 'https://menafn.com/rss/menafn_saudi_arabia.xml', 
+    logo: '🌍',
+    isArabic: false
+  },
+  { 
+    name: 'Saudi Gazette', 
+    url: 'https://saudigazette.com.sa/rssFeed/74', 
+    logo: '📰',
+    isArabic: false
+  },
+  { 
+    name: 'Arab News', 
+    url: 'https://www.arabnews.com/rss.xml', 
+    logo: '🗞️',
+    isArabic: false
+  },
+  { 
+    name: 'وزارة البيئة والمياه والزراعة', 
+    url: 'https://www.mewa.gov.sa/ar/InformationCenter/News/_layouts/15/listfeed.aspx', 
+    logo: '🌴',
+    isArabic: true
+  },
+  { 
+    name: 'هيئة الغذاء والدواء', 
+    url: 'https://www.sfda.gov.sa/ar/news/rss', 
+    logo: '🛡️',
+    isArabic: true
+  },
+  { 
+    name: 'SaudiArabiaPR', 
+    url: 'https://www.saudiarabiapr.com/feed/', 
+    logo: '📢',
+    isArabic: true
+  }
+];
+
+// Use a CORS proxy to bypass browser security restrictions during development/demo
+const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+
+export const fetchSaudiEconomicNews = async (): Promise<RSSNewsItem[]> => {
+  const allNews: RSSNewsItem[] = [];
+  const processedLinks = new Set<string>();
+
+  const fetchSource = async (source: typeof RSS_SOURCES[0]) => {
+    try {
+      const response = await fetch(`${CORS_PROXY}${encodeURIComponent(source.url)}`);
+      if (!response.ok) throw new Error(`Failed to fetch from ${source.name}`);
+      
+      const xmlString = await response.text();
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+      
+      const items = xmlDoc.querySelectorAll("item");
+      const sourceItems: RSSNewsItem[] = [];
+
+      items.forEach((item, index) => {
+        const title = item.querySelector("title")?.textContent || "";
+        const link = item.querySelector("link")?.textContent || "";
+        const description = item.querySelector("description")?.textContent || "";
+        const pubDate = item.querySelector("pubDate")?.textContent || "";
+        const category = item.querySelector("category")?.textContent || "Economy";
+        
+        // Media extraction (check enclosure or media:content)
+        const media = item.querySelector("enclosure")?.getAttribute("url") || 
+                      item.querySelector("media\\:content, content")?.getAttribute("url") || "";
+
+        // Deduplication and Saudi relevancy check
+        if (!processedLinks.has(link)) {
+          processedLinks.add(link);
+          
+          const isUrgent = title.includes("عاجل") || title.toLowerCase().includes("breaking");
+
+          sourceItems.push({
+            id: `${source.name}-${index}-${Date.now()}`,
+            title: title.trim(),
+            description: cleanHTML(description),
+            source: source.name,
+            sourceLogo: source.logo,
+            publishedDate: new Date(pubDate).toISOString(),
+            link: link.trim(),
+            category: normalizeCategory(category),
+            media: media,
+            isUrgent: isUrgent
+          });
+        }
+      });
+
+      return sourceItems;
+    } catch (error) {
+      console.warn(`Error fetching ${source.name}:`, error);
+      return [];
+    }
+  };
+
+  const results = await Promise.allSettled(RSS_SOURCES.map(fetchSource));
+  
+  results.forEach(result => {
+    if (result.status === 'fulfilled') {
+      allNews.push(...result.value);
+    }
+  });
+
+  // Sort by date descending
+  return allNews.sort((a, b) => new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime());
+};
+
+const cleanHTML = (html: string): string => {
+  const tmp = document.createElement("DIV");
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || "";
+};
+
+const normalizeCategory = (category: string): string => {
+  const cat = category.toLowerCase();
+  if (cat.includes('invest') || cat.includes('استثمار')) return 'investment';
+  if (cat.includes('gover') || cat.includes('حكوم')) return 'government';
+  if (cat.includes('energy') || cat.includes('طاقة')) return 'energy';
+  if (cat.includes('finan') || cat.includes('مال')) return 'finance';
+  return 'economy';
+};

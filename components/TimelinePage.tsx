@@ -198,38 +198,46 @@ const TimelinePage: React.FC<TimelinePageProps> = ({ events }) => {
         </div>
       )}
 
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <h2 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-            <div className="p-2.5 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/20">
-              <Clock className="text-white" size={24} />
+      {/* Enhanced Page Header Card - More Compact */}
+      <header className="relative overflow-hidden bg-slate-900 rounded-[32px] p-6 lg:p-8 shadow-xl shadow-slate-900/10 mb-8">
+        {/* Abstract background blobs */}
+        <div className="absolute -top-24 -left-24 w-48 h-48 bg-blue-600/10 rounded-full blur-[60px]" />
+        <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-600/10 rounded-full blur-[60px]" />
+        
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex-1 space-y-4 text-right">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 text-blue-400 rounded-full text-[9px] font-black uppercase tracking-widest backdrop-blur-md">
+              <Clock size={12} className="animate-pulse" />
+              التحديثات اللحظية
             </div>
-            سجل التغييرات
-          </h2>
-          <p className="text-slate-500 mt-3 text-base lg:text-lg max-w-2xl font-medium leading-relaxed">
-            استعرض آخر التحديثات والإشارات الاقتصادية والتحليلات الذكية في منصة رادار لحظة بلحظة.
-          </p>
-        </div>
-
-        {/* AI Summary Card */}
-        <div className="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-3xl p-6 shadow-xl shadow-blue-500/20 text-white md:max-w-md relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
-             <Sparkles size={120} />
-          </div>
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-1.5 bg-white/20 backdrop-blur-md rounded-lg">
-                <Sparkles size={16} className="text-blue-200" />
-              </div>
-              <span className="text-[11px] font-black uppercase tracking-widest text-blue-100">ملخص الذكاء الاصطناعي</span>
-            </div>
-            <p className="text-sm font-bold leading-relaxed text-blue-50 line-clamp-2">
-              أهم تغييرات هذا الأسبوع: ارتفاع ملحوظ في مؤشرات الناتج المحلي وتحديثات جوهرية في الاستثمار الأجنبي وقطاع التقنية.
+            
+            <h1 className="text-2xl lg:text-3xl font-black text-white tracking-tight">
+              سجل التغييرات
+            </h1>
+            
+            <p className="max-w-2xl text-sm text-slate-400 font-bold leading-relaxed">
+              تتبع شامل لكل التحديثات الاقتصادية والإشارات السوقية لضمان البقاء في قلب الحدث وتوثيق كل حركة تغيير جوهرية.
             </p>
           </div>
+          
+          <div className="flex items-center gap-6 bg-white/5 p-4 rounded-2xl backdrop-blur-md border border-white/5">
+            <div className="flex flex-col items-center px-2">
+              <span className="text-white text-lg font-black">100+</span>
+              <span className="text-[9px] text-slate-500 font-black uppercase">حدث/شهر</span>
+            </div>
+            <div className="w-px h-8 bg-white/10" />
+            <div className="flex flex-col items-center px-2">
+              <span className="text-white text-lg font-black">Live</span>
+              <span className="text-[9px] text-slate-500 font-black uppercase">إشارات</span>
+            </div>
+            <div className="w-px h-8 bg-white/10" />
+            <div className="flex flex-col items-center px-2">
+              <span className="text-white text-lg font-black">100%</span>
+              <span className="text-[9px] text-slate-500 font-black uppercase">دقة</span>
+            </div>
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* Advanced Filtering & Search Bar */}
       <div className={`bg-white p-2 rounded-[28px] shadow-sm border border-slate-200/60 sticky top-[72px] lg:top-[84px] z-40 transition-all duration-300 ${tourStep === 1 || tourStep === 2 ? 'ring-4 ring-blue-500 shadow-2xl z-[101]' : ''}`}>

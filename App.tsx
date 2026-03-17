@@ -297,7 +297,11 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
   onToggle: () => void
 }) => {
   const location = useLocation();
-  const isAdminPath = location.pathname.startsWith('/admin') || 
+  const isAdminPath = location.pathname.startsWith('/admin') ||
+                      location.pathname.startsWith('/ai-dashboard') ||
+                      location.pathname.startsWith('/data-review') ||
+                      location.pathname.startsWith('/reports') ||
+                      location.pathname.startsWith('/metadata') ||
                       ['/editorial', '/campaigns', '/moderation', '/tags', '/media', '/create-post', '/my-posts', '/design-studio'].some(p => location.pathname.startsWith(p));
 
   // Helper for role checks
