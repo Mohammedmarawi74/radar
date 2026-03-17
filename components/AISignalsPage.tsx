@@ -7,7 +7,7 @@
  * AI-powered signals and insights page
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Sparkles,
     TrendingUp,
@@ -32,8 +32,10 @@ import {
     CheckCircle2,
     AlertCircle,
     Flame,
-    Layout
+    Layout,
+    X
 } from 'lucide-react';
+
 
 // ============================================
 // TYPES - الأنواع
@@ -64,7 +66,7 @@ interface AISignal {
 }
 
 // ============================================
-// MOCK DATA - بيانات تجريبية
+// MOCK DATA - البيانات التجريبية
 // ============================================
 
 const AI_SIGNALS: AISignal[] = [
@@ -107,6 +109,30 @@ const AI_SIGNALS: AISignal[] = [
         relatedRegions: ['الرياض', 'جدة', 'الدمام']
     },
     {
+        id: 'sig_4',
+        type: 'opportunity',
+        category: 'trend',
+        title: 'طفرة في الاستثمار بالذكاء الاصطناعي التوليدي داخل نيوم',
+        summary: 'رصد تدفقات مالية ضخمة تتوجه نحو الشركات الناشئة في مجال الذكاء الاصطناعي المستقرة في نيوم، بمعدل نمو شهري يصل إلى 15%.',
+        impactScore: 95,
+        confidenceLevel: 91,
+        timestamp: new Date().toISOString(),
+        dataSources: ['نيوم تيك', 'وزارة الاستثمار', 'تقارير الصفقات الخاصة'],
+        explanation: {
+            why: 'إطلاق صندوق دعم الابتكار الجديد أدى إلى قفزة في التراخيص التقنية وتأسيس مكاتب إقليمية لشركات عالمية.',
+            dataUsed: ['تراخيص MISA', 'قيمة صفقات VCs', 'طلبات التوظيف التقني'],
+            assumptions: ['استقرار البرنامج الزمني لمشاريع نيوم', 'استمرار الحوافز الضريبية'],
+            limitations: ['تركز الاستثمارات في 3 قطاعات فرعية فقط', 'ندرة الخبرات المحلية المتخصصة حالياً']
+        },
+        insights: [
+            'نمو بنسبة 200% في عدد مكاتب شركات الذكاء الاصطناعي الإقليمية.',
+            'توقعات بخلق 5000 وظيفة تقنية عالية التخصص بحلول نهاية 2026.',
+            'تركز 40% من النشاط في مجال الروبوتات والمدن الذكية.'
+        ],
+        relatedSectors: ['التقنية', 'الذكاء الاصطناعي', 'الابتكار'],
+        relatedRegions: ['نيوم', 'تبوك']
+    },
+    {
         id: 'sig_2',
         type: 'watch',
         category: 'pattern',
@@ -145,6 +171,30 @@ const AI_SIGNALS: AISignal[] = [
         relatedRegions: ['المملكة - عام']
     },
     {
+        id: 'sig_5',
+        type: 'watch',
+        category: 'heatmap',
+        title: 'تغير جذري في خارطة التوسع العقاري بالمنطقة الغربية',
+        summary: 'رصد تزايد الطلب على العقارات التجارية في المدن الثانوية المحيطة بجدة (مثل رابغ وخليص) نتيجة اكتمال مشاريع الربط السككي.',
+        impactScore: 72,
+        confidenceLevel: 84,
+        timestamp: new Date(Date.now() - 43200000).toISOString(),
+        dataSources: ['سجل الأراضي', 'بيانات سار (SAR)', 'المخطط الشامل للمدن'],
+        explanation: {
+            why: 'سهولة الوصول من وإلى جدة قللت الضغط السكني داخل المركز وخلقت مراكز لوجستية جديدة.',
+            dataUsed: ['قيم الصفقات في رابغ (+18%)', 'حركات المسافرين اليومية', 'تراخيص البناء الجديدة'],
+            assumptions: ['استقرار أسعار الوقود والكهرباء'],
+            limitations: ['البيانات لا تشمل الأراضي غير المطورة حالياً']
+        },
+        insights: [
+            'رابغ تسجل أعلى قيمة صفقات للعقارات الصناعية في تاريخها خلال شهر.',
+            'زيادة بنسبة 35% في طلبات إيصال الخدمات للمدن الجديدة.',
+            'تحول استثماري ملحوظ من جدة نحو المحاور الشمالية.'
+        ],
+        relatedSectors: ['العقار', 'النقل والخدمات اللوجستية'],
+        relatedRegions: ['جدة', 'رابغ', 'المنطقة الغربية']
+    },
+    {
         id: 'sig_3',
         type: 'risk',
         category: 'anomaly',
@@ -165,7 +215,7 @@ const AI_SIGNALS: AISignal[] = [
             assumptions: [
                 'البيانات المتاحة دقيقة وكاملة',
                 'لا توجد تأخيرات في تسجيل البيانات',
-                'العوامل الموسمية تم أخذها في الاعتبار'
+                'العوامل موسمية تم أخذها في الاعتبار'
             ],
             limitations: [
                 'شهرين فقط من البيانات (فترة قصيرة)',
@@ -181,6 +231,222 @@ const AI_SIGNALS: AISignal[] = [
         ],
         relatedSectors: ['المطاعم', 'الضيافة', 'التجزئة'],
         relatedRegions: ['الرياض', 'جدة', 'الدمام']
+    },
+    {
+        id: 'sig_6',
+        type: 'risk',
+        category: 'trend',
+        title: 'تذبذب سلاسل الإمداد العالمية وتأثيرها على المواد الإنشائية',
+        summary: 'تحذير من نقص محتمل في مواد البناء المتخصصة وتأخر وصول الشحنات نتيجة التوترات في خطوط الملاحة الدولية، مما قد يرفع التكاليف بنسبة 8%.',
+        impactScore: 88,
+        confidenceLevel: 85,
+        timestamp: new Date(Date.now() - 172800000).toISOString(),
+        dataSources: ['بيانات الموانئ العالمية', 'عقود التوريد الآجلة', 'نشرات الأسعار العالمية'],
+        explanation: {
+            why: 'زيادة مدة الشحن البحري بنسبة 12 يومًا مقارنة بالمتوسط السنوي أدت لتراكم الطلبات.',
+            dataUsed: ['مؤشر حاويات الموانئ', 'بيانات الاعتمادات المستندية لاستيراد المعادن'],
+            assumptions: ['استمرار الاضطرابات الملاحية لمدة 3 أشهر على الأقل'],
+            limitations: ['لا يشمل المواد المصنعة محلياً بنسبة 100%']
+        },
+        insights: [
+            'ارتفاع أسعار الحديد المستورد بنسبة 4.5% في أسبوعين.',
+            'شركات المقاولات الكبرى تبدأ في تفعيل خطط المخزون الاستراتيجي.',
+            'توقعات بتباطؤ تسليم بعض مشاريع الأبراج في الرياض وجدة.'
+        ],
+        relatedSectors: ['المقاولات والإنشاءات', 'سلاسل الإمداد'],
+        relatedRegions: ['المملكة - عام']
+    },
+    {
+        id: 'sig_7',
+        type: 'opportunity',
+        category: 'pattern',
+        title: 'تزايد زخم طروحات الـ IPO في سوق تاسي للعام القادم',
+        summary: 'تحليل سلوك الشركات العائلية الكبرى يشير إلى جاهزية 12 شركة جديدة للاكتتاب العام خلال الـ 15 شهراً القادمة، خاصة في قطاعات الرعاية الصحية والتعليم.',
+        impactScore: 82,
+        confidenceLevel: 75,
+        timestamp: new Date(Date.now() - 259200000).toISOString(),
+        dataSources: ['إعلانات تداول', 'بيانات هيئة السوق المالية', 'تحليلات البنوك الاستثمارية'],
+        explanation: {
+            why: 'تحسن مستويات السيولة والرغبة في تعزيز الحوكمة دفعت الشركات نحو الأسواق المالية.',
+            dataUsed: ['ملفات طلبات الإدراج تحت المراجعة', 'نمو الأرباح المجمعة للقطاعات المذكورة (+14%)'],
+            assumptions: ['استقرار مؤشر تاسي فوق حاجز الـ 12,000 نقطة'],
+            limitations: ['عوامل الاقتصاد الكلي قد تؤدي لتأجيل بعض الطروحات']
+        },
+        insights: [
+            'قطاع التعليم يسجل أعلى رغبة في الإدراج لتمويل التوسعات الجديدة.',
+            'شركات التقنية المالية (FinTech) تدخل خط المنافسة بقوة لأول مرة.',
+            'توقعات بجذب سيولة أجنبية جديدة بقيمة 3 مليار دولار.'
+        ],
+        relatedSectors: ['السوق المالي', 'البنوك والتمويل'],
+        relatedRegions: ['تداول']
+    },
+    {
+        id: 'sig_8',
+        type: 'watch',
+        category: 'heatmap',
+        title: 'تسارع وتيرة مشاريع الطاقة المتجددة في الشمال والشمال الغربي',
+        summary: 'رصد تزايد كثافة المشاريع المتعلقة بالطاقة الشمسية وطاقة الرياح في مناطق الجوف والوجه نتيجة اكتمال المرحلة التجريبية بنجاح باهر.',
+        impactScore: 76,
+        confidenceLevel: 89,
+        timestamp: new Date(Date.now() - 345600000).toISOString(),
+        dataSources: ['تقارير وزارة الطاقة', 'صور الأقمار الاصطناعية للمواقع', 'مناقصات شركة الكهرباء السعودية'],
+        explanation: {
+            why: 'انخفاض تكلفة إنتاج الكيلوواط في هذه المناطق لأدنى مستوى عالمي محققاً جدوى اقتصادية قياسية.',
+            dataUsed: ['بيانات إنتاج المحطات القائمة', 'عدد تراخيص التوليد الجديدة'],
+            assumptions: ['بدء تشغيل شبكات الربط الجديدة في الموعد المحدد'],
+            limitations: ['التحديات التقنية المتعلقة بالتخزين الطويل للكهرباء']
+        },
+        insights: [
+            'الجوف تستعد لتكون مركزاً عالمياً لإنتاج الطاقة الشمسية.',
+            'اكتمال تركيب 450 توربين رياح جديد بنهاية الربع الأول.',
+            'توفير 15% من التكاليف التشغيلية للمصانع القريبة من هذه الحقول.'
+        ],
+        relatedSectors: ['الطاقة والمرافق', 'الصناعة'],
+        relatedRegions: ['الجوف', 'تبوك', 'الوجه']
+    },
+    {
+        id: 'sig_9',
+        type: 'opportunity',
+        category: 'trend',
+        title: 'ثروات التعدين: قفزة في استكشاف الذهب والنحاس بالدرع العربي',
+        summary: 'تشير بيانات المسح الجيولوجي الأخيرة إلى وجود احتياطات ضخمة غير مكتشفة في منطقة الدرع العربي، مع اهتمام عالمي متزايد بالاستثمار في قطاع التعدين السعودي.',
+        impactScore: 89,
+        confidenceLevel: 82,
+        timestamp: new Date(Date.now() - 86400000).toISOString(),
+        dataSources: ['وزارة الصناعة والثروة المعدنية', 'هيئة المساحة الجيولوجية'],
+        explanation: {
+            why: 'توفر تقنيات استكشاف جديدة وكشف بيانات جيولوجية دقيقة لأول مرة بطريقة رقمية.',
+            dataUsed: ['خرائط المسح المغناطيسي', 'تراخيص الاستكشاف الجديدة (+25%)'],
+            assumptions: ['ثبات أسعار المعادن العالمية المستهدفة'],
+            limitations: ['الحاجة لاستثمارات ضخمة في البنية التحتية للمناجم']
+        },
+        insights: [
+            'توقعات بزيادة مساهمة التعدين في الناتج المحلي إلى 240 مليار ريال.',
+            'اكتشاف 4 مواقع واعدة جداً في منطقة مكة المكرمة والمدينة المنورة.',
+            'ارتفاع طلبات الشركات العالمية بنسبة 40% خلال الربع الأخير.'
+        ],
+        relatedSectors: ['التعدين', 'الصناعة', 'المواد الأساسية'],
+        relatedRegions: ['مكة المكرمة', 'المدينة المنورة', 'الدرع العربي']
+    },
+    {
+        id: 'sig_10',
+        type: 'opportunity',
+        category: 'heatmap',
+        title: 'طفرة السياحة الفاخرة: البحر الأحمر يغير موازين الإنفاق السياحي',
+        summary: 'رصد زيادة غير مسبوقة في متوسط إنفاق السائح اليومي في جهات البحر الأحمر وأمالا، متجاوزاً المتوسطات الإقليمية بنسبة 60%.',
+        impactScore: 91,
+        confidenceLevel: 87,
+        timestamp: new Date(Date.now() - 172800000).toISOString(),
+        dataSources: ['وزارة السياحة', 'بيانات البنوك المحلية (نقاط البيع)', 'شركة البحر الأحمر الدولية'],
+        explanation: {
+            why: 'افتتاح المنتجعات العالمية وبدء استقبال الرحلات المباشرة لمطار البحر الأحمر الدولي.',
+            dataUsed: ['حجم معاملات POS في المنتجعات', 'نسب الإشغال الفعلي (85%+)'],
+            assumptions: ['استمرار نمو حركة الطيران الدولي للمنطقة'],
+            limitations: ['الموسمية قد تؤثر على البيانات في فترات الصيف']
+        },
+        insights: [
+            'متوسط إقامة السائح ارتفع إلى 5.5 ليالٍ مقارنة بـ 3.2 سابقاً.',
+            '65% من السياح هم من الفئات ذات الملاءة المالية العالية جداً.',
+            'نمو قطاع الخدمات المساندة (تأجير يخوت، طيران خاص) بنسبة 120%.'
+        ],
+        relatedSectors: ['السياحة', 'الفندقة والضيافة', 'الترفيه'],
+        relatedRegions: ['منطقة البحر الأحمر', 'تبوك', 'أمالا']
+    },
+    {
+        id: 'sig_11',
+        type: 'watch',
+        category: 'trend',
+        title: 'التحول الرقمي: تسارع تبني الخدمات المالية المفتوحة (Open Banking)',
+        summary: 'رصد تزايد مضاعف في عدد الربط التقني بين البنوك التقليدية وشركات الفينتك، مما يمهد لثورة في الخدمات التمويلية الشخصية.',
+        impactScore: 78,
+        confidenceLevel: 93,
+        timestamp: new Date(Date.now() - 432000000).toISOString(),
+        dataSources: ['البنك المركزي السعودي (ساما)', 'اتحاد الفينتك السعودي'],
+        explanation: {
+            why: 'دخول اللوائح الجديدة حيز التنفيذ وتحفز الشركات على ابتكار منتجات مبنية على البيانات.',
+            dataUsed: ['عدد استدعاءات الـ API البنكية', 'حجم القروض المصغرة الممنوحة آلياً'],
+            assumptions: ['ثقة المستخدمين في مشاركة البيانات المالية'],
+            limitations: ['تحديات الأمن السيبراني قد تبطئ سرعة التبني']
+        },
+        insights: [
+            'انخفاض وقت الموافقة على القروض الشخصية من 3 أيام إلى 5 دقائق.',
+            'ظهور 15 منصة جديدة لإدارة الثروات الشخصية في 6 أشهر.',
+            'توقعات بوصول قيمة سوق الفينتك السعودي إلى 12 مليار ريال بحلول 2027.'
+        ],
+        relatedSectors: ['التقنية المالية', 'البنوك', 'التقنية'],
+        relatedRegions: ['المملكة - عام']
+    },
+    {
+        id: 'sig_12',
+        type: 'risk',
+        category: 'anomaly',
+        title: 'ضغوط تضخمية مؤقتة في قطاع الخدمات التعليمية الخاصة',
+        summary: 'تحليل تكاليف التشغيل للمدارس الخاصة يظهر ارتفاعاً حاداً في بنود الرواتب والتقنيات، مما قد يؤدي لرفع الرسوم بنسبة 10% العام القادم.',
+        impactScore: 84,
+        confidenceLevel: 79,
+        timestamp: new Date(Date.now() - 604800000).toISOString(),
+        dataSources: ['تقارير مالية لشركات تعليمية مدرجة', 'بيانات سوق العمل'],
+        explanation: {
+            why: 'ارتفاع الطلب على الكوادر التعليمية المتخصصة وزيادة تكاليف الأنظمة الرقمية المطلوبة.',
+            dataUsed: ['مؤشر رواتب المعلمين', 'تكاليف تراخيص البرمجيات التعليمية'],
+            assumptions: ['استمرار توجه الأسر نحو التعليم النوعي رغم التكلفة'],
+            limitations: ['التدخلات التنظيمية لضبط الأسعار قد تحد من الارتفاع']
+        },
+        insights: [
+            'نقص في تخصصات (الذكاء الاصطناعي، العلوم المتقدمة) بالمدارس.',
+            'زيادة الاستثمارات في بناء المجمعات التعليمية المتعثرة سابقاً.',
+            'ارتفاع تكلفة استقطاب المعلمين الدوليين بنسبة 15%.'
+        ],
+        relatedSectors: ['التعليم', 'الرعاية والخدمات الاجتماعية'],
+        relatedRegions: ['الرياض', 'جدة', 'الخبر']
+    },
+    {
+        id: 'sig_13',
+        type: 'opportunity',
+        category: 'pattern',
+        title: 'ازدهار قطاع التصنيع المتقدم - تقنية الطباعة ثلاثية الأبعاد',
+        summary: 'رصد نمط نمو في المصانع التي تتبنى تقنيات الثورة الصناعية الرابعة، خاصة في إنتاج قطع الغيار محلياً للصناعات العسكرية والنفطية.',
+        impactScore: 82,
+        confidenceLevel: 76,
+        timestamp: new Date(Date.now() - 259200000).toISOString(),
+        dataSources: ['البرنامج الوطني لتطوير التجمعات الصناعية', 'مودن (MODON)'],
+        explanation: {
+            why: 'مبادرات توطين الصناعة (اصنع في السعودية) دفعت الشركات لتبني حلول إنتاج مرنة وسريعة.',
+            dataUsed: ['عدد المصانع الذكية المسجلة', 'حجم الاستيراد لآلات الطباعة المعدنية'],
+            assumptions: ['استمرار الدعم التمويلي لصندوق التنمية الصناعية'],
+            limitations: ['الحاجة لتطوير معايير الجودة والمواصفات المحلية']
+        },
+        insights: [
+            'انخفاض وقت استلام قطع الغيار الحرجة بنسبة 70%.',
+            'توفير 20% من تكاليف سلاسل الإمداد في قطاع النفط والغاز.',
+            'تأسيس أول مجمع متخصص للتصنيع المضاف بالمنطقة الشرقية.'
+        ],
+        relatedSectors: ['الصناعة', 'التقنية', 'الدفاع'],
+        relatedRegions: ['الدمام', 'الجبيل', 'الخفجي']
+    },
+    {
+        id: 'sig_14',
+        type: 'watch',
+        category: 'trend',
+        title: 'نمو قطاع التجارة الإلكترونية العابرة للحدود',
+        summary: 'رصد زيادة في حجم الشحنات الواردة لصالح المتاجر المحلية التي تستخدم الرياض كمركز إقليمي للتوزيع نحو الشرق الأوسط.',
+        impactScore: 75,
+        confidenceLevel: 88,
+        timestamp: new Date(Date.now() - 345600000).toISOString(),
+        dataSources: ['هيئة الزكاة والضريبة والجمارك', 'البريد السعودي (سبل)'],
+        explanation: {
+            why: 'تحسين الإجراءات الجمركية وتدشين المناطق اللوجستية المتكاملة في مطار الرياض.',
+            dataUsed: ['عدد البيانات الجمركية (شحنات صغيرة)', 'متوسط زمن التخليص'],
+            assumptions: ['استقرار قوانين التجارة الإلكترونية الإقليمية'],
+            limitations: ['قوة المنافسة من المنصات العالمية الكبرى']
+        },
+        insights: [
+            'الرياض تصبح الوجهة الأولى للمخازن المركزية لشركات التقنية.',
+            'زيادة بنسبة 45% في سعة التخزين المبردة المتاحة.',
+            'نمو شركات التوصيل "الميل الأخير" بنسبة 30% سنوياً.'
+        ],
+        relatedSectors: ['التجارة الإلكترونية', 'اللوجستيات', 'البيع بالتجزئة'],
+        relatedRegions: ['الرياض', 'جدة', 'الشرقية']
     }
 ];
 
@@ -465,36 +731,103 @@ const SignalDetailModal: React.FC<{ signal: AISignal; onClose: () => void }> = (
 const AISignalsPage: React.FC = () => {
     const [selectedSignal, setSelectedSignal] = useState<AISignal | null>(null);
     const [filter, setFilter] = useState<'all' | SignalType>('all');
+    const [showWelcome, setShowWelcome] = useState(() => localStorage.getItem('hideAISignalsWelcome') !== 'true');
+
+    const dismissWelcome = () => {
+        setShowWelcome(false);
+        localStorage.setItem('hideAISignalsWelcome', 'true');
+    };
+
 
     const filteredSignals = filter === 'all'
         ? AI_SIGNALS
         : AI_SIGNALS.filter(s => s.type === filter);
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] p-4 lg:p-6 animate-fadeIn">
-            {/* Sleek Minimal Header */}
-            <div className="max-w-7xl mx-auto mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 px-1">
-                <div>
-                    <div className="flex items-center gap-2 mb-1">
-                        <Sparkles size={20} className="text-blue-600" />
-                        <h1 className="text-2xl font-black text-slate-900 tracking-tight">إشارات السوق الذكية</h1>
-                        <span className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded-md text-[10px] font-black uppercase tracking-widest border border-blue-100 shadow-sm">AI Powered</span>
+        <div className="max-w-7xl mx-auto space-y-8 p-4 lg:p-8">
+            {/* Welcome Banner - Narrower & Optimized */}
+            {showWelcome && (
+                <div className="bg-white border-2 border-purple-100 rounded-[32px] p-6 lg:p-8 shadow-xl shadow-purple-500/5 relative overflow-hidden group max-w-4xl">
+                    <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:scale-110 transition-transform duration-700">
+                        <Sparkles size={160} />
                     </div>
-                    <p className="text-slate-500 text-sm font-medium">تحليل فوري وذكي لأهم الفرص والمخاطر في السوق.</p>
-                </div>
+                    
+                    <button 
+                        onClick={dismissWelcome}
+                        className="absolute top-6 left-6 p-2 text-slate-400 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all"
+                    >
+                        <X size={20} />
+                    </button>
 
-                {/* Minimal Micro-Badges */}
-                <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-xl border border-slate-200 shadow-sm">
-                        <Target size={14} className="text-blue-500" />
-                        <span className="text-[10px] font-black text-slate-700">دقة 70%+</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-xl border border-slate-200 shadow-sm">
-                        <Activity size={14} className="text-emerald-500" />
-                        <span className="text-[10px] font-black text-slate-700">بيانات حية</span>
+                    <div className="flex flex-col lg:flex-row lg:items-center gap-8 relative z-10">
+                        <div className="w-20 h-20 bg-purple-600 rounded-[24px] shadow-lg shadow-purple-500/20 flex items-center justify-center shrink-0">
+                            <Brain size={40} className="text-white fill-white/20" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="text-xl lg:text-2xl font-black text-slate-900 mb-2">مرحباً بك في إشارات السوق الذكية! ✨</h3>
+                            <p className="text-slate-500 font-bold text-base max-w-2xl leading-relaxed">
+                                هنا نستخدم قوة الذكاء الاصطناعي لتحليل ملايين نقاط البيانات واكتشاف الفرص الاستثمارية والأنماط السوقية الاستباقية التي تساعدك على اتخاذ قرارات مدروسة.
+                            </p>
+                            <div className="flex items-center gap-4 mt-6">
+                                <button 
+                                    onClick={dismissWelcome}
+                                    className="px-6 py-3 bg-slate-900 text-white rounded-xl font-black text-sm hover:bg-black transition-all"
+                                >
+                                    فهمت ذلك
+                                </button>
+                                <button 
+                                    className="px-6 py-3 bg-white border border-slate-200 text-slate-600 hover:text-purple-600 hover:border-purple-500 rounded-xl font-black text-sm transition-all flex items-center gap-2"
+                                >
+                                    <Sparkles size={16} />
+                                    اكتشف المزيد
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
+
+            {/* Enhanced Page Header Card - Premium & Compact */}
+            <header className="relative overflow-hidden bg-slate-900 rounded-[32px] p-6 lg:p-8 shadow-xl shadow-slate-900/10 mb-8 mt-4">
+
+                {/* Abstract background blobs */}
+                <div className="absolute -top-24 -left-24 w-48 h-48 bg-purple-600/10 rounded-full blur-[60px]" />
+                <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-blue-600/10 rounded-full blur-[60px]" />
+                
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex-1 space-y-4 text-right">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 text-purple-400 rounded-full text-[9px] font-black uppercase tracking-widest backdrop-blur-md">
+                            <Sparkles size={12} className="animate-pulse" />
+                            الذكاء الاستباقي
+                        </div>
+                        
+                        <h1 className="text-2xl lg:text-3xl font-black text-white tracking-tight">
+                            إشارات السوق الذكية
+                        </h1>
+                        
+                        <p className="max-w-2xl text-sm text-slate-400 font-bold leading-relaxed">
+                            بوصلتكم الذكية لاكتشاف الفرص الاستثمارية الناشئة والتحركات السعرية غير الاعتيادية. نعتمد على الذكاء الاصطناعي لرصد الأنماط المالية بدقة عالية لاتخاذ قرارات استباقية.
+                        </p>
+                    </div>
+                    
+                    <div className="flex items-center gap-6 bg-white/5 p-4 rounded-2xl backdrop-blur-md border border-white/5">
+                        <div className="flex flex-col items-center px-2">
+                            <span className="text-white text-lg font-black">50+</span>
+                            <span className="text-[9px] text-slate-500 font-black uppercase">إشارة/يوم</span>
+                        </div>
+                        <div className="w-px h-8 bg-white/10" />
+                        <div className="flex flex-col items-center px-2">
+                            <span className="text-white text-lg font-black">95%</span>
+                            <span className="text-[9px] text-slate-500 font-black uppercase">دقة التحليل</span>
+                        </div>
+                        <div className="w-px h-8 bg-white/10" />
+                        <div className="flex flex-col items-center px-2">
+                            <span className="text-white text-lg font-black">24/7</span>
+                            <span className="text-[9px] text-slate-500 font-black uppercase">رصد آلي</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
 
             {/* Tabs & Navigation */}
             <div className="max-w-7xl mx-auto mb-6">

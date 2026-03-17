@@ -1265,7 +1265,7 @@ const App = () => {
       />
 
       {/* Main Layout Adjustments for Mobile and Collapsible Sidebar */}
-      <main className={`flex-1 transition-all duration-300 pb-24 lg:pb-0 ${isSidebarCollapsed ? 'lg:mr-20' : 'lg:mr-64'} min-w-0`}>
+      <main className={`flex-1 transition-all duration-300 pb-24 lg:pb-0 ${isSidebarCollapsed ? 'lg:mr-20' : 'lg:mr-[280px]'} min-w-0`}>
         <Topbar
           user={currentUser}
           onRoleChange={handleRoleChange}
