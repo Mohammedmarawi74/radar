@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Globe, Clock, RefreshCw, Search, ChevronRight, X, Calendar, ExternalLink, Copy, Info,
-  TrendingUp, DollarSign, Zap, Building2, Briefcase, AlertCircle, Newspaper
+  TrendingUp, DollarSign, Zap, Building2, Briefcase, AlertCircle, Newspaper, Languages,
+  Bookmark, BookmarkCheck, Sparkles, CheckCircle2
 } from 'lucide-react';
 import { useToast } from './Toast';
 import { fetchSaudiEconomicNews, RSSNewsItem } from '../services/rssService';
@@ -9,23 +10,39 @@ import { fetchSaudiEconomicNews, RSSNewsItem } from '../services/rssService';
 const AIEconomicDashboard = () => {
   const [newsList, setNewsList] = useState<RSSNewsItem[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [newsFilter, setNewsFilter] = useState<string>('all');
   const [newsSearch, setNewsSearch] = useState('');
   const [showNewsModal, setShowNewsModal] = useState(false);
   const [selectedNews, setSelectedNews] = useState<RSSNewsItem | null>(null);
   const [newsLastUpdated, setNewsLastUpdated] = useState(new Date());
   const [visibleCount, setVisibleCount] = useState(6);
+  const [savedNewsIds, setSavedNewsIds] = useState<Set<string>>(new Set());
 
   const { showToast } = useToast();
 
   const categories = [
     { id: 'all', label: 'الكل', icon: Globe },
+    { id: 'saved', label: 'المحفوظة', icon: Bookmark },
     { id: 'economy', label: 'اقتصاد كلي', icon: TrendingUp },
     { id: 'finance', label: 'مالية واستثمار', icon: DollarSign },
     { id: 'energy', label: 'طاقة وتعدين', icon: Zap },
     { id: 'government', label: 'أخبار حكومية', icon: Building2 },
     { id: 'investment', label: 'فرص استثمارية', icon: Briefcase },
   ];
+
+  const toggleSaveNews = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    const newSaved = new Set(savedNewsIds);
+    if (newSaved.has(id)) {
+      newSaved.delete(id);
+      showToast('تم إزالة الخبر من المحفوظات', 'info');
+    } else {
+      newSaved.add(id);
+      showToast('تم حفظ الخبر للرجوع إليه لاحقاً', 'success');
+    }
+    setSavedNewsIds(newSaved);
+  };
 
   const handleRefreshNews = useCallback(async (isSilent = false) => {
     if (!isSilent) setIsRefreshing(true);
@@ -38,6 +55,7 @@ const AIEconomicDashboard = () => {
       if (!isSilent) showToast('فشل في تحديث الأخبار', 'error');
     } finally {
       if (!isSilent) setIsRefreshing(false);
+      setIsInitialLoading(false);
     }
   }, [showToast]);
 
@@ -87,7 +105,11 @@ const AIEconomicDashboard = () => {
   };
 
   const filteredNews = newsList.filter(news => {
-    const matchesFilter = newsFilter === 'all' || news.category === newsFilter;
+    const matchesFilter = newsFilter === 'all' 
+      ? true 
+      : newsFilter === 'saved' 
+        ? savedNewsIds.has(news.id)
+        : news.category === newsFilter;
     const matchesSearch = news.title.toLowerCase().includes(newsSearch.toLowerCase()) ||
                          news.description.toLowerCase().includes(newsSearch.toLowerCase());
     return matchesFilter && matchesSearch;
@@ -98,42 +120,42 @@ const AIEconomicDashboard = () => {
   return (
     <div className="p-6 lg:p-10 font-sans max-w-5xl mx-auto animate-fadeIn" dir="rtl">
       
-      {/* Enhanced Page Header Card */}
-      <header className="mb-10 relative overflow-hidden bg-slate-900 rounded-[40px] p-10 lg:p-12 shadow-2xl shadow-slate-900/20">
-        {/* Abstract background blobs for premium feel */}
-        <div className="absolute -top-24 -left-24 w-64 h-64 bg-blue-600/20 rounded-full blur-[80px]" />
-        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-indigo-600/20 rounded-full blur-[80px]" />
+      {/* Enhanced Page Header Card - More Compact */}
+      <header className="relative overflow-hidden bg-slate-900 rounded-[32px] p-6 lg:p-8 shadow-xl shadow-slate-900/10 mb-8">
+        {/* Abstract background blobs */}
+        <div className="absolute -top-24 -left-24 w-48 h-48 bg-blue-600/10 rounded-full blur-[60px]" />
+        <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-600/10 rounded-full blur-[60px]" />
         
-        <div className="relative z-10 flex flex-col items-center text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-blue-400 rounded-full text-[10px] font-black uppercase tracking-[0.2em] backdrop-blur-md shadow-inner">
-            <Globe size={14} className="animate-pulse" />
-            مرصد رادار الاقتصادي
-          </div>
-          
-          <h1 className="text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
-            الملخص الاقتصادي
-          </h1>
-          
-          <div className="max-w-3xl border-t border-white/5 pt-6">
-            <p className="text-base lg:text-lg text-slate-400 font-bold leading-relaxed">
-              نافذتكم المباشرة على نبض الاقتصاد العالمي؛ حيث نقوم بجمع وتحليل أهم الأخبار والتحديثات من المصادر الموثوقة لنضع بين أيديكم رؤية شاملة تساعدكم في فهم التحركات المالية وتوجهات السوق.
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 text-right">
+          <div className="flex-1 space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 text-blue-400 rounded-full text-[9px] font-black uppercase tracking-widest backdrop-blur-md">
+              <Globe size={12} className="animate-pulse" />
+              مرصد رادار الاقتصادي
+            </div>
+            
+            <h1 className="text-2xl lg:text-3xl font-black text-white tracking-tight">
+              الملخص الاقتصادي
+            </h1>
+            
+            <p className="max-w-xl text-sm text-slate-400 font-bold leading-relaxed">
+              نافذتكم المباشرة على نبض الاقتصاد العالمي وكافة التحركات المالية وتوجهات السوق من مصادر موثوقة.
             </p>
           </div>
           
-          <div className="flex items-center gap-8 pt-2">
-            <div className="flex flex-col items-center">
-              <span className="text-white text-xl font-black">10+</span>
-              <span className="text-[10px] text-slate-500 font-black uppercase">مصدر عالمي</span>
+          <div className="flex items-center gap-6 bg-white/5 p-4 rounded-2xl backdrop-blur-md border border-white/5">
+            <div className="flex flex-col items-center px-2">
+              <span className="text-white text-lg font-black">10+</span>
+              <span className="text-[9px] text-slate-500 font-black uppercase">مصدر عالمي</span>
             </div>
             <div className="w-px h-8 bg-white/10" />
-            <div className="flex flex-col items-center">
-              <span className="text-white text-xl font-black">24h</span>
-              <span className="text-[10px] text-slate-500 font-black uppercase">تحديث مستمر</span>
+            <div className="flex flex-col items-center px-2">
+              <span className="text-white text-lg font-black">24h</span>
+              <span className="text-[9px] text-slate-500 font-black uppercase">تحديث</span>
             </div>
             <div className="w-px h-8 bg-white/10" />
-            <div className="flex flex-col items-center">
-              <span className="text-white text-xl font-black">AI</span>
-              <span className="text-[10px] text-slate-500 font-black uppercase">تنقية دقيقة</span>
+            <div className="flex flex-col items-center px-2">
+              <span className="text-white text-lg font-black">AI</span>
+              <span className="text-[9px] text-slate-500 font-black uppercase">تنقية</span>
             </div>
           </div>
         </div>
@@ -164,6 +186,35 @@ const AIEconomicDashboard = () => {
             >
               <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
             </button>
+          </div>
+        </div>
+
+        {/* AI Daily Brief Card */}
+        <div className="mb-10 p-6 bg-gradient-to-br from-blue-600/5 to-indigo-600/5 border border-blue-100 rounded-[32px] relative overflow-hidden">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-sm border border-blue-50">
+              <Sparkles size={24} />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-black text-slate-900 mb-3 flex items-center gap-2">
+                الملخص الذكي لآخر 24 ساعة
+                <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full font-black animate-pulse">AI Analysis</span>
+              </h3>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3 text-sm text-slate-700 font-bold">
+                  <CheckCircle2 size={18} className="text-emerald-500 shrink-0 mt-0.5" />
+                  استقرار في مؤشرات التضخم يدفع المركزي السعودي للحفاظ على أسعار الفائدة الحالية.
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700 font-bold">
+                  <CheckCircle2 size={18} className="text-emerald-500 shrink-0 mt-0.5" />
+                  زخم قوي في استثمارات القطاع غير النفطي تزامناً مع إطلاق مبادرات تقنية جديدة.
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700 font-bold">
+                  <CheckCircle2 size={18} className="text-emerald-500 shrink-0 mt-0.5" />
+                  تحسن ملحوظ في ميزان المدفوعات مدفوعاً بزيادة الصادرات الخدمية والسياحية.
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 
@@ -203,7 +254,15 @@ const AIEconomicDashboard = () => {
 
         {/* News List */}
         <div className="space-y-4">
-          {displayedNews.length > 0 ? (
+          {isInitialLoading && newsList.length === 0 ? (
+            <div className="text-center py-20 bg-blue-50/30 rounded-[40px] border border-dashed border-blue-200 animate-pulse">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                <RefreshCw size={32} className="text-blue-500 animate-spin" />
+              </div>
+              <p className="text-lg font-black text-slate-900">جاري جلب آخر الأخبار الاقتصادية...</p>
+              <p className="text-sm text-slate-400 font-bold mt-2">نتصل الآن بالمصادر العالمية لتزويدك بأحدث البيانات</p>
+            </div>
+          ) : displayedNews.length > 0 ? (
             displayedNews.map((news) => (
               <div
                 key={news.id}
@@ -226,12 +285,22 @@ const AIEconomicDashboard = () => {
                         {React.createElement(getCategoryTheme(news.category).icon, { size: 12 })}
                         {getCategoryTheme(news.category).label}
                       </span>
-                      <span className="text-[11px] font-bold text-slate-400 flex items-center gap-2">
+                      <button 
+                        onClick={(e) => toggleSaveNews(e, news.id)}
+                        className={`mr-auto p-2 rounded-xl transition-all ${
+                          savedNewsIds.has(news.id) 
+                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
+                            : 'bg-slate-100 text-slate-400 hover:text-blue-600 hover:bg-blue-50'
+                        }`}
+                      >
+                        {savedNewsIds.has(news.id) ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
+                      </button>
+                    </div>
+                    <span className="text-[11px] font-bold text-slate-400 flex items-center gap-2">
                         <span className="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg">{news.source}</span>
                         <span>•</span>
                         {getMinutesAgo(new Date(news.publishedDate))}
                       </span>
-                    </div>
                     <h3 className="text-[17px] font-black text-slate-900 group-hover:text-blue-600 transition-colors mb-2 leading-tight">
                       {news.title}
                     </h3>
@@ -363,6 +432,15 @@ const AIEconomicDashboard = () => {
                   <ExternalLink size={20} />
                   قراءة المقال كاملاً
                 </a>
+                <button
+                  onClick={() => {
+                    showToast('ميزة الترجمة ستتوفر قريباً عبر الذكاء الاصطناعي', 'info');
+                  }}
+                  className="px-8 py-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-[20px] text-sm font-black hover:bg-emerald-100 transition-all flex items-center justify-center gap-3"
+                >
+                  <Languages size={20} />
+                  ترجمة للعربية
+                </button>
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(selectedNews.link);

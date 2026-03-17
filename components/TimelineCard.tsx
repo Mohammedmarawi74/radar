@@ -102,53 +102,45 @@ const TimelineCard: React.FC<TimelineCardProps> = ({ event, onClick }) => {
   return (
     <div 
       onClick={onClick}
-      className={`group relative flex flex-col p-5 bg-white rounded-[24px] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-pointer border-l-4 ${getEventColor()} overflow-hidden`}
+      className={`group relative flex flex-col p-5 bg-white rounded-3xl border border-slate-100 shadow-sm transition-all cursor-pointer border-l-4 ${getEventColor()} overflow-hidden`}
     >
-      {/* Action Buttons Top Right */}
-      <div className="absolute top-4 left-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      {/* Action Buttons Top Left (Refined) */}
+      <div className="absolute top-3 left-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all transform translate-y-1 group-hover:translate-y-0">
          <button 
            onClick={(e) => { e.stopPropagation(); setIsBookmarked(!isBookmarked); }}
-           className={`p-2 rounded-xl border transition-all ${isBookmarked ? 'bg-blue-600 text-white border-blue-500' : 'bg-white text-slate-400 hover:text-blue-600 border-slate-100'}`}
+           className={`p-2 rounded-xl border transition-all ${isBookmarked ? 'bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-500/20' : 'bg-white text-slate-400 hover:text-blue-600 border-slate-100'}`}
          >
            <Bookmark size={14} className={isBookmarked ? 'fill-current' : ''} />
          </button>
-         <button 
-           onClick={(e) => { e.stopPropagation(); }}
-           className="p-2 rounded-xl bg-white text-slate-400 hover:text-blue-600 border border-slate-100 transition-all"
-         >
-           <Share2 size={14} />
-         </button>
       </div>
 
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 mr-[-4px] rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-white group-hover:scale-110 transition-all duration-300">
+      {/* Header - Balanced */}
+      <div className="flex items-center gap-3 mb-3">
+        <div className="p-2 mr-[-4px] rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-white transition-colors shadow-inner">
           {getEventIcon()}
         </div>
         <div className="flex flex-col">
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
+          <span className="text-[10px] font-black text-slate-400 subtitle-arabic uppercase tracking-widest leading-none mb-1">
             {event.type === TimelineEventType.NEW_DATA && 'بيانات جديدة'}
             {event.type === TimelineEventType.UPDATE && 'تحديث دوري'}
             {event.type === TimelineEventType.REVISION && 'تعديل تاريخي'}
             {event.type === TimelineEventType.SIGNAL && 'إشارة سوق'}
             {event.type === TimelineEventType.INSIGHT && 'رؤية ذكية'}
-            {event.type === TimelineEventType.RADAR && 'تحديث رادار'}
           </span>
-          <div className="flex items-center gap-2 text-[11px] font-bold text-slate-400">
-            <Clock size={11} />
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400">
+            <Clock size={12} className="text-blue-400" />
             {getTimeAgo(event.timestamp)}
           </div>
         </div>
       </div>
 
-      {/* Title & Impact */}
-      <div className="flex flex-col mb-3">
-        <div className="flex items-start justify-between min-h-[44px]">
-          <h3 className="font-black text-slate-900 text-lg leading-tight group-hover:text-blue-600 transition-colors pl-8">
-            {event.title}
-          </h3>
-        </div>
-        <div className="flex items-center gap-2 mt-1">
+      {/* Title - Better breathing room */}
+      <div className="mb-3">
+        <h3 className="font-black text-slate-900 text-[16px] lg:text-[17px] leading-tight group-hover:text-blue-600 transition-colors mb-2">
+          {event.title}
+        </h3>
+        
+        <div className="flex flex-wrap items-center gap-2">
           {impactStyles && (
             <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black ${impactStyles.bg} ${impactStyles.text} border ${impactStyles.border} whitespace-nowrap shadow-sm`}>
                 {impactStyles.icon}
@@ -156,88 +148,47 @@ const TimelineCard: React.FC<TimelineCardProps> = ({ event, onClick }) => {
             </span>
           )}
           {event.delta && (
-             <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black ${event.delta.isPositive ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'} border shadow-sm`}>
+             <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black ${event.delta.isPositive ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'} border shadow-sm`}>
                 {event.delta.isPositive ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
                 <span dir="ltr">{event.delta.value}</span>
-                <span className="opacity-60 mr-1">{event.delta.label}</span>
+                <span className="opacity-60 font-bold mr-1">{event.delta.label}</span>
              </div>
           )}
         </div>
       </div>
       
-      {/* Summary with Expansion */}
-      <div className="relative mb-6">
-        <p className={`text-[13px] text-slate-600 leading-relaxed font-medium ${isExpanded ? '' : 'line-clamp-2'}`}>
+      {/* Summary - Flexible Clamping */}
+      <div className="mb-5">
+        <p className={`text-[13px] text-slate-500 leading-relaxed font-medium ${isExpanded ? '' : 'line-clamp-2'}`}>
           {event.summary}
         </p>
-        {event.summary.length > 100 && (
+        {!isExpanded && event.summary.length > 80 && (
           <button 
-            onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+            onClick={(e) => { e.stopPropagation(); setIsExpanded(true); }}
             className="text-[11px] font-black text-blue-600 hover:text-blue-700 mt-2 flex items-center gap-1 transition-all"
           >
-            {isExpanded ? (
-              <>
-                <ChevronUp size={12} />
-                عرض تفاصيل أقل
-              </>
-            ) : (
-              <>
-                <ChevronDown size={12} />
-                قراءة المزيد
-              </>
-            )}
+            <ChevronDown size={14} />
+            قراءة المزيد
           </button>
         )}
       </div>
 
-      {/* Footer Info */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-50 mt-auto">
-        {/* Source */}
-        <div className="flex items-center gap-2 px-2.5 py-1.5 bg-slate-50 rounded-xl border border-slate-100 group-hover:border-slate-200 transition-colors">
-          <div className="w-5 h-5 rounded-lg bg-blue-600 flex items-center justify-center text-[10px] text-white font-black shadow-sm">
+      {/* Footer Info - High-End Source Section */}
+      <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-50">
+        <div className="flex items-center gap-2.5 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+          <div className="w-5 h-5 rounded-lg bg-slate-900 flex items-center justify-center text-[10px] text-white font-black shadow-sm group-hover:bg-blue-600 transition-colors">
             {event.sourceName.substring(0,1)}
           </div>
-          <span className="text-[11px] text-slate-700 font-black truncate max-w-[120px]">{event.sourceName}</span>
-          <CheckCircle2 size={12} className="text-blue-500 fill-blue-50" />
+          <span className="text-[11px] text-slate-700 font-black truncate max-w-[100px]">{event.sourceName}</span>
+          <CheckCircle2 size={12} className="text-blue-500" />
         </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-[50%]">
-          {event.tags.map(tag => (
-            <TagWithTooltip key={tag} tag={tag} onFollow={handleFollowTag} />
+        <div className="flex items-center gap-1.5 overflow-hidden">
+          {event.tags.slice(0, 2).map(tag => (
+            <span key={tag} className="text-[10px] text-slate-400 font-bold bg-slate-50 px-2 py-0.5 rounded-md">#{tag}</span>
           ))}
         </div>
       </div>
-
-      {/* CTA Section (Visible on Hover or Expanded) */}
-      <div className={`mt-4 grid grid-cols-2 gap-2 transition-all duration-300 ${isExpanded ? 'opacity-100 max-h-20' : 'opacity-0 max-h-0 pointer-events-none group-hover:opacity-100 group-hover:max-h-20 group-hover:pointer-events-auto'}`}>
-        <button 
-          onClick={(e) => { e.stopPropagation(); }}
-          className="flex items-center justify-center gap-2 px-3 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-black transition-all shadow-md shadow-blue-500/10"
-        >
-           <FileText size={14} />
-           عرض التقرير التفصيلي
-        </button>
-        <button 
-          onClick={(e) => { e.stopPropagation(); }}
-          className="flex items-center justify-center gap-2 px-3 py-2.5 bg-slate-900 hover:bg-black text-white rounded-xl text-[11px] font-black transition-all shadow-md shadow-slate-900/10"
-        >
-           <LayoutDashboard size={14} />
-           الذهاب للمؤشرات
-        </button>
-      </div>
-
-      {/* So What? Section (Impact Explanation) */}
-      {event.impactExplanation && (
-        <div className={`mt-4 bg-blue-50/50 rounded-2xl border border-blue-100/50 p-4 transition-all duration-500 ${isExpanded ? 'opacity-100 max-h-[200px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
-           <div className="flex items-center gap-2 mb-2 text-blue-700">
-              <Zap size={14} className="fill-blue-600" />
-              <span className="text-xs font-black uppercase tracking-wider">ماذا يعني هذا لي؟</span>
-           </div>
-           <p className="text-[12px] font-bold text-blue-900/80 leading-relaxed">
-              {event.impactExplanation}
-           </p>
-        </div>
-      )}
     </div>
   );
 };
