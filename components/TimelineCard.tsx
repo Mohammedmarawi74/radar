@@ -63,6 +63,16 @@ const TimelineCard: React.FC<TimelineCardProps> = ({ event, onClick }) => {
       default: return 'border-l-slate-300';
     }
   };
+  const getEventTextColor = () => {
+    switch (event.type) {
+      case TimelineEventType.NEW_DATA: return 'text-blue-600';
+      case TimelineEventType.UPDATE: return 'text-indigo-600';
+      case TimelineEventType.REVISION: return 'text-amber-600';
+      case TimelineEventType.SIGNAL: return 'text-emerald-600';
+      case TimelineEventType.INSIGHT: return 'text-purple-600';
+      default: return 'text-slate-500';
+    }
+  };
 
   const getTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -120,7 +130,7 @@ const TimelineCard: React.FC<TimelineCardProps> = ({ event, onClick }) => {
           {getEventIcon()}
         </div>
         <div className="flex flex-col">
-          <span className="text-[10px] font-black text-slate-400 subtitle-arabic uppercase tracking-widest leading-none mb-1">
+          <span className={`text-[11px] font-black ${getEventTextColor()} subtitle-arabic uppercase tracking-wider leading-none mb-1.5`}>
             {event.type === TimelineEventType.NEW_DATA && 'بيانات جديدة'}
             {event.type === TimelineEventType.UPDATE && 'تحديث دوري'}
             {event.type === TimelineEventType.REVISION && 'تعديل تاريخي'}
@@ -128,7 +138,7 @@ const TimelineCard: React.FC<TimelineCardProps> = ({ event, onClick }) => {
             {event.type === TimelineEventType.INSIGHT && 'رؤية ذكية'}
           </span>
           <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400">
-            <Clock size={12} className="text-blue-400" />
+            <Clock size={12} className="text-blue-400/70" />
             {getTimeAgo(event.timestamp)}
           </div>
         </div>
