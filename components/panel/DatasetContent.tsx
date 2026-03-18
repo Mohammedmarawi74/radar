@@ -80,7 +80,7 @@ const DatasetContent: React.FC<DatasetContentProps> = ({
         <div className="absolute top-0 right-0 w-32 h-32 bg-gov-blue/5 rounded-full -mr-16 -mt-16"></div>
         <h2 className="text-2xl font-black text-gov-blue mb-6 flex items-center gap-3 relative z-10">
           <FileText size={28} />
-          عن مجموعة البيانات
+          تفاصيل البيانات
         </h2>
         <div className="prose prose-lg text-gray-600 leading-relaxed max-w-none relative z-10">
           <p className="text-sm font-bold leading-relaxed text-gray-700">
@@ -110,7 +110,7 @@ const DatasetContent: React.FC<DatasetContentProps> = ({
                         <span className="font-bold text-gray-800 text-base">{publisher}</span>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 border-b border-gray-50 last:border-0">
-                        <span className="text-gray-500 text-sm">الجهات المشاركة</span>
+                        <span className="text-gray-500 text-sm">الجهات</span>
                         <span className="font-bold text-gray-800 text-base">
                             {sources.length > 0 ? sources.join('، ') : 'وزارة التجارة، والجهات ذات العلاقة'}
                         </span>
@@ -235,25 +235,43 @@ Accept: application/json`}
       </section>
 
       {/* Rating Section */}
-      <section className="bg-gradient-to-l from-gov-blue to-blue-900 rounded-3xl p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-         <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -ml-32 -mt-32"></div>
-         <div className="text-center md:text-right relative z-10">
-            <h3 className="text-2xl font-black mb-2 tracking-tight">كيف كانت تجربتك مع هذه البيانات؟</h3>
-            <p className="text-blue-100 text-sm opacity-90 font-bold">رأيك يساهم في بناء مستقبل البيانات المفتوحة في المملكة لعام 2030</p>
-         </div>
-         <div className="flex gap-2 relative z-10">
-             {[1, 2, 3, 4, 5].map((star) => (
-                 <button key={star} className="text-blue-200/40 hover:text-amber-400 transition-all hover:scale-125 focus:scale-125 focus:text-amber-400">
-                     <Star size={36} fill="currentColor" />
-                 </button>
-             ))}
-         </div>
-         <button className="bg-white text-gov-blue px-10 py-4 rounded-2xl font-black hover:bg-gov-light hover:text-white transition-all shadow-xl active:scale-95 relative z-10">
-             إرسال التقييم
-         </button>
-      </section>
-
+      <RatingSection />
     </div>
+  );
+};
+
+const RatingSection: React.FC = () => {
+  const [hoverRating, setHoverRating] = useState(0);
+  const [selectedRating, setSelectedRating] = useState(0);
+
+  return (
+    <section className="bg-gradient-to-l from-gov-blue to-blue-900 rounded-3xl p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+       <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -ml-32 -mt-32"></div>
+       <div className="text-center md:text-right relative z-10">
+          <h3 className="text-2xl font-black mb-2 tracking-tight">كيف كانت تجربتك مع هذه البيانات؟</h3>
+          <p className="text-blue-100 text-sm opacity-90 font-bold">رأيك يساهم في بناء مستقبل البيانات المفتوحة في المملكة لعام 2030</p>
+       </div>
+       <div className="flex gap-2 relative z-10">
+           {[1, 2, 3, 4, 5].map((star) => (
+               <button
+                   key={star}
+                   onMouseEnter={() => setHoverRating(star)}
+                   onMouseLeave={() => setHoverRating(0)}
+                   onClick={() => setSelectedRating(star)}
+                   className={`transition-all hover:scale-125 focus:scale-125 ${
+                       (hoverRating || selectedRating) >= star
+                           ? 'text-amber-400'
+                           : 'text-blue-200/40'
+                   }`}
+               >
+                   <Star size={36} fill="currentColor" />
+               </button>
+           ))}
+       </div>
+       <button className="bg-white text-gov-blue px-10 py-4 rounded-2xl font-black hover:bg-gov-light hover:text-white transition-all shadow-xl active:scale-95 relative z-10">
+           إرسال التقييم
+       </button>
+    </section>
   );
 };
 

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
+import {
     ChevronLeft,
     Info,
     Database,
@@ -12,7 +12,7 @@ import Hero from './panel/Hero';
 import DatasetTabs from './panel/DatasetTabs';
 import PanelSidebar from './panel/Sidebar';
 import DatasetContent from './panel/DatasetContent';
-import DashboardEmbed from './panel/DashboardEmbed';
+import DashboardTab from './panel/DashboardTab';
 import CommentsSection from './panel/CommentsSection';
 import ReviewsSection from './panel/ReviewsSection';
 
@@ -89,14 +89,14 @@ const DatasetExplorerPage: React.FC = () => {
                         {/* Main Content Area */}
                         <div className={`w-full ${isFullWidthTab ? '' : 'lg:w-2/3'} order-2 lg:order-1`}>
                            {activePanelTab === 'dataset' ? (
-                             <DatasetContent 
+                             <DatasetContent
                                 description={angle.explanation}
                                 sources={angle.sources}
                                 fields={angle.fields}
                                 datasets={angle.datasets}
                              />
                            ) : activePanelTab === 'dashboard' ? (
-                             <DashboardEmbed />
+                             <DashboardTab title={angle.title} agency={angle.agency} />
                            ) : activePanelTab === 'comments' ? (
                              <CommentsSection />
                            ) : activePanelTab === 'reviews' ? (
