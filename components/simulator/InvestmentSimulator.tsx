@@ -14,6 +14,7 @@ export const InvestmentSimulator: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [aiInsights, setAiInsights] = useState<string | null>(null);
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(true);
 
   // 1. General Investment State
   const [inputs, setInputs] = useState<InvestmentInput>({

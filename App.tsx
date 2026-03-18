@@ -132,6 +132,7 @@ import { ToastProvider } from './components/Toast';
 import GuidedTours from './components/GuidedTours';
 import HelpCenterPage from './components/HelpCenterPage';
 import AdminNotificationsPage from './components/AdminNotificationsPage';
+import SubscriptionsManagement from './components/admin/SubscriptionsManagement';
 import AdminOverviewPage from './components/AdminOverviewPage';
 import SmartComparisonsPage from './components/SmartComparisonsPage';
 import DataSourcesPage from './components/DataSourcesPage';
@@ -449,6 +450,7 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
                   <NavItem id="nav-admin" to="/admin" icon={LayoutDashboard} isCollapsed={isCollapsed} important>لوحة التحكم الإدارية</NavItem>
                   <NavItem id="nav-ai-dashboard" to="/ai-dashboard" icon={Cpu} isCollapsed={isCollapsed} important>لوحة الذكاء</NavItem>
                   <NavItem id="nav-admin-users" to="/admin/users" icon={Users2} isCollapsed={isCollapsed} important>إدارة المستخدمين</NavItem>
+                  <NavItem id="nav-admin-subscriptions" to="/admin/subscriptions" icon={CreditCard} isCollapsed={isCollapsed} important>الاشتراكات والترخيص</NavItem>
                   <NavItem id="nav-admin-activity" to="/admin/activity" icon={History} isCollapsed={isCollapsed}>سجل العمليات</NavItem>
                   <NavItem id="nav-admin-settings" to="/admin/settings" icon={Settings2} isCollapsed={isCollapsed}>إعدادات النظام</NavItem>
                   <div className="h-px bg-slate-800/20 mx-3 my-2"></div>
@@ -1281,6 +1283,7 @@ const App = () => {
             <Route path="/ai-dashboard" element={<AIRadarDashboard />} />
             <Route path="/smart-radar" element={<SmartRadarPage />} />
             <Route path="/geo-radar" element={<InvestmentGeoRadar />} />
+            <Route path="/simulator" element={<InvestmentSimulator />} />
             <Route path="/dashboards" element={<OfficialDashboardsPage dashboards={officialDashboards} widgets={allWidgets} userRole={currentUser.role} />} />
             <Route path="/dataset-explorer/:angleId" element={<DatasetExplorerPage />} />
             {/* Removed official-panels route */}
@@ -1318,6 +1321,7 @@ const App = () => {
             <Route path="/verification" element={<div className="p-10 text-center text-gray-400">Data Verification (Expert+)</div>} />
             <Route path="/admin" element={<AdminOverviewPage />} />
             <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
+            <Route path="/admin/subscriptions" element={<SubscriptionsManagement />} />
 
             <Route path="*" element={<div className="p-10 text-center text-gray-400">جاري العمل على هذه الصفحة...</div>} />
           </Routes>
