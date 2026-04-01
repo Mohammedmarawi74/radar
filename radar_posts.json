@@ -1,0 +1,746 @@
+[
+  {
+    "id": "p_sig_0",
+    "contentType": "signal_alert",
+    "title": "إشارة تداول نشطة طوال العام في الرياض/النظيم",
+    "author": {
+      "name": "خوارزمية الرصد",
+      "role": "AI Alert",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "الرياض",
+      "الأحياء الأكثر نشاطا"
+    ],
+    "engagement": {
+      "likes": 340,
+      "shares": 120,
+      "saves": 50
+    },
+    "payload": {
+      "delta": "نشاط بلغ 10655 صفقة",
+      "isPositive": true,
+      "context": "رصدنا إقبالاً مستمراً على عقارات حي الرياض/النظيم في الرياض، بإجمالي سيولة بلغت 9.06 مليار خلال كامل عام 2024.",
+      "alertLevel": "high"
+    }
+  },
+  {
+    "id": "p_sig_1",
+    "contentType": "signal_alert",
+    "title": "إشارة تداول نشطة طوال العام في الرياض/الجنادرية",
+    "author": {
+      "name": "خوارزمية الرصد",
+      "role": "AI Alert",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "الرياض",
+      "الأحياء الأكثر نشاطا"
+    ],
+    "engagement": {
+      "likes": 350,
+      "shares": 125,
+      "saves": 52
+    },
+    "payload": {
+      "delta": "نشاط بلغ 5141 صفقة",
+      "isPositive": true,
+      "context": "رصدنا إقبالاً مستمراً على عقارات حي الرياض/الجنادرية في الرياض، بإجمالي سيولة بلغت 6.46 مليار خلال كامل عام 2024.",
+      "alertLevel": "high"
+    }
+  },
+  {
+    "id": "p_sig_2",
+    "contentType": "signal_alert",
+    "title": "إشارة تداول نشطة طوال العام في الرياض/نمار",
+    "author": {
+      "name": "خوارزمية الرصد",
+      "role": "AI Alert",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "الرياض",
+      "الأحياء الأكثر نشاطا"
+    ],
+    "engagement": {
+      "likes": 360,
+      "shares": 130,
+      "saves": 54
+    },
+    "payload": {
+      "delta": "نشاط بلغ 4988 صفقة",
+      "isPositive": true,
+      "context": "رصدنا إقبالاً مستمراً على عقارات حي الرياض/نمار في الرياض، بإجمالي سيولة بلغت 4.55 مليار خلال كامل عام 2024.",
+      "alertLevel": "high"
+    }
+  },
+  {
+    "id": "p_pulse_0",
+    "contentType": "market_pulse",
+    "title": "حرارة السوق 2024: الزخم في الرياض",
+    "author": {
+      "name": "رادار المستثمر",
+      "role": "تحليل",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "الرياض",
+      "سيولة المدن"
+    ],
+    "engagement": {
+      "likes": 500,
+      "shares": 160,
+      "saves": 200
+    },
+    "payload": {
+      "sector": "القطاع العقاري",
+      "status": "hot",
+      "score": 98,
+      "summary": "الطلب المرتفع مستمر، حيث قادت الرياض حركة التداول السنوية محققة 130.36 مليار موزعة على 72923 صفقة عقارية مسجلة إلكترونياً."
+    }
+  },
+  {
+    "id": "p_pulse_1",
+    "contentType": "market_pulse",
+    "title": "حرارة السوق 2024: الزخم في جده",
+    "author": {
+      "name": "رادار المستثمر",
+      "role": "تحليل",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "جده",
+      "سيولة المدن"
+    ],
+    "engagement": {
+      "likes": 480,
+      "shares": 150,
+      "saves": 200
+    },
+    "payload": {
+      "sector": "القطاع العقاري",
+      "status": "hot",
+      "score": 97,
+      "summary": "الطلب المرتفع مستمر، حيث قادت جده حركة التداول السنوية محققة 43.39 مليار موزعة على 32213 صفقة عقارية مسجلة إلكترونياً."
+    }
+  },
+  {
+    "id": "p_pulse_2",
+    "contentType": "market_pulse",
+    "title": "حرارة السوق 2024: الزخم في مكة المكرمة",
+    "author": {
+      "name": "رادار المستثمر",
+      "role": "تحليل",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "مكة المكرمة",
+      "سيولة المدن"
+    ],
+    "engagement": {
+      "likes": 460,
+      "shares": 140,
+      "saves": 200
+    },
+    "payload": {
+      "sector": "القطاع العقاري",
+      "status": "hot",
+      "score": 96,
+      "summary": "الطلب المرتفع مستمر، حيث قادت مكة المكرمة حركة التداول السنوية محققة 17.57 مليار موزعة على 7965 صفقة عقارية مسجلة إلكترونياً."
+    }
+  },
+  {
+    "id": "p_pulse_3",
+    "contentType": "market_pulse",
+    "title": "حرارة السوق 2024: الزخم في الدمام",
+    "author": {
+      "name": "رادار المستثمر",
+      "role": "تحليل",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "الدمام",
+      "سيولة المدن"
+    ],
+    "engagement": {
+      "likes": 440,
+      "shares": 130,
+      "saves": 200
+    },
+    "payload": {
+      "sector": "القطاع العقاري",
+      "status": "hot",
+      "score": 95,
+      "summary": "الطلب المرتفع مستمر، حيث قادت الدمام حركة التداول السنوية محققة 13.49 مليار موزعة على 8553 صفقة عقارية مسجلة إلكترونياً."
+    }
+  },
+  {
+    "id": "p_pulse_4",
+    "contentType": "market_pulse",
+    "title": "حرارة السوق 2024: الزخم في الخبر",
+    "author": {
+      "name": "رادار المستثمر",
+      "role": "تحليل",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "الخبر",
+      "سيولة المدن"
+    ],
+    "engagement": {
+      "likes": 420,
+      "shares": 120,
+      "saves": 200
+    },
+    "payload": {
+      "sector": "القطاع العقاري",
+      "status": "hot",
+      "score": 94,
+      "summary": "الطلب المرتفع مستمر، حيث قادت الخبر حركة التداول السنوية محققة 11.77 مليار موزعة على 5848 صفقة عقارية مسجلة إلكترونياً."
+    }
+  },
+  {
+    "id": "p_comp_1",
+    "contentType": "comparison",
+    "title": "مقارنة القطاعات لعام 2024 في الرياض",
+    "author": {
+      "name": "التحليل الإحصائي",
+      "role": "المدن",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "سكني",
+      "تجاري",
+      "الرياض"
+    ],
+    "engagement": {
+      "likes": 400,
+      "shares": 150,
+      "saves": 320
+    },
+    "payload": {
+      "itemA": {
+        "label": "قطاع سكني",
+        "value": "81.49 مليار",
+        "subtext": "السيولة السنوية"
+      },
+      "itemB": {
+        "label": "قطاع تجاري",
+        "value": "48.75 مليار",
+        "subtext": "السيولة السنوية"
+      },
+      "conclusion": "القطاع سكني يسيطر تماماً على حصة الأسد في تداولات الرياض مقارنة بنظيره التجاري."
+    }
+  },
+  {
+    "id": "p_port_1",
+    "contentType": "portfolio",
+    "title": "محفظة الاستقرار السكني المعتمدة من AI",
+    "author": {
+      "name": "خبير المحافظ",
+      "role": "استراتيجيات",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "محفظة آمنة",
+      "عائد ثابت"
+    ],
+    "engagement": {
+      "likes": 320,
+      "shares": 105,
+      "saves": 400
+    },
+    "payload": {
+      "expectedReturn": 7.5,
+      "assets": [
+        {
+          "name": "عقارات في الرياض",
+          "value": 50,
+          "color": "blue"
+        },
+        {
+          "name": "عقارات في جده",
+          "value": 30,
+          "color": "purple"
+        },
+        {
+          "name": "صناديق ريت سكنية",
+          "value": 20,
+          "color": "green"
+        }
+      ]
+    }
+  },
+  {
+    "id": "p_fact_0",
+    "contentType": "fact",
+    "title": "حقائق وأرقام قياسية خلال 2024",
+    "author": {
+      "name": "فريق الرصد",
+      "role": "بيانات",
+      "verified": false
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "صفقات كبرى",
+      "الرياض"
+    ],
+    "engagement": {
+      "likes": 800,
+      "shares": 120,
+      "saves": 90
+    },
+    "payload": {
+      "fact": "إحدى أضخم صفقات عام 2024 للعقار من نوع 'تجاري' تمت في حي الرياض/النظيم بمدينة الرياض.",
+      "highlight": "2.27 مليار",
+      "source": "الصفقات العقارية الرسمية المفتوحة"
+    }
+  },
+  {
+    "id": "p_fact_1",
+    "contentType": "fact",
+    "title": "حقائق وأرقام قياسية خلال 2024",
+    "author": {
+      "name": "فريق الرصد",
+      "role": "بيانات",
+      "verified": false
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "صفقات كبرى",
+      "الرياض"
+    ],
+    "engagement": {
+      "likes": 750,
+      "shares": 120,
+      "saves": 90
+    },
+    "payload": {
+      "fact": "إحدى أضخم صفقات عام 2024 للعقار من نوع 'تجاري' تمت في حي الرياض/الرمال بمدينة الرياض.",
+      "highlight": "1.63 مليار",
+      "source": "الصفقات العقارية الرسمية المفتوحة"
+    }
+  },
+  {
+    "id": "p_fact_2",
+    "contentType": "fact",
+    "title": "حقائق وأرقام قياسية خلال 2024",
+    "author": {
+      "name": "فريق الرصد",
+      "role": "بيانات",
+      "verified": false
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "صفقات كبرى",
+      "الرياض"
+    ],
+    "engagement": {
+      "likes": 700,
+      "shares": 120,
+      "saves": 90
+    },
+    "payload": {
+      "fact": "إحدى أضخم صفقات عام 2024 للعقار من نوع 'تجاري' تمت في حي الرياض/عريض بمدينة الرياض.",
+      "highlight": "1.24 مليار",
+      "source": "الصفقات العقارية الرسمية المفتوحة"
+    }
+  },
+  {
+    "id": "p_news_1",
+    "contentType": "breaking_news",
+    "title": "عاجل: السوق يخترق حاجز 216.59 مليار في 2024",
+    "author": {
+      "name": "مؤشر رادار",
+      "role": "اقتصاد",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "أخبار 2024",
+      "العام"
+    ],
+    "engagement": {
+      "likes": 1500,
+      "shares": 900,
+      "saves": 200
+    },
+    "payload": {
+      "headline": "تجاوز أعداد الصفقات لـ 127502 عبر المدن الرئيسية",
+      "summary": "عام 2024 يشهد ضخاً هائلاً للسيولة يعيد تشكيل خريطة الأسعار، حيث حقق التداول السنوي مستويات غير مسبوقة."
+    }
+  },
+  {
+    "id": "p_widget_trend",
+    "contentType": "widget",
+    "title": "مسار السيولة الربعي لعام 2024 (بالمليار ريال)",
+    "author": {
+      "name": "محرك الرسوم",
+      "role": "رسوم بيانية",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "Trend",
+      "Line Chart",
+      "2024"
+    ],
+    "engagement": {
+      "likes": 840,
+      "shares": 310,
+      "saves": 500
+    },
+    "payload": {
+      "widgetData": {
+        "id": "w_trend_2024",
+        "title": "اتجاه حجم تداول القطاع العقاري طوال 2024",
+        "type": "line",
+        "description": "يوضح الرسم البياني كيف تدرجت السيولة (بالمليار ريال) منذ الربع الأول وحتى الربع الرابع.",
+        "data": [
+          {
+            "name": "Q1",
+            "value": 70.62643586406041
+          },
+          {
+            "name": "Q2",
+            "value": 57.494638795000036
+          },
+          {
+            "name": "Q3",
+            "value": 74.33205350585007
+          },
+          {
+            "name": "Q4",
+            "value": 78.76227656909998
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "p_widget_bar",
+    "contentType": "widget",
+    "title": "عدد الصفقات في كل ربع (2024)",
+    "author": {
+      "name": "محرك الرسوم",
+      "role": "رسوم بيانية",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "Trend",
+      "Bar Chart",
+      "Volume"
+    ],
+    "engagement": {
+      "likes": 650,
+      "shares": 220,
+      "saves": 400
+    },
+    "payload": {
+      "widgetData": {
+        "id": "w_bar_2024",
+        "title": "أحجام الصفقات ربع السنوية",
+        "type": "bar",
+        "description": "يوضح عدد العمليات والصفقات العقارية المتممة بنجاح في كل ربع من أرباع 2024.",
+        "data": [
+          {
+            "name": "Q1",
+            "value": 59099
+          },
+          {
+            "name": "Q2",
+            "value": 48271
+          },
+          {
+            "name": "Q3",
+            "value": 69020
+          },
+          {
+            "name": "Q4",
+            "value": 72938
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "p_exp_trend",
+    "contentType": "expert_insight",
+    "title": "خبراء رادار: النمط السنوي الواضح",
+    "author": {
+      "name": "أبحاث رادار",
+      "role": "رصد الفصول",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "Expert",
+      "ترند مقروء"
+    ],
+    "engagement": {
+      "likes": 400,
+      "shares": 150,
+      "saves": 250
+    },
+    "payload": {
+      "quote": "من المثير للاهتمام رؤية كيف كان الربع Q4 هو ذروة السيولة في عام 2024. هذا النمط يعطينا فكرة دقيقة عن مواسم الطرح والطلب للمستثمرين.",
+      "expertName": "فريق أبحاث رادار",
+      "expertRole": "شعبة البيانات الديموغرافية",
+      "expertImage": "https://ui-avatars.com/api/?name=Research&background=10b981&color=fff"
+    }
+  },
+  {
+    "id": "p_snapshot_2024",
+    "contentType": "weekly_snapshot",
+    "title": "الملخص الاقتصادي الشامل (2024)",
+    "author": {
+      "name": "التأريخ الاقتصادي",
+      "role": "بانوراما",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "ملخص العام",
+      "Annual"
+    ],
+    "engagement": {
+      "likes": 1200,
+      "shares": 650,
+      "saves": 900
+    },
+    "payload": {
+      "highlights": [
+        {
+          "label": "أعلى ربع بالسيولة",
+          "value": "الربع Q4"
+        },
+        {
+          "label": "أعلى مدن التداول",
+          "value": "الرياض"
+        },
+        {
+          "label": "إجمالي صفقات العام",
+          "value": "127502 صفقة مسجلة"
+        }
+      ]
+    }
+  },
+  {
+    "id": "p_art_trend",
+    "contentType": "article",
+    "title": "قراءة في حصاد عام 2024: أين اتجهت المليارات؟",
+    "author": {
+      "name": "د. عقاري",
+      "role": "محلل استراتيجي",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "حصاد 2024",
+      "مقالات طويلة"
+    ],
+    "engagement": {
+      "likes": 950,
+      "shares": 300,
+      "saves": 600
+    },
+    "payload": {
+      "excerpt": "لقد برهنت أرصدة عام 2024 المتتابعة عبر الأرباع الأربعة أن المشهد العقاري لم يكتفِ بنجاحات الرياض فحسب، بل شهدنا تصاعداً استثمارياً كبيراً بحصاد تعدّى نطاقات التوقعات. دعونا نحلل الخط البياني الطويل...",
+      "readTime": "8 دقائق",
+      "imageUrl": "https://images.unsplash.com/photo-1542435503-956c469947f6?auto=format&fit=crop&w=800&q=80"
+    }
+  },
+  {
+    "id": "p_dash_deep1",
+    "contentType": "dashboard",
+    "title": "لوحات تفاعلية للسيولة في الرياض",
+    "author": {
+      "name": "قسم البيانات",
+      "role": "إحصاء",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "Dashboard",
+      "لوحات 2024"
+    ],
+    "engagement": {
+      "likes": 320,
+      "shares": 50,
+      "saves": 900
+    },
+    "payload": {
+      "dashboardId": "dash_الرياض_2024_full",
+      "widgetCount": 8,
+      "views": 25000,
+      "previewImage": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80"
+    }
+  },
+  {
+    "id": "p_poll_1",
+    "contentType": "poll",
+    "title": "توقعات 2025: إلى أين نتجه؟",
+    "author": {
+      "name": "رادار البيانات",
+      "role": "تفاعل",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "توقعات",
+      "استطلاع"
+    ],
+    "engagement": {
+      "likes": 1240,
+      "shares": 300,
+      "saves": 150
+    },
+    "payload": {
+      "totalVotes": 7200,
+      "options": [
+        {
+          "label": "استمرار صدارة الرياض",
+          "percentage": 48
+        },
+        {
+          "label": "صعود مدينة جده",
+          "percentage": 32
+        },
+        {
+          "label": "تراجع السيولة بشكل عام",
+          "percentage": 20
+        }
+      ]
+    }
+  },
+  {
+    "id": "p_event_1",
+    "contentType": "event",
+    "title": "ملتقى الاستثمار السنوي في الرياض",
+    "author": {
+      "name": "غرفة التجارة",
+      "role": "منظم",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "Event",
+      "مؤتمرات"
+    ],
+    "engagement": {
+      "likes": 250,
+      "shares": 75,
+      "saves": 300
+    },
+    "payload": {
+      "eventName": "المعرض العقاري الشامل (نسخة التتويج)",
+      "month": "NOV",
+      "day": "22",
+      "time": "09:00 AM",
+      "location": "قاعة المؤتمرات الكبرى بـ الرياض",
+      "isOnline": false
+    }
+  },
+  {
+    "id": "p_term_1",
+    "contentType": "terminology",
+    "title": "مصطلح: حجم التداول الكلي (Volume)",
+    "author": {
+      "name": "أكاديمية العقار",
+      "role": "تعليم",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "تعليم",
+      "مصطلحات"
+    ],
+    "engagement": {
+      "likes": 400,
+      "shares": 50,
+      "saves": 500
+    },
+    "payload": {
+      "term": "حجم التداول العقاري",
+      "definition": "هو القيمة الإجمالية لجميع الصفقات والمبالغ المتداولة لبيع وشراء العقارات خلال فترة زمنية محددة. في عام 2024 لوحده رأينا أرقاما غير مسبوقة.",
+      "difficulty": "Easy"
+    }
+  },
+  {
+    "id": "p_qa_1",
+    "contentType": "q_and_a",
+    "title": "سؤال: هل تفضل الاستثمار في الرياض أم التوجه للأطراف؟",
+    "author": {
+      "name": "مجتمع رادار",
+      "role": "نقاش",
+      "verified": false
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "Q&A",
+      "استثمار"
+    ],
+    "engagement": {
+      "likes": 85,
+      "shares": 25,
+      "saves": 45
+    },
+    "payload": {
+      "question": "مع وصول الصفقات إلى مستويات تاريخية في الرياض، هل الأسعار ما تزال مشجعة للشراء أم الأفضل البحث عن مدن نامية أخرى؟",
+      "answer": "بالرغم من الأسعار القوية، الدعم الحكومي ومشاريع البنية التحتية في الرياض يجعلها ملاذاً آمناً طويل الأجل، بينما تمثل المدن الأخرى فرص نمو متسارعة الخطى.",
+      "expertAvatar": "https://i.pravatar.cc/150?u=expert3"
+    }
+  },
+  {
+    "id": "p_check_1",
+    "contentType": "checklist",
+    "title": "قائمة المراجعة: قبل دخول سوق 2025",
+    "author": {
+      "name": "نصائح رادار",
+      "role": "مستشار رقمي",
+      "verified": true
+    },
+    "timestamp": "2026-04-01T15:27:55.983662",
+    "tags": [
+      "Checklist",
+      "القانون"
+    ],
+    "engagement": {
+      "likes": 650,
+      "shares": 190,
+      "saves": 820
+    },
+    "payload": {
+      "listTitle": "أشياء يجب القيام بها قبل اتخاذ قرار الشراء",
+      "items": [
+        {
+          "text": "مراجعة تقرير السيولة لعام 2024 لمدينة الرياض",
+          "checked": true
+        },
+        {
+          "text": "التحقق من صحة الرقم المرجعي للصكوك",
+          "checked": false
+        },
+        {
+          "text": "مقارنة السعر بمتوسط الحي خلال الربع الأخير القوي",
+          "checked": false
+        },
+        {
+          "text": "دراسة العائد التأجيري التجاري vs السكني",
+          "checked": false
+        }
+      ]
+    }
+  }
+]

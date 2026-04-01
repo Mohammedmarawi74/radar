@@ -137,6 +137,7 @@ import AdminOverviewPage from './components/AdminOverviewPage';
 import SmartComparisonsPage from './components/SmartComparisonsPage';
 import DataSourcesPage from './components/DataSourcesPage';
 import AIEconomicDashboard from './components/AIEconomicDashboard';
+import AdvancedContentManagement from './components/AdvancedContentManagement';
 
 // --- Safe Navigation Helper ---
 interface NavItemProps {
@@ -305,6 +306,7 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
                       location.pathname.startsWith('/data-review') ||
                       location.pathname.startsWith('/reports') ||
                       location.pathname.startsWith('/metadata') ||
+                      location.pathname.startsWith('/advanced-content') ||
                       ['/editorial', '/campaigns', '/moderation', '/tags', '/media', '/create-post', '/my-posts', '/design-studio'].some(p => location.pathname.startsWith(p));
 
   // Helper for role checks
@@ -421,7 +423,8 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
           <>
             {/* --- Admin Mode: Content Management --- */}
             <NavGroup title="إدارة المحتوى" open={sections.content} onToggle={() => toggleSection('content')} isCollapsed={isCollapsed} icon={FileText}>
-              <NavItem id="nav-review" to="/editorial/review" icon={Eye} isCollapsed={isCollapsed} important>مراجعة المحتوى</NavItem>
+              <NavItem id="nav-advanced-content" to="/advanced-content" icon={Layers} isCollapsed={isCollapsed} important>إدارة المحتوى المتقدم</NavItem>
+              <NavItem id="nav-review" to="/editorial/review" icon={Eye} isCollapsed={isCollapsed}>مراجعة المحتوى</NavItem>
               <NavItem id="nav-campaigns" to="/campaigns" icon={Radio} isCollapsed={isCollapsed}>الحملات التفاعلية</NavItem>
               <NavItem id="nav-moderation" to="/moderation" icon={MessageSquare} isCollapsed={isCollapsed}>إشراف التعليقات</NavItem>
               <NavItem id="nav-tags" to="/tags" icon={Tags} isCollapsed={isCollapsed}>إدارة الوسوم</NavItem>
@@ -596,6 +599,9 @@ const Breadcrumbs = () => {
       if (pathname === '/admin/notifications') {
         crumbs.push({ label: 'إدارة التنبيهات', path: '', icon: Bell });
       }
+    } else if (pathname.includes('/advanced-content')) {
+      crumbs.push({ label: 'لوحة التحكم الإدارية', path: '/admin', icon: ShieldAlert });
+      crumbs.push({ label: 'إدارة المحتوى المتقدم', path: '', icon: Layers });
     } else if (pathname.includes('/simulator')) {
       crumbs.push({ label: 'المحور الرئيسي', path: '', icon: Target });
       crumbs.push({ label: 'محاكي الاستثمار', path: '', icon: Calculator });
@@ -1322,6 +1328,7 @@ const App = () => {
             <Route path="/admin" element={<AdminOverviewPage />} />
             <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
             <Route path="/admin/subscriptions" element={<SubscriptionsManagement />} />
+            <Route path="/advanced-content" element={<AdvancedContentManagement />} />
 
             <Route path="*" element={<div className="p-10 text-center text-gray-400">جاري العمل على هذه الصفحة...</div>} />
           </Routes>

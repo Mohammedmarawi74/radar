@@ -37,7 +37,7 @@ import {
   ArrowDownRight,
   RefreshCcw,
   Send,
-  Warning,
+  AlertOctagon,
 } from "lucide-react";
 import {
   UserSubscription,
@@ -78,6 +78,1886 @@ import {
   Legend,
 } from "recharts";
 
+// Sub-components
+const KPICard: React.FC<{
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+  color: "indigo" | "emerald" | "amber" | "rose";
+  trend?: { value: number; positive: boolean };
+}> = ({ title, value, icon, color, trend }) => {
+  const colorClasses = {
+    indigo: "from-indigo-600 to-purple-600",
+    emerald: "from-emerald-600 to-teal-600",
+    amber: "from-amber-600 to-orange-600",
+    rose: "from-rose-600 to-red-600",
+  };
+
+  return (
+    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 hover:shadow-lg transition-all">
+      <div className="flex items-start justify-between mb-4">
+        <div
+          className={`p-3 rounded-2xl bg-gradient-to-br ${colorClasses[color]} text-white`}
+        >
+          {icon}
+        </div>
+        {trend && (
+          <div
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-black ${
+              trend.positive
+                ? "bg-emerald-50 text-emerald-700"
+                : "bg-rose-50 text-rose-700"
+            }`}
+          >
+            <TrendingUp
+              className={`w-3.5 h-3.5 ${!trend.positive ? "rotate-180" : ""}`}
+            />
+            {trend.value}%
+          </div>
+        )}
+      </div>
+      <p className="text-3xl font-black text-slate-900 mb-1">{value}</p>
+      <p className="text-sm font-bold text-slate-500">{title}</p>
+    </div>
+  );
+};
+
+const TabButton: React.FC<{
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+}> = ({ active, onClick, icon, label }) => (
+  <button
+    onClick={onClick}
+    className={`flex items-center gap-2 px-5 py-3 rounded-[1.5rem] font-bold text-sm transition-all ${
+      active
+        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
+        : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+    }`}
+  >
+    {icon}
+    {label}
+  </button>
+);
+
+// ==========================================
+// Usage Tab Implementation
+// ==========================================
+const renderUsageTab = () => {
+  // Filter and sort usage data
+  const filteredUsageData = MOCK_USAGE_DATA.filter((item) => {
+    const matchesSearch =
+      item.userName.toLowerCase().includes(usageSearchQuery.toLowerCase()) ||
+      item.email.toLowerCase().includes(usageSearchQuery.toLowerCase()) ||
+      item.license.toLowerCase().includes(usageSearchQuery.toLowerCase());
+    const matchesPlan =
+      usagePlanFilter === "all" || item.planType === usagePlanFilter;
+    const matchesStatus =
+      usageStatusFilter === "all" || item.status === usageStatusFilter;
+    return matchesSearch && matchesPlan && matchesStatus;
+  }).sort((a, b) => {
+    const modifier = usageSortDirection === "asc" ? 1 : -1;
+    if (usageSortField === "userName")
+      return a.userName.localeCompare(b.userName) * modifier;
+    if (usageSortField === "apiCallsUsed")
+      return (a.apiCallsUsed - b.apiCallsUsed) * modifier;
+    if (usageSortField === "aiModelsUsed")
+      return (a.aiModelsUsed - b.aiModelsUsed) * modifier;
+    if (usageSortField === "lastActive")
+      return (
+        (new Date(a.lastActive).getTime() - new Date(b.lastActive).getTime()) *
+        modifier
+      );
+    return 0;
+  });
+
+  // Calculate usage stats
+  const usageStats = {
+    totalUsers: MOCK_USAGE_DATA.length,
+    activeUsers: MOCK_USAGE_DATA.filter((u) => u.status === "active").length,
+    overused: MOCK_USAGE_DATA.filter((u) => u.status === "overused").length,
+    totalApiCalls: MOCK_USAGE_DATA.reduce((sum, u) => sum + u.apiCallsUsed, 0),
+    totalAiQueries: MOCK_USAGE_DATA.reduce((sum, u) => sum + u.aiModelsUsed, 0),
+    avgUsagePercentage: Math.round(
+      MOCK_USAGE_DATA.reduce(
+        (sum, u) =>
+          sum +
+          (u.apiCallsLimit > 0 ? (u.apiCallsUsed / u.apiCallsLimit) * 100 : 0),
+        0,
+      ) / MOCK_USAGE_DATA.length,
+    ),
+  };
+
+  const toggleUsageSelection = (id: string) => {
+    setSelectedUsageItems((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+    );
+  };
+
+  const toggleAllUsage = () => {
+    if (selectedUsageItems.length === filteredUsageData.length) {
+      setSelectedUsageItems([]);
+    } else {
+      setSelectedUsageItems(filteredUsageData.map((u) => u.id));
+    }
+  };
+
+  const getStatusBadgeColor = (status: string) => {
+    if (status === "active") return "bg-emerald-50 text-emerald-700";
+    if (status === "overused") return "bg-rose-50 text-rose-700";
+    return "bg-slate-50 text-slate-700";
+  };
+
+  const getStatusLabel = (status: string) => {
+    if (status === "active") return "نشط";
+    if (status === "overused") return "استهلاك عالي";
+    return "غير نشط";
+  };
+
+  return (
+    <div className="space-y-6 animate-fadeIn">
+      {/* Usage Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <UsageStatCard
+          title="إجمالي المستخدمين"
+          value={usageStats.totalUsers.toString()}
+          icon={<Users className="w-6 h-6" />}
+          color="indigo"
+          trend={{ value: 12.5, positive: true }}
+        />
+        <UsageStatCard
+          title="مستخدمون نشطون"
+          value={usageStats.activeUsers.toString()}
+          icon={<Activity className="w-6 h-6" />}
+          color="emerald"
+          trend={{ value: 8.3, positive: true }}
+        />
+        <UsageStatCard
+          title="استهلاك عالي"
+          value={usageStats.overused.toString()}
+          icon={<AlertTriangle className="w-6 h-6" />}
+          color="rose"
+          trend={{ value: 2, positive: false }}
+        />
+        <UsageStatCard
+          title="متوسط الاستخدام"
+          value={`${usageStats.avgUsagePercentage}%`}
+          icon={<BarChart3 className="w-6 h-6" />}
+          color="blue"
+        />
+      </div>
+
+      {/* Additional Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-[2rem] p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+              <Server className="w-6 h-6" />
+            </div>
+            <span className="text-xs font-bold bg-white/20 px-3 py-1 rounded-full">
+              هذا الشهر
+            </span>
+          </div>
+          <p className="text-sm font-medium text-white/80 mb-1">
+            إجمالي طلبات API
+          </p>
+          <p className="text-3xl font-black">
+            {usageStats.totalApiCalls.toLocaleString()}
+          </p>
+        </div>
+        <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-[2rem] p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+              <Cpu className="w-6 h-6" />
+            </div>
+            <span className="text-xs font-bold bg-white/20 px-3 py-1 rounded-full">
+              هذا الشهر
+            </span>
+          </div>
+          <p className="text-sm font-medium text-white/80 mb-1">
+            إجمالي استعلامات AI
+          </p>
+          <p className="text-3xl font-black">
+            {usageStats.totalAiQueries.toLocaleString()}
+          </p>
+        </div>
+        <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-[2rem] p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+              <Layers className="w-6 h-6" />
+            </div>
+            <span className="text-xs font-bold bg-white/20 px-3 py-1 rounded-full">
+              نشط الآن
+            </span>
+          </div>
+          <p className="text-sm font-medium text-white/80 mb-1">
+            لوحات التحكم المستخدمة
+          </p>
+          <p className="text-3xl font-black">
+            {MOCK_USAGE_DATA.reduce(
+              (sum, u) => sum + u.dashboardsUsed,
+              0,
+            ).toLocaleString()}
+          </p>
+        </div>
+      </div>
+
+      {/* Header & Actions */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-xl font-black text-slate-900">تحليل الاستخدام</h3>
+          <p className="text-sm text-slate-500 font-medium">
+            مراقبة وتتبع استهلاك الموارد عبر المستخدمين
+          </p>
+        </div>
+        {selectedUsageItems.length > 0 && (
+          <div className="flex items-center gap-3 bg-indigo-50 px-4 py-2.5 rounded-xl border border-indigo-200">
+            <span className="text-sm font-bold text-indigo-700">
+              تم تحديد {selectedUsageItems.length} عنصر
+            </span>
+            <button className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-all flex items-center gap-1">
+              <Download className="w-3 h-3" />
+              تصدير
+            </button>
+            <button className="px-3 py-1.5 bg-white text-indigo-600 border border-indigo-200 rounded-lg text-xs font-bold hover:bg-indigo-50 transition-all flex items-center gap-1">
+              <MessageSquare className="w-3 h-3" />
+              إشعار
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Filters & Controls */}
+      <div className="flex items-center gap-4 bg-white p-4 rounded-[1.5rem] border border-slate-200">
+        <div className="flex-1 relative">
+          <Search className="w-5 h-5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="ابحث عن مستخدم أو ترخيص..."
+            value={usageSearchQuery}
+            onChange={(e) => setUsageSearchQuery(e.target.value)}
+            className="w-full pr-10 pl-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-100"
+          />
+        </div>
+        <select
+          value={usagePlanFilter}
+          onChange={(e) => setUsagePlanFilter(e.target.value)}
+          className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+        >
+          <option value="all">جميع الخطط</option>
+          <option value="free">مجاني</option>
+          <option value="basic">أساسي</option>
+          <option value="pro">محترف</option>
+          <option value="enterprise">مؤسسات</option>
+        </select>
+        <select
+          value={usageStatusFilter}
+          onChange={(e) => setUsageStatusFilter(e.target.value)}
+          className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+        >
+          <option value="all">جميع الحالات</option>
+          <option value="active">نشط</option>
+          <option value="inactive">غير نشط</option>
+          <option value="overused">استهلاك عالي</option>
+        </select>
+        <select
+          value={usageDateRange}
+          onChange={(e) => setUsageDateRange(e.target.value)}
+          className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+        >
+          <option value="7">آخر 7 أيام</option>
+          <option value="30">آخر 30 يوم</option>
+          <option value="90">آخر 90 يوم</option>
+          <option value="custom">مخصص</option>
+        </select>
+      </div>
+
+      {/* Usage Trends Chart */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+            <TrendingUp className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-lg font-black text-slate-900">
+              اتجاهات الاستخدام
+            </h3>
+            <p className="text-sm text-slate-500 font-medium">
+              نظرة عامة على الاستخدام خلال الفترة المحددة
+            </p>
+          </div>
+        </div>
+        <div className="h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={MOCK_USAGE_TRENDS}>
+              <defs>
+                <linearGradient id="colorApi" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="colorAi" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis dataKey="period" stroke="#94a3b8" fontSize={12} />
+              <YAxis stroke="#94a3b8" fontSize={12} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#fff",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                }}
+              />
+              <Legend />
+              <Area
+                type="monotone"
+                dataKey="apiCalls"
+                stroke="#6366f1"
+                fillOpacity={1}
+                fill="url(#colorApi)"
+                name="طلبات API"
+              />
+              <Area
+                type="monotone"
+                dataKey="aiQueries"
+                stroke="#8b5cf6"
+                fillOpacity={1}
+                fill="url(#colorAi)"
+                name="استعلامات AI"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Usage by Feature Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl">
+              <PieChart className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-slate-900">
+                الاستخدام حسب الميزة
+              </h3>
+              <p className="text-sm text-slate-500 font-medium">
+                توزيع الاستخدام عبر الميزات المختلفة
+              </p>
+            </div>
+          </div>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={MOCK_USAGE_BY_FEATURE}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ feature, percent }) =>
+                    `${feature} (${(percent * 100).toFixed(0)}%)`
+                  }
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  nameKey="feature"
+                >
+                  {MOCK_USAGE_BY_FEATURE.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Daily Usage Stats */}
+        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+              <BarChart3 className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-slate-900">
+                الاستخدام اليومي
+              </h3>
+              <p className="text-sm text-slate-500 font-medium">
+                متوسط الاستخدام خلال أيام الأسبوع
+              </p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            {MOCK_DAILY_USAGE.map((day, idx) => (
+              <div key={idx} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-slate-700">
+                    {day.day}
+                  </span>
+                  <div className="flex items-center gap-4">
+                    <span className="text-xs text-slate-500">
+                      <span className="font-bold text-indigo-600">
+                        {day.apiCalls.toLocaleString()}
+                      </span>{" "}
+                      API
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      <span className="font-bold text-purple-600">
+                        {day.aiQueries.toLocaleString()}
+                      </span>{" "}
+                      AI
+                    </span>
+                  </div>
+                </div>
+                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-l from-indigo-500 to-purple-500 rounded-full"
+                    style={{ width: `${(day.apiCalls / 12000) * 100}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Usage Table */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-slate-50 border-b-2 border-slate-100">
+              <tr>
+                <th className="text-right py-4 px-6">
+                  <input
+                    type="checkbox"
+                    checked={
+                      selectedUsageItems.length === filteredUsageData.length
+                    }
+                    onChange={toggleAllUsage}
+                    className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                </th>
+                <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                  المستخدم
+                </th>
+                <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                  الترخيص
+                </th>
+                <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                  الخطة
+                </th>
+                <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                  لوحات التحكم
+                </th>
+                <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                  زوايا البيانات
+                </th>
+                <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                  طلبات API
+                </th>
+                <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                  نماذج AI
+                </th>
+                <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                  آخر نشاط
+                </th>
+                <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                  الحالة
+                </th>
+                <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                  الإجراءات
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filteredUsageData.map((item) => (
+                <tr
+                  key={item.id}
+                  className="hover:bg-slate-50 transition-colors group"
+                >
+                  <td className="py-4 px-6">
+                    <input
+                      type="checkbox"
+                      checked={selectedUsageItems.includes(item.id)}
+                      onChange={() => toggleUsageSelection(item.id)}
+                      className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-black text-sm">
+                        {item.userName.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-900">
+                          {item.userName}
+                        </p>
+                        <p className="text-xs text-slate-500">{item.email}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <span className="text-sm font-bold text-slate-700">
+                      {item.license}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <span
+                      className={`inline-block px-3 py-1.5 rounded-xl text-xs font-bold ${getPlanColor(item.planType)}`}
+                    >
+                      {item.planType === "enterprise"
+                        ? "مؤسسات"
+                        : item.planType === "pro"
+                          ? "محترف"
+                          : item.planType === "basic"
+                            ? "أساسي"
+                            : "مجاني"}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <span className="text-sm font-bold text-slate-700">
+                      {item.dashboardsUsed}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <span className="text-sm font-bold text-slate-700">
+                      {item.dataAnglesUsed}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden w-24">
+                        <div
+                          className={`h-full rounded-full ${item.apiCallsLimit > 0 ? (item.apiCallsUsed / item.apiCallsLimit > 0.9 ? "bg-rose-500" : item.apiCallsUsed / item.apiCallsLimit > 0.7 ? "bg-amber-500" : "bg-emerald-500") : "bg-slate-300"}`}
+                          style={{
+                            width: `${item.apiCallsLimit > 0 ? (item.apiCallsUsed / item.apiCallsLimit) * 100 : 0}%`,
+                          }}
+                        />
+                      </div>
+                      <span className="text-xs font-bold text-slate-600 w-16">
+                        {item.apiCallsLimit > 0
+                          ? `${Math.round((item.apiCallsUsed / item.apiCallsLimit) * 100)}%`
+                          : "غير محدود"}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden w-24">
+                        <div
+                          className={`h-full rounded-full ${item.aiModelsLimit > 0 ? (item.aiModelsUsed / item.aiModelsLimit > 0.9 ? "bg-rose-500" : item.aiModelsUsed / item.aiModelsLimit > 0.7 ? "bg-amber-500" : "bg-emerald-500") : "bg-slate-300"}`}
+                          style={{
+                            width: `${item.aiModelsLimit > 0 ? (item.aiModelsUsed / item.aiModelsLimit) * 100 : 0}%`,
+                          }}
+                        />
+                      </div>
+                      <span className="text-xs font-bold text-slate-600 w-16">
+                        {item.aiModelsLimit > 0
+                          ? `${Math.round((item.aiModelsUsed / item.aiModelsLimit) * 100)}%`
+                          : "غير محدود"}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <span className="text-sm text-slate-600 font-medium">
+                      {new Date(item.lastActive).toLocaleDateString("ar-SA")}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <span
+                      className={`inline-block px-3 py-1.5 rounded-xl text-xs font-bold ${getStatusBadgeColor(item.status)}`}
+                    >
+                      {getStatusLabel(item.status)}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setSelectedUsageItem(item);
+                          setShowUsageDetails(true);
+                        }}
+                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                        title="عرض التفاصيل"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button
+                        className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+                        title="إعادة تعيين"
+                      >
+                        <RefreshCcw className="w-4 h-4" />
+                      </button>
+                      <button
+                        className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                        title="إشعار"
+                      >
+                        <Send className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Usage Details Modal */}
+      {showUsageDetails && selectedUsageItem && (
+        <UsageDetailsModal
+          item={selectedUsageItem}
+          onClose={() => setShowUsageDetails(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+// Usage Stat Card Component
+const UsageStatCard: React.FC<{
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+  color: string;
+  trend?: { value: number; positive: boolean };
+}> = ({ title, value, icon, color, trend }) => {
+  const colorClasses: Record<string, string> = {
+    indigo: "bg-indigo-50 text-indigo-600",
+    emerald: "bg-emerald-50 text-emerald-600",
+    rose: "bg-rose-50 text-rose-600",
+    blue: "bg-blue-50 text-blue-600",
+  };
+
+  return (
+    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 hover:shadow-lg transition-all">
+      <div className="flex items-center justify-between mb-4">
+        <div className={`p-3 rounded-2xl ${colorClasses[color]}`}>{icon}</div>
+        {trend && (
+          <div
+            className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full ${
+              trend.positive
+                ? "bg-emerald-50 text-emerald-700"
+                : "bg-rose-50 text-rose-700"
+            }`}
+          >
+            {trend.positive ? (
+              <ArrowUpRight className="w-3 h-3" />
+            ) : (
+              <ArrowDownRight className="w-3 h-3" />
+            )}
+            {trend.value}%
+          </div>
+        )}
+      </div>
+      <p className="text-sm font-medium text-slate-500 mb-1">{title}</p>
+      <p className="text-3xl font-black text-slate-900">{value}</p>
+    </div>
+  );
+};
+
+// Alert Stat Card Component
+const AlertStatCard: React.FC<{
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+  color: string;
+  trend?: { value: number; positive: boolean };
+}> = ({ title, value, icon, color, trend }) => {
+  const colorClasses: Record<string, string> = {
+    indigo: "bg-indigo-50 text-indigo-600",
+    emerald: "bg-emerald-50 text-emerald-600",
+    rose: "bg-rose-50 text-rose-600",
+    amber: "bg-amber-50 text-amber-600",
+    orange: "bg-orange-50 text-orange-600",
+    blue: "bg-blue-50 text-blue-600",
+  };
+
+  return (
+    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 hover:shadow-lg transition-all">
+      <div className="flex items-center justify-between mb-4">
+        <div className={`p-3 rounded-2xl ${colorClasses[color]}`}>{icon}</div>
+        {trend && (
+          <div
+            className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full ${
+              trend.positive
+                ? "bg-emerald-50 text-emerald-700"
+                : "bg-rose-50 text-rose-700"
+            }`}
+          >
+            {trend.positive ? (
+              <ArrowUpRight className="w-3 h-3" />
+            ) : (
+              <ArrowDownRight className="w-3 h-3" />
+            )}
+            {trend.value}%
+          </div>
+        )}
+      </div>
+      <p className="text-sm font-medium text-slate-500 mb-1">{title}</p>
+      <p className="text-3xl font-black text-slate-900">{value}</p>
+    </div>
+  );
+};
+
+// Alert Details Modal Component
+const AlertDetailsModal: React.FC<{
+  alert: SubscriptionAlert;
+  onClose: () => void;
+  onResolve: () => void;
+}> = ({ alert, onClose, onResolve }) => {
+  const getAlertTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      expiring_soon: "قرب الانتهاء",
+      high_usage: "استخدام عالي",
+      limit_exceeded: "تجاوز الحد",
+      payment_failed: "فشل الدفع",
+      license_warning: "تحذير الترخيص",
+      system_warning: "تحذير النظام",
+    };
+    return labels[type] || type;
+  };
+
+  const getSuggestedActions = (type: string) => {
+    const actions: Record<string, string[]> = {
+      expiring_soon: [
+        "إرسال بريد إلكتروني تذكيري للمستخدم",
+        "عرض خيارات التجديد",
+        "تقديم خصم للتجديد المبكر",
+      ],
+      high_usage: [
+        "مراجعة خطة الاشتراك الحالية",
+        "اقتراح ترقية الخطة",
+        "مراقبة الاستخدام خلال الأيام القادمة",
+      ],
+      limit_exceeded: [
+        "إشعار المستخدم بتجاوز الحد",
+        "تعليق الخدمة حتى يتم حل المشكلة",
+        "عرض خيارات زيادة الحد",
+      ],
+      payment_failed: [
+        "إرسال إشعار للمستخدم",
+        "تحديث معلومات الدفع",
+        "إعادة محاولة الدفع",
+      ],
+    };
+    return actions[type] || ["مراجعة التفاصيل", "اتخاذ الإجراء المناسب"];
+  };
+
+  return (
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
+      <div className="bg-white rounded-[2rem] w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
+          <div className="flex items-center gap-4">
+            <div
+              className={`p-4 rounded-2xl ${getSeverityColor(alert.severity)}`}
+            >
+              <AlertTriangle className="w-8 h-8" />
+            </div>
+            <div>
+              <h3 className="text-xl font-black text-slate-900">
+                تفاصيل التنبيه
+              </h3>
+              <p className="text-sm text-slate-500 font-medium">
+                #{alert.id} • {getAlertTypeLabel(alert.type)}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-slate-100 rounded-xl transition-all"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {/* Alert Info */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-slate-50 rounded-xl p-4">
+              <p className="text-xs font-bold text-slate-500 mb-1">الخطورة</p>
+              <span
+                className={`inline-block px-3 py-1.5 rounded-xl text-xs font-bold ${getSeverityColor(
+                  alert.severity,
+                )}`}
+              >
+                {alert.severity === "critical"
+                  ? "حرج"
+                  : alert.severity === "high"
+                    ? "عالي"
+                    : alert.severity === "medium"
+                      ? "متوسط"
+                      : "منخفض"}
+              </span>
+            </div>
+            <div className="bg-slate-50 rounded-xl p-4">
+              <p className="text-xs font-bold text-slate-500 mb-1">الحالة</p>
+              <span
+                className={`inline-block px-3 py-1.5 rounded-xl text-xs font-bold ${
+                  alert.resolved
+                    ? "bg-emerald-50 text-emerald-700"
+                    : "bg-amber-50 text-amber-700"
+                }`}
+              >
+                {alert.resolved ? "تم الحل" : "نشط"}
+              </span>
+            </div>
+            <div className="bg-slate-50 rounded-xl p-4">
+              <p className="text-xs font-bold text-slate-500 mb-1">التاريخ</p>
+              <p className="text-sm font-bold text-slate-900">
+                {new Date(alert.createdAt).toLocaleDateString("ar-SA")}
+              </p>
+            </div>
+            <div className="bg-slate-50 rounded-xl p-4">
+              <p className="text-xs font-bold text-slate-500 mb-1">المستخدم</p>
+              <p className="text-sm font-bold text-slate-900">
+                {alert.userName || "-"}
+              </p>
+            </div>
+          </div>
+
+          {/* Alert Description */}
+          <div>
+            <h4 className="text-sm font-black text-slate-700 mb-3 flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              وصف التنبيه
+            </h4>
+            <div className="bg-slate-50 rounded-xl p-4">
+              <p className="text-sm font-medium text-slate-700">
+                {alert.message}
+              </p>
+            </div>
+          </div>
+
+          {/* Suggested Actions */}
+          <div>
+            <h4 className="text-sm font-black text-slate-700 mb-3 flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              الإجراءات المقترحة
+            </h4>
+            <div className="space-y-2">
+              {getSuggestedActions(alert.type).map((action, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-3 bg-indigo-50 rounded-xl p-3"
+                >
+                  <div className="w-2 h-2 bg-indigo-600 rounded-full" />
+                  <span className="text-sm font-medium text-indigo-700">
+                    {action}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Internal Notes */}
+          <div>
+            <h4 className="text-sm font-black text-slate-700 mb-3 flex items-center gap-2">
+              <MessageSquare className="w-4 h-4" />
+              ملاحظات داخلية
+            </h4>
+            <textarea
+              className="w-full p-4 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              rows={3}
+              placeholder="أضف ملاحظات داخلية حول هذا التنبيه..."
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
+            <button
+              onClick={onClose}
+              className="px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all"
+            >
+              إغلاق
+            </button>
+            {!alert.resolved && (
+              <>
+                <button className="px-6 py-2.5 bg-amber-600 text-white rounded-xl text-sm font-bold hover:bg-amber-700 transition-all flex items-center gap-2">
+                  <Send className="w-4 h-4" />
+                  إرسال إشعار
+                </button>
+                <button
+                  onClick={onResolve}
+                  className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all flex items-center gap-2"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  تحديد كحل
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Usage Details Modal Component
+const UsageDetailsModal: React.FC<{ item: UsageData; onClose: () => void }> = ({
+  item,
+  onClose,
+}) => {
+  return (
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
+      <div className="bg-white rounded-[2rem] w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
+          <div className="flex items-center gap-4">
+            <div className="p-4 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl text-white">
+              <BarChart3 className="w-8 h-8" />
+            </div>
+            <div>
+              <h3 className="text-xl font-black text-slate-900">
+                تفاصيل الاستخدام
+              </h3>
+              <p className="text-sm text-slate-500 font-medium">
+                {item.userName}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-slate-100 rounded-xl transition-all"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {/* User Info */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-slate-50 rounded-xl p-4">
+              <p className="text-xs font-bold text-slate-500 mb-1">
+                البريد الإلكتروني
+              </p>
+              <p className="text-sm font-bold text-slate-900">{item.email}</p>
+            </div>
+            <div className="bg-slate-50 rounded-xl p-4">
+              <p className="text-xs font-bold text-slate-500 mb-1">الترخيص</p>
+              <p className="text-sm font-bold text-slate-900">{item.license}</p>
+            </div>
+            <div className="bg-slate-50 rounded-xl p-4">
+              <p className="text-xs font-bold text-slate-500 mb-1">الخطة</p>
+              <p className="text-sm font-bold text-slate-900">
+                {item.planType}
+              </p>
+            </div>
+            <div className="bg-slate-50 rounded-xl p-4">
+              <p className="text-xs font-bold text-slate-500 mb-1">الحالة</p>
+              <span
+                className={`inline-block px-2 py-1 rounded-lg text-xs font-bold ${
+                  item.status === "active"
+                    ? "bg-emerald-50 text-emerald-700"
+                    : item.status === "overused"
+                      ? "bg-rose-50 text-rose-700"
+                      : "bg-slate-50 text-slate-700"
+                }`}
+              >
+                {item.status}
+              </span>
+            </div>
+          </div>
+
+          {/* Usage Breakdown */}
+          <div>
+            <h4 className="text-sm font-black text-slate-700 mb-4 flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              تفصيل الاستخدام
+            </h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <UsageDetailCard
+                label="لوحات التحكم"
+                value={item.dashboardsUsed.toString()}
+                icon={<Layers className="w-4 h-4" />}
+              />
+              <UsageDetailCard
+                label="زوايا البيانات"
+                value={item.dataAnglesUsed.toString()}
+                icon={<Globe className="w-4 h-4" />}
+              />
+              <UsageDetailCard
+                label="طلبات API"
+                value={item.apiCallsUsed.toLocaleString()}
+                icon={<Server className="w-4 h-4" />}
+              />
+              <UsageDetailCard
+                label="نماذج AI"
+                value={item.aiModelsUsed.toLocaleString()}
+                icon={<Cpu className="w-4 h-4" />}
+              />
+            </div>
+          </div>
+
+          {/* API Usage Progress */}
+          <div>
+            <h4 className="text-sm font-black text-slate-700 mb-4">
+              استخدام API
+            </h4>
+            <div className="bg-slate-50 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-bold text-slate-600">
+                  المستخدم
+                </span>
+                <span className="text-sm font-black text-slate-900">
+                  {item.apiCallsUsed.toLocaleString()} /{" "}
+                  {item.apiCallsLimit.toLocaleString()}
+                </span>
+              </div>
+              <div className="h-3 bg-slate-200 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${item.apiCallsLimit > 0 ? (item.apiCallsUsed / item.apiCallsLimit > 0.9 ? "bg-gradient-to-l from-rose-500 to-rose-600" : item.apiCallsUsed / item.apiCallsLimit > 0.7 ? "bg-gradient-to-l from-amber-500 to-amber-600" : "bg-gradient-to-l from-emerald-500 to-emerald-600") : "bg-slate-400"}`}
+                  style={{
+                    width: `${item.apiCallsLimit > 0 ? (item.apiCallsUsed / item.apiCallsLimit) * 100 : 0}%`,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* AI Usage Progress */}
+          <div>
+            <h4 className="text-sm font-black text-slate-700 mb-4">
+              استخدام AI
+            </h4>
+            <div className="bg-slate-50 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-bold text-slate-600">
+                  المستخدم
+                </span>
+                <span className="text-sm font-black text-slate-900">
+                  {item.aiModelsUsed.toLocaleString()} /{" "}
+                  {item.aiModelsLimit.toLocaleString()}
+                </span>
+              </div>
+              <div className="h-3 bg-slate-200 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${item.aiModelsLimit > 0 ? (item.aiModelsUsed / item.aiModelsLimit > 0.9 ? "bg-gradient-to-l from-rose-500 to-rose-600" : item.aiModelsUsed / item.aiModelsLimit > 0.7 ? "bg-gradient-to-l from-amber-500 to-amber-600" : "bg-gradient-to-l from-emerald-500 to-emerald-600") : "bg-slate-400"}`}
+                  style={{
+                    width: `${item.aiModelsLimit > 0 ? (item.aiModelsUsed / item.aiModelsLimit) * 100 : 0}%`,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Usage Trends */}
+          <div>
+            <h4 className="text-sm font-black text-slate-700 mb-4">
+              اتجاهات الاستخدام (آخر 7 أيام)
+            </h4>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={MOCK_DAILY_USAGE.slice(0, 7)}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis dataKey="day" stroke="#94a3b8" fontSize={12} />
+                  <YAxis stroke="#94a3b8" fontSize={12} />
+                  <Tooltip />
+                  <Bar
+                    dataKey="apiCalls"
+                    fill="#6366f1"
+                    radius={[4, 4, 0, 0]}
+                    name="طلبات API"
+                  />
+                  <Bar
+                    dataKey="aiQueries"
+                    fill="#8b5cf6"
+                    radius={[4, 4, 0, 0]}
+                    name="استعلامات AI"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+            <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 text-indigo-600 rounded-xl text-sm font-bold hover:bg-indigo-100 transition-all">
+              <RefreshCcw className="w-4 h-4" />
+              إعادة تعيين الاستخدام
+            </button>
+            <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-50 text-amber-600 rounded-xl text-sm font-bold hover:bg-amber-100 transition-all">
+              <Send className="w-4 h-4" />
+              إرسال إشعار
+            </button>
+            <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-50 text-emerald-600 rounded-xl text-sm font-bold hover:bg-emerald-100 transition-all">
+              <Download className="w-4 h-4" />
+              تصدير التقرير
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Usage Detail Card Component
+const UsageDetailCard: React.FC<{
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+}> = ({ label, value, icon }) => (
+  <div className="bg-white border border-slate-200 rounded-xl p-4">
+    <div className="flex items-center gap-2 mb-2">
+      <div className="text-slate-400">{icon}</div>
+      <span className="text-xs font-bold text-slate-500">{label}</span>
+    </div>
+    <p className="text-2xl font-black text-slate-900">{value}</p>
+  </div>
+);
+
+const LicenseDetailsModal: React.FC<{ license: any; onClose: () => void }> = ({
+  license,
+  onClose,
+}) => {
+  return (
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
+      <div className="bg-white rounded-[2rem] w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
+          <div className="flex items-center gap-4">
+            <div className="p-4 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl text-white">
+              <Key className="w-8 h-8" />
+            </div>
+            <div>
+              <h3 className="text-xl font-black text-slate-900">
+                {license.name}
+              </h3>
+              <p className="text-sm text-slate-500 font-mono">{license.key}</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all"
+          >
+            <X className="w-5 h-5 text-slate-400" />
+          </button>
+        </div>
+        <div className="p-6 space-y-6">
+          <div className="bg-gradient-to-l from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">
+            <h4 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
+              <FileText className="w-5 h-5 text-indigo-600" />
+              معلومات الترخيص
+            </h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <InfoItem
+                label="نوع الترخيص"
+                value={
+                  license.type === "enterprise"
+                    ? "مؤسسات"
+                    : license.type === "team"
+                      ? "فريق"
+                      : "فردي"
+                }
+              />
+              <InfoItem label="الحالة" value={license.status} badge />
+              <InfoItem
+                label="تاريخ الإصدار"
+                value={new Date(license.issuedDate).toLocaleDateString("ar-SA")}
+              />
+              <InfoItem
+                label="تاريخ الانتهاء"
+                value={new Date(license.expiryDate).toLocaleDateString("ar-SA")}
+              />
+            </div>
+          </div>
+          <div>
+            <h4 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
+              <Activity className="w-5 h-5 text-indigo-600" />
+              استخدام الترخيص
+            </h4>
+            <div className="bg-white rounded-xl p-6 border border-slate-100">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-bold text-slate-700">
+                  المستخدمين
+                </span>
+                <span className="text-lg font-black text-slate-900">
+                  {license.currentUsers} / {license.maxUsers}
+                </span>
+              </div>
+              <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${license.currentUsers / license.maxUsers > 0.9 ? "bg-rose-500" : license.currentUsers / license.maxUsers > 0.7 ? "bg-amber-500" : "bg-emerald-500"}`}
+                  style={{
+                    width: `${(license.currentUsers / license.maxUsers) * 100}%`,
+                  }}
+                />
+              </div>
+              <p className="text-xs font-bold text-slate-400 mt-2">
+                {((license.currentUsers / license.maxUsers) * 100).toFixed(0)}%
+                مستخدم
+              </p>
+            </div>
+          </div>
+          {license.allowedDomains && license.allowedDomains.length > 0 && (
+            <div>
+              <h4 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
+                <Globe className="w-5 h-5 text-indigo-600" />
+                النطاقات المسموحة
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {license.allowedDomains.map((domain: string, idx: number) => (
+                  <span
+                    key={idx}
+                    className="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-bold border border-indigo-200"
+                  >
+                    {domain}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
+            <button
+              onClick={onClose}
+              className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all"
+            >
+              إغلاق
+            </button>
+            <button className="px-6 py-2.5 bg-indigo-50 text-indigo-600 rounded-xl text-sm font-bold hover:bg-indigo-100 transition-all">
+              تجديد الترخيص
+            </button>
+            <button className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all">
+              تعديل المستخدمين
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const StatCard: React.FC<{
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+  color: "indigo" | "emerald" | "blue" | "amber";
+  trend?: { value: number; positive: boolean };
+}> = ({ title, value, icon, color, trend }) => {
+  const colorClasses = {
+    indigo: "from-indigo-600 to-purple-600",
+    emerald: "from-emerald-600 to-teal-600",
+    blue: "from-blue-600 to-cyan-600",
+    amber: "from-amber-600 to-orange-600",
+  };
+
+  return (
+    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 hover:shadow-lg transition-all">
+      <div className="flex items-start justify-between mb-4">
+        <div
+          className={`p-3 rounded-2xl bg-gradient-to-br ${colorClasses[color]} text-white`}
+        >
+          {icon}
+        </div>
+        {trend && (
+          <div
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-black ${
+              trend.positive
+                ? "bg-emerald-50 text-emerald-700"
+                : "bg-rose-50 text-rose-700"
+            }`}
+          >
+            <TrendingUp
+              className={`w-3.5 h-3.5 ${!trend.positive ? "rotate-180" : ""}`}
+            />
+            {trend.value}%
+          </div>
+        )}
+      </div>
+      <p className="text-3xl font-black text-slate-900 mb-1">{value}</p>
+      <p className="text-sm font-bold text-slate-500">{title}</p>
+    </div>
+  );
+};
+
+const UserDetailsModal: React.FC<{ user: any; onClose: () => void }> = ({
+  user,
+  onClose,
+}) => {
+  return (
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
+      <div className="bg-white rounded-[2rem] w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-black text-2xl">
+              {user.name.charAt(0)}
+            </div>
+            <div>
+              <h3 className="text-xl font-black text-slate-900">{user.name}</h3>
+              <p className="text-sm text-slate-500">{user.email}</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all"
+          >
+            <X className="w-5 h-5 text-slate-400" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="p-6 space-y-6">
+          {/* Subscription Info */}
+          <div className="bg-gradient-to-l from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">
+            <h4 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-indigo-600" />
+              معلومات الاشتراك
+            </h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <InfoItem label="الخطة الحالية" value={user.plan} />
+              <InfoItem label="الحالة" value={user.status} badge />
+              <InfoItem
+                label="تاريخ البداية"
+                value={new Date(user.startDate).toLocaleDateString("ar-SA")}
+              />
+              <InfoItem
+                label="تاريخ النهاية"
+                value={new Date(user.endDate).toLocaleDateString("ar-SA")}
+              />
+            </div>
+          </div>
+
+          {/* Usage Metrics */}
+          <div>
+            <h4 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
+              <Activity className="w-5 h-5 text-indigo-600" />
+              استخدام الخدمة
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <UsageBar
+                label="لوحات التحكم"
+                used={user.usage.dashboardInteractions || 0}
+                limit={user.limits.maxDashboards}
+                percentage={user.usagePercentage.dashboard || 0}
+              />
+              <UsageBar
+                label="مجموعات البيانات"
+                used={user.usage.datasetQueries || 0}
+                limit={user.limits.maxDatasets}
+                percentage={user.usagePercentage.datasets || 0}
+              />
+              <UsageBar
+                label="طلبات API"
+                used={user.usage.apiCalls}
+                limit={user.limits.apiRequestsPerMonth}
+                percentage={user.usagePercentage.api || 0}
+              />
+              <UsageBar
+                label="استعلامات AI"
+                used={
+                  user.usage.aiQueries.prediction +
+                  user.usage.aiQueries.analysis +
+                  user.usage.aiQueries.summarization
+                }
+                limit={user.limits.aiQueriesPerMonth}
+                percentage={user.usagePercentage.ai || 0}
+              />
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
+            <button
+              onClick={onClose}
+              className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all"
+            >
+              إغلاق
+            </button>
+            <button className="px-6 py-2.5 bg-indigo-50 text-indigo-600 rounded-xl text-sm font-bold hover:bg-indigo-100 transition-all">
+              تغيير الخطة
+            </button>
+            <button className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all">
+              إعادة تعيين كلمة المرور
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const InfoItem: React.FC<{
+  label: string;
+  value: string | number;
+  badge?: boolean;
+}> = ({ label, value, badge }) => (
+  <div>
+    <p className="text-xs font-bold text-slate-500 mb-1">{label}</p>
+    {badge ? (
+      <span
+        className={`inline-block px-3 py-1.5 rounded-lg text-xs font-bold ${getStatusColor(String(value))}`}
+      >
+        {value === "active"
+          ? "نشط"
+          : value === "trial"
+            ? "تجريبي"
+            : value === "expired"
+              ? "منتهي"
+              : "ملغى"}
+      </span>
+    ) : (
+      <p className="text-sm font-black text-slate-900">{value}</p>
+    )}
+  </div>
+);
+
+const UsageBar: React.FC<{
+  label: string;
+  used: number;
+  limit: number;
+  percentage: number;
+}> = ({ label, used, limit, percentage }) => (
+  <div className="bg-white rounded-xl p-4 border border-slate-100">
+    <div className="flex items-center justify-between mb-2">
+      <span className="text-sm font-bold text-slate-700">{label}</span>
+      <span className="text-xs font-bold text-slate-500">
+        {used.toLocaleString()} / {limit.toLocaleString()}
+      </span>
+    </div>
+    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+      <div
+        className={`h-full rounded-full transition-all ${
+          percentage > 90
+            ? "bg-rose-500"
+            : percentage > 70
+              ? "bg-amber-500"
+              : "bg-emerald-500"
+        }`}
+        style={{ width: `${Math.min(100, percentage)}%` }}
+      />
+    </div>
+    <p className="text-xs font-bold text-slate-400 mt-2">
+      {percentage.toFixed(0)}% مستخدم
+    </p>
+  </div>
+);
+
+const LimitRow: React.FC<{ label: string; value: string | number }> = ({
+  label,
+  value,
+}) => (
+  <div className="flex items-center justify-between text-sm">
+    <span className="text-slate-500 font-medium">{label}</span>
+    <span className="text-slate-900 font-black">{value}</span>
+  </div>
+);
+
+const FeatureBadge: React.FC<{ label: string; enabled: boolean }> = ({
+  label,
+  enabled,
+}) => (
+  <div
+    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold ${
+      enabled ? "bg-emerald-50 text-emerald-700" : "bg-slate-50 text-slate-400"
+    }`}
+  >
+    {enabled ? (
+      <CheckCircle className="w-3.5 h-3.5" />
+    ) : (
+      <XCircle className="w-3.5 h-3.5" />
+    )}
+    {label}
+  </div>
+);
+
+const ComparisonRow: React.FC<{
+  label: string;
+  values: any[];
+  type?: "text" | "boolean";
+}> = ({ label, values, type = "text" }) => (
+  <tr className="border-b border-slate-50">
+    <td className="py-4 px-4 text-sm font-bold text-slate-700">{label}</td>
+    {values.map((value, idx) => (
+      <td key={idx} className="text-center py-4 px-4">
+        {type === "boolean" ? (
+          value ? (
+            <CheckCircle className="w-5 h-5 text-emerald-500 mx-auto" />
+          ) : (
+            <XCircle className="w-5 h-5 text-slate-300 mx-auto" />
+          )
+        ) : (
+          <span className="text-sm font-bold text-slate-700">{value}</span>
+        )}
+      </td>
+    ))}
+  </tr>
+);
+
+const PlanModal: React.FC<{
+  plan: any;
+  onClose: () => void;
+  onSave: () => void;
+}> = ({ plan, onClose, onSave }) => {
+  const [formData, setFormData] = useState(
+    plan || {
+      name: "",
+      type: "basic",
+      price: { monthly: 0, yearly: 0 },
+      description: "",
+      features: {
+        dataAngles: false,
+        datasetExplorer: false,
+        dashboardInsights: false,
+        aiPrediction: false,
+        aiAnalysis: false,
+        aiSummarization: false,
+        exportData: false,
+        apiAccess: false,
+        customBranding: false,
+        prioritySupport: false,
+      },
+      limits: {
+        maxDashboards: 0,
+        maxDatasets: 0,
+        apiRequestsPerMonth: 0,
+        aiQueriesPerMonth: 0,
+        maxUsers: 0,
+        storageGB: 0,
+      },
+    },
+  );
+
+  return (
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
+      <div className="bg-white rounded-[2rem] w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-slate-100">
+          <div>
+            <h3 className="text-xl font-black text-slate-900">
+              {plan ? "تعديل الخطة" : "إنشاء خطة جديدة"}
+            </h3>
+            <p className="text-sm text-slate-500 font-medium">
+              أدخل تفاصيل الخطة الجديدة
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all"
+          >
+            <X className="w-5 h-5 text-slate-400" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="p-6 space-y-6">
+          {/* Basic Info */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">
+                اسم الخطة
+              </label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                placeholder="مثال: محترف"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">
+                نوع الخطة
+              </label>
+              <select
+                value={formData.type}
+                onChange={(e) =>
+                  setFormData({ ...formData, type: e.target.value })
+                }
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              >
+                <option value="free">مجاني</option>
+                <option value="basic">أساسي</option>
+                <option value="pro">محترف</option>
+                <option value="enterprise">مؤسسات</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Pricing */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">
+                السعر الشهري (ر.س)
+              </label>
+              <input
+                type="number"
+                value={formData.price.monthly}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    price: {
+                      ...formData.price,
+                      monthly: Number(e.target.value),
+                    },
+                  })
+                }
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">
+                السعر السنوي (ر.س)
+              </label>
+              <input
+                type="number"
+                value={formData.price.yearly}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    price: {
+                      ...formData.price,
+                      yearly: Number(e.target.value),
+                    },
+                  })
+                }
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              />
+            </div>
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-2">
+              الوصف
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              rows={3}
+              placeholder="وصف قصير للخطة..."
+            />
+          </div>
+
+          {/* Limits */}
+          <div>
+            <h4 className="text-sm font-black text-slate-700 mb-4 flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              حدود الخطة
+            </h4>
+            <div className="grid grid-cols-2 gap-4">
+              <LimitInput
+                label="لوحات التحكم"
+                value={formData.limits.maxDashboards}
+                onChange={(v) =>
+                  setFormData({
+                    ...formData,
+                    limits: { ...formData.limits, maxDashboards: v },
+                  })
+                }
+              />
+              <LimitInput
+                label="مجموعات البيانات"
+                value={formData.limits.maxDatasets}
+                onChange={(v) =>
+                  setFormData({
+                    ...formData,
+                    limits: { ...formData.limits, maxDatasets: v },
+                  })
+                }
+              />
+              <LimitInput
+                label="طلبات API"
+                value={formData.limits.apiRequestsPerMonth}
+                onChange={(v) =>
+                  setFormData({
+                    ...formData,
+                    limits: { ...formData.limits, apiRequestsPerMonth: v },
+                  })
+                }
+              />
+              <LimitInput
+                label="استعلامات AI"
+                value={formData.limits.aiQueriesPerMonth}
+                onChange={(v) =>
+                  setFormData({
+                    ...formData,
+                    limits: { ...formData.limits, aiQueriesPerMonth: v },
+                  })
+                }
+              />
+              <LimitInput
+                label="المستخدمين"
+                value={formData.limits.maxUsers}
+                onChange={(v) =>
+                  setFormData({
+                    ...formData,
+                    limits: { ...formData.limits, maxUsers: v },
+                  })
+                }
+              />
+              <LimitInput
+                label="التخزين (GB)"
+                value={formData.limits.storageGB}
+                onChange={(v) =>
+                  setFormData({
+                    ...formData,
+                    limits: { ...formData.limits, storageGB: v },
+                  })
+                }
+              />
+            </div>
+          </div>
+
+          {/* Features */}
+          <div>
+            <h4 className="text-sm font-black text-slate-700 mb-4 flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              الميزات
+            </h4>
+            <div className="grid grid-cols-2 gap-3">
+              <FeatureToggle
+                label="زوايا البيانات"
+                enabled={formData.features.dataAngles}
+                onChange={(v) =>
+                  setFormData({
+                    ...formData,
+                    features: { ...formData.features, dataAngles: v },
+                  })
+                }
+              />
+              <FeatureToggle
+                label="مستكشف البيانات"
+                enabled={formData.features.datasetExplorer}
+                onChange={(v) =>
+                  setFormData({
+                    ...formData,
+                    features: { ...formData.features, datasetExplorer: v },
+                  })
+                }
+              />
+              <FeatureToggle
+                label="رؤى لوحة القيادة"
+                enabled={formData.features.dashboardInsights}
+                onChange={(v) =>
+                  setFormData({
+                    ...formData,
+                    features: { ...formData.features, dashboardInsights: v },
+                  })
+                }
+              />
+              <FeatureToggle
+                label="تنبؤات AI"
+                enabled={formData.features.aiPrediction}
+                onChange={(v) =>
+                  setFormData({
+                    ...formData,
+                    features: { ...formData.features, aiPrediction: v },
+                  })
+                }
+              />
+              <FeatureToggle
+                label="تحليلات AI"
+                enabled={formData.features.aiAnalysis}
+                onChange={(v) =>
+                  setFormData({
+                    ...formData,
+                    features: { ...formData.features, aiAnalysis: v },
+                  })
+                }
+              />
+              <FeatureToggle
+                label="تصدير البيانات"
+                enabled={formData.features.exportData}
+                onChange={(v) =>
+                  setFormData({
+                    ...formData,
+                    features: { ...formData.features, exportData: v },
+                  })
+                }
+              />
+              <FeatureToggle
+                label="وصول API"
+                enabled={formData.features.apiAccess}
+                onChange={(v) =>
+                  setFormData({
+                    ...formData,
+                    features: { ...formData.features, apiAccess: v },
+                  })
+                }
+              />
+              <FeatureToggle
+                label="دعم ذو أولوية"
+                enabled={formData.features.prioritySupport}
+                onChange={(v) =>
+                  setFormData({
+                    ...formData,
+                    features: { ...formData.features, prioritySupport: v },
+                  })
+                }
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-100 bg-slate-50">
+          <button
+            onClick={onClose}
+            className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all"
+          >
+            إلغاء
+          </button>
+          <button
+            onClick={onSave}
+            className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-sm font-bold hover:shadow-lg transition-all"
+          >
+            <Save className="w-4 h-4" />
+            حفظ الخطة
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const LimitInput: React.FC<{
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+}> = ({ label, value, onChange }) => (
+  <div>
+    <label className="block text-xs font-bold text-slate-500 mb-1.5">
+      {label}
+    </label>
+    <input
+      type="number"
+      value={value}
+      onChange={(e) => onChange(Number(e.target.value))}
+      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+    />
+  </div>
+);
+
+const FeatureToggle: React.FC<{
+  label: string;
+  enabled: boolean;
+  onChange: (v: boolean) => void;
+}> = ({ label, enabled, onChange }) => (
+  <button
+    onClick={() => onChange(!enabled)}
+    className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${
+      enabled
+        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+        : "border-slate-200 bg-slate-50 text-slate-500"
+    }`}
+  >
+    <span className="text-sm font-bold">{label}</span>
+    {enabled ? (
+      <ToggleRight className="w-5 h-5 text-emerald-600" />
+    ) : (
+      <ToggleLeft className="w-5 h-5 text-slate-400" />
+    )}
+  </button>
+);
+
 const SubscriptionsManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     "overview" | "plans" | "users" | "licenses" | "usage" | "alerts"
@@ -117,6 +1997,37 @@ const SubscriptionsManagement: React.FC = () => {
   const [selectedLicenses, setSelectedLicenses] = useState<string[]>([]);
   const [showLicenseModal, setShowLicenseModal] = useState(false);
   const [selectedLicense, setSelectedLicense] = useState<any>(null);
+
+  // Usage tab state
+  const [usageSearchQuery, setUsageSearchQuery] = useState("");
+  const [usagePlanFilter, setUsagePlanFilter] = useState<string>("all");
+  const [usageStatusFilter, setUsageStatusFilter] = useState<string>("all");
+  const [usageDateRange, setUsageDateRange] = useState<string>("30");
+  const [selectedUsageItems, setSelectedUsageItems] = useState<string[]>([]);
+  const [showUsageDetails, setShowUsageDetails] = useState(false);
+  const [selectedUsageItem, setSelectedUsageItem] = useState<UsageData | null>(
+    null,
+  );
+  const [usageSortField, setUsageSortField] = useState<string>("lastActive");
+  const [usageSortDirection, setUsageSortDirection] = useState<"asc" | "desc">(
+    "desc",
+  );
+
+  // Alerts tab state
+  const [alertSearchQuery, setAlertSearchQuery] = useState("");
+  const [alertSeverityFilter, setAlertSeverityFilter] = useState<string>("all");
+  const [alertStatusFilter, setAlertStatusFilter] = useState<string>("all");
+  const [alertTypeFilter, setAlertTypeFilter] = useState<string>("all");
+  const [alertDateRange, setAlertDateRange] = useState<string>("30");
+  const [selectedAlerts, setSelectedAlerts] = useState<string[]>([]);
+  const [showAlertDetails, setShowAlertDetails] = useState(false);
+  const [selectedAlert, setSelectedAlert] = useState<SubscriptionAlert | null>(
+    null,
+  );
+  const [alertSortField, setAlertSortField] = useState<string>("createdAt");
+  const [alertSortDirection, setAlertSortDirection] = useState<"asc" | "desc">(
+    "desc",
+  );
 
   // KPI Cards Data
   const kpiData = {
@@ -188,12 +2099,12 @@ const SubscriptionsManagement: React.FC = () => {
     return (
       <div className="space-y-6 animate-fadeIn">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-xl font-black text-slate-900">
               إدارة خطط الاشتراك
             </h3>
-            <p className="text-sm text-slate-500 font-medium">
+            <p className="text-sm text-slate-500 font-medium mt-1">
               إنشاء وتعديل الخطط والأسعار
             </p>
           </div>
@@ -210,7 +2121,7 @@ const SubscriptionsManagement: React.FC = () => {
         </div>
 
         {/* Filters & Controls */}
-        <div className="flex items-center gap-4 bg-white p-4 rounded-[1.5rem] border border-slate-200">
+        <div className="flex items-center gap-4 bg-white p-4 rounded-[1.5rem] border border-slate-200 shadow-sm mb-6">
           <div className="flex-1 relative">
             <Search className="w-5 h-5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2" />
             <input
@@ -267,7 +2178,7 @@ const SubscriptionsManagement: React.FC = () => {
               >
                 {/* Card Header */}
                 <div
-                  className={`p-6 bg-gradient-to-l ${
+                  className={`p-8 bg-gradient-to-l ${
                     plan.type === "free"
                       ? "from-slate-500 to-slate-600"
                       : plan.type === "basic"
@@ -1489,10 +3400,1174 @@ const SubscriptionsManagement: React.FC = () => {
     </div>
   );
 
+  // ==========================================
+  // Usage Tab Implementation
+  // ==========================================
+  const renderUsageTab = () => {
+    // Filter and sort usage data
+    const filteredUsageData = MOCK_USAGE_DATA.filter((item) => {
+      const matchesSearch =
+        item.userName.toLowerCase().includes(usageSearchQuery.toLowerCase()) ||
+        item.email.toLowerCase().includes(usageSearchQuery.toLowerCase()) ||
+        item.license.toLowerCase().includes(usageSearchQuery.toLowerCase());
+      const matchesPlan =
+        usagePlanFilter === "all" || item.planType === usagePlanFilter;
+      const matchesStatus =
+        usageStatusFilter === "all" || item.status === usageStatusFilter;
+      return matchesSearch && matchesPlan && matchesStatus;
+    }).sort((a, b) => {
+      const modifier = usageSortDirection === "asc" ? 1 : -1;
+      if (usageSortField === "userName")
+        return a.userName.localeCompare(b.userName) * modifier;
+      if (usageSortField === "apiCallsUsed")
+        return (a.apiCallsUsed - b.apiCallsUsed) * modifier;
+      if (usageSortField === "aiModelsUsed")
+        return (a.aiModelsUsed - b.aiModelsUsed) * modifier;
+      if (usageSortField === "lastActive")
+        return (
+          (new Date(a.lastActive).getTime() -
+            new Date(b.lastActive).getTime()) *
+          modifier
+        );
+      return 0;
+    });
+
+    // Calculate usage stats
+    const usageStats = {
+      totalUsers: MOCK_USAGE_DATA.length,
+      activeUsers: MOCK_USAGE_DATA.filter((u) => u.status === "active").length,
+      overused: MOCK_USAGE_DATA.filter((u) => u.status === "overused").length,
+      totalApiCalls: MOCK_USAGE_DATA.reduce(
+        (sum, u) => sum + u.apiCallsUsed,
+        0,
+      ),
+      totalAiQueries: MOCK_USAGE_DATA.reduce(
+        (sum, u) => sum + u.aiModelsUsed,
+        0,
+      ),
+      avgUsagePercentage: Math.round(
+        MOCK_USAGE_DATA.reduce(
+          (sum, u) =>
+            sum +
+            (u.apiCallsLimit > 0
+              ? (u.apiCallsUsed / u.apiCallsLimit) * 100
+              : 0),
+          0,
+        ) / MOCK_USAGE_DATA.length,
+      ),
+    };
+
+    const toggleUsageSelection = (id: string) => {
+      setSelectedUsageItems((prev) =>
+        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+      );
+    };
+
+    const toggleAllUsage = () => {
+      if (selectedUsageItems.length === filteredUsageData.length) {
+        setSelectedUsageItems([]);
+      } else {
+        setSelectedUsageItems(filteredUsageData.map((u) => u.id));
+      }
+    };
+
+    const getStatusBadgeColor = (status: string) => {
+      if (status === "active") return "bg-emerald-50 text-emerald-700";
+      if (status === "overused") return "bg-rose-50 text-rose-700";
+      return "bg-slate-50 text-slate-700";
+    };
+
+    const getStatusLabel = (status: string) => {
+      if (status === "active") return "نشط";
+      if (status === "overused") return "استهلاك عالي";
+      return "غير نشط";
+    };
+
+    return (
+      <div className="space-y-6 animate-fadeIn">
+        {/* Usage Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <UsageStatCard
+            title="إجمالي المستخدمين"
+            value={usageStats.totalUsers.toString()}
+            icon={<Users className="w-6 h-6" />}
+            color="indigo"
+            trend={{ value: 12.5, positive: true }}
+          />
+          <UsageStatCard
+            title="مستخدمون نشطون"
+            value={usageStats.activeUsers.toString()}
+            icon={<Activity className="w-6 h-6" />}
+            color="emerald"
+            trend={{ value: 8.3, positive: true }}
+          />
+          <UsageStatCard
+            title="استهلاك عالي"
+            value={usageStats.overused.toString()}
+            icon={<AlertTriangle className="w-6 h-6" />}
+            color="rose"
+            trend={{ value: 2, positive: false }}
+          />
+          <UsageStatCard
+            title="متوسط الاستخدام"
+            value={`${usageStats.avgUsagePercentage}%`}
+            icon={<BarChart3 className="w-6 h-6" />}
+            color="blue"
+          />
+        </div>
+
+        {/* Additional Stats Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-[2rem] p-6 text-white shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+                <Server className="w-6 h-6" />
+              </div>
+              <span className="text-xs font-bold bg-white/20 px-3 py-1 rounded-full">
+                هذا الشهر
+              </span>
+            </div>
+            <p className="text-sm font-medium text-white/80 mb-1">
+              إجمالي طلبات API
+            </p>
+            <p className="text-3xl font-black">
+              {usageStats.totalApiCalls.toLocaleString()}
+            </p>
+          </div>
+          <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-[2rem] p-6 text-white shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+                <Cpu className="w-6 h-6" />
+              </div>
+              <span className="text-xs font-bold bg-white/20 px-3 py-1 rounded-full">
+                هذا الشهر
+              </span>
+            </div>
+            <p className="text-sm font-medium text-white/80 mb-1">
+              إجمالي استعلامات AI
+            </p>
+            <p className="text-3xl font-black">
+              {usageStats.totalAiQueries.toLocaleString()}
+            </p>
+          </div>
+          <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-[2rem] p-6 text-white shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+                <Layers className="w-6 h-6" />
+              </div>
+              <span className="text-xs font-bold bg-white/20 px-3 py-1 rounded-full">
+                نشط الآن
+              </span>
+            </div>
+            <p className="text-sm font-medium text-white/80 mb-1">
+              لوحات التحكم المستخدمة
+            </p>
+            <p className="text-3xl font-black">
+              {MOCK_USAGE_DATA.reduce(
+                (sum, u) => sum + u.dashboardsUsed,
+                0,
+              ).toLocaleString()}
+            </p>
+          </div>
+        </div>
+
+        {/* Header & Actions */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-black text-slate-900">
+              تحليل الاستخدام
+            </h3>
+            <p className="text-sm text-slate-500 font-medium">
+              مراقبة وتتبع استهلاك الموارد عبر المستخدمين
+            </p>
+          </div>
+          {selectedUsageItems.length > 0 && (
+            <div className="flex items-center gap-3 bg-indigo-50 px-4 py-2.5 rounded-xl border border-indigo-200">
+              <span className="text-sm font-bold text-indigo-700">
+                تم تحديد {selectedUsageItems.length} عنصر
+              </span>
+              <button className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-all flex items-center gap-1">
+                <Download className="w-3 h-3" />
+                تصدير
+              </button>
+              <button className="px-3 py-1.5 bg-white text-indigo-600 border border-indigo-200 rounded-lg text-xs font-bold hover:bg-indigo-50 transition-all flex items-center gap-1">
+                <MessageSquare className="w-3 h-3" />
+                إشعار
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Filters & Controls */}
+        <div className="flex items-center gap-4 bg-white p-4 rounded-[1.5rem] border border-slate-200">
+          <div className="flex-1 relative">
+            <Search className="w-5 h-5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="ابحث عن مستخدم أو ترخيص..."
+              value={usageSearchQuery}
+              onChange={(e) => setUsageSearchQuery(e.target.value)}
+              className="w-full pr-10 pl-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-100"
+            />
+          </div>
+          <select
+            value={usagePlanFilter}
+            onChange={(e) => setUsagePlanFilter(e.target.value)}
+            className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+          >
+            <option value="all">جميع الخطط</option>
+            <option value="free">مجاني</option>
+            <option value="basic">أساسي</option>
+            <option value="pro">محترف</option>
+            <option value="enterprise">مؤسسات</option>
+          </select>
+          <select
+            value={usageStatusFilter}
+            onChange={(e) => setUsageStatusFilter(e.target.value)}
+            className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+          >
+            <option value="all">جميع الحالات</option>
+            <option value="active">نشط</option>
+            <option value="inactive">غير نشط</option>
+            <option value="overused">استهلاك عالي</option>
+          </select>
+          <select
+            value={usageDateRange}
+            onChange={(e) => setUsageDateRange(e.target.value)}
+            className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+          >
+            <option value="7">آخر 7 أيام</option>
+            <option value="30">آخر 30 يوم</option>
+            <option value="90">آخر 90 يوم</option>
+            <option value="custom">مخصص</option>
+          </select>
+        </div>
+
+        {/* Usage Trends Chart */}
+        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+              <TrendingUp className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-slate-900">
+                اتجاهات الاستخدام
+              </h3>
+              <p className="text-sm text-slate-500 font-medium">
+                نظرة عامة على الاستخدام خلال الفترة المحددة
+              </p>
+            </div>
+          </div>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={MOCK_USAGE_TRENDS}>
+                <defs>
+                  <linearGradient id="colorApi" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorAi" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="period" stroke="#94a3b8" fontSize={12} />
+                <YAxis stroke="#94a3b8" fontSize={12} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                  }}
+                />
+                <Legend />
+                <Area
+                  type="monotone"
+                  dataKey="apiCalls"
+                  stroke="#6366f1"
+                  fillOpacity={1}
+                  fill="url(#colorApi)"
+                  name="طلبات API"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="aiQueries"
+                  stroke="#8b5cf6"
+                  fillOpacity={1}
+                  fill="url(#colorAi)"
+                  name="استعلامات AI"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Usage by Feature Chart */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl">
+                <PieChart className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900">
+                  الاستخدام حسب الميزة
+                </h3>
+                <p className="text-sm text-slate-500 font-medium">
+                  توزيع الاستخدام عبر الميزات المختلفة
+                </p>
+              </div>
+            </div>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={MOCK_USAGE_BY_FEATURE}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ feature, percent }) =>
+                      `${feature} (${(percent * 100).toFixed(0)}%)`
+                    }
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    nameKey="feature"
+                  >
+                    {MOCK_USAGE_BY_FEATURE.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Daily Usage Stats */}
+          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+                <BarChart3 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900">
+                  الاستخدام اليومي
+                </h3>
+                <p className="text-sm text-slate-500 font-medium">
+                  متوسط الاستخدام خلال أيام الأسبوع
+                </p>
+              </div>
+            </div>
+            <div className="space-y-4">
+              {MOCK_DAILY_USAGE.map((day, idx) => (
+                <div key={idx} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-slate-700">
+                      {day.day}
+                    </span>
+                    <div className="flex items-center gap-4">
+                      <span className="text-xs text-slate-500">
+                        <span className="font-bold text-indigo-600">
+                          {day.apiCalls.toLocaleString()}
+                        </span>{" "}
+                        API
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        <span className="font-bold text-purple-600">
+                          {day.aiQueries.toLocaleString()}
+                        </span>{" "}
+                        AI
+                      </span>
+                    </div>
+                  </div>
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-l from-indigo-500 to-purple-500 rounded-full"
+                      style={{ width: `${(day.apiCalls / 12000) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Usage Table */}
+        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-slate-50 border-b-2 border-slate-100">
+                <tr>
+                  <th className="text-right py-4 px-6">
+                    <input
+                      type="checkbox"
+                      checked={
+                        selectedUsageItems.length === filteredUsageData.length
+                      }
+                      onChange={toggleAllUsage}
+                      className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                  </th>
+                  <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                    المستخدم
+                  </th>
+                  <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                    الترخيص
+                  </th>
+                  <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                    الخطة
+                  </th>
+                  <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                    لوحات التحكم
+                  </th>
+                  <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                    زوايا البيانات
+                  </th>
+                  <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                    طلبات API
+                  </th>
+                  <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                    نماذج AI
+                  </th>
+                  <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                    آخر نشاط
+                  </th>
+                  <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                    الحالة
+                  </th>
+                  <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                    الإجراءات
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredUsageData.map((item) => (
+                  <tr
+                    key={item.id}
+                    className="hover:bg-slate-50 transition-colors group"
+                  >
+                    <td className="py-4 px-6">
+                      <input
+                        type="checkbox"
+                        checked={selectedUsageItems.includes(item.id)}
+                        onChange={() => toggleUsageSelection(item.id)}
+                        className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-black text-sm">
+                          {item.userName.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-slate-900">
+                            {item.userName}
+                          </p>
+                          <p className="text-xs text-slate-500">{item.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="text-sm font-bold text-slate-700">
+                        {item.license}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span
+                        className={`inline-block px-3 py-1.5 rounded-xl text-xs font-bold ${getPlanColor(item.planType)}`}
+                      >
+                        {item.planType === "enterprise"
+                          ? "مؤسسات"
+                          : item.planType === "pro"
+                            ? "محترف"
+                            : item.planType === "basic"
+                              ? "أساسي"
+                              : "مجاني"}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="text-sm font-bold text-slate-700">
+                        {item.dashboardsUsed}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="text-sm font-bold text-slate-700">
+                        {item.dataAnglesUsed}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden w-24">
+                          <div
+                            className={`h-full rounded-full ${item.apiCallsLimit > 0 ? (item.apiCallsUsed / item.apiCallsLimit > 0.9 ? "bg-rose-500" : item.apiCallsUsed / item.apiCallsLimit > 0.7 ? "bg-amber-500" : "bg-emerald-500") : "bg-slate-300"}`}
+                            style={{
+                              width: `${item.apiCallsLimit > 0 ? (item.apiCallsUsed / item.apiCallsLimit) * 100 : 0}%`,
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs font-bold text-slate-600 w-16">
+                          {item.apiCallsLimit > 0
+                            ? `${Math.round((item.apiCallsUsed / item.apiCallsLimit) * 100)}%`
+                            : "غير محدود"}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden w-24">
+                          <div
+                            className={`h-full rounded-full ${item.aiModelsLimit > 0 ? (item.aiModelsUsed / item.aiModelsLimit > 0.9 ? "bg-rose-500" : item.aiModelsUsed / item.aiModelsLimit > 0.7 ? "bg-amber-500" : "bg-emerald-500") : "bg-slate-300"}`}
+                            style={{
+                              width: `${item.aiModelsLimit > 0 ? (item.aiModelsUsed / item.aiModelsLimit) * 100 : 0}%`,
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs font-bold text-slate-600 w-16">
+                          {item.aiModelsLimit > 0
+                            ? `${Math.round((item.aiModelsUsed / item.aiModelsLimit) * 100)}%`
+                            : "غير محدود"}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="text-sm text-slate-600 font-medium">
+                        {new Date(item.lastActive).toLocaleDateString("ar-SA")}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span
+                        className={`inline-block px-3 py-1.5 rounded-xl text-xs font-bold ${getStatusBadgeColor(item.status)}`}
+                      >
+                        {getStatusLabel(item.status)}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            setSelectedUsageItem(item);
+                            setShowUsageDetails(true);
+                          }}
+                          className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                          title="عرض التفاصيل"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+                          title="إعادة تعيين"
+                        >
+                          <RefreshCcw className="w-4 h-4" />
+                        </button>
+                        <button
+                          className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                          title="إشعار"
+                        >
+                          <Send className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Usage Details Modal */}
+        {showUsageDetails && selectedUsageItem && (
+          <UsageDetailsModal
+            item={selectedUsageItem}
+            onClose={() => setShowUsageDetails(false)}
+          />
+        )}
+      </div>
+    );
+  };
+
+  // ==========================================
+  // Alerts Tab Implementation
+  // ==========================================
+  const renderAlertsTab = () => {
+    // Filter and sort alerts
+    const filteredAlerts = MOCK_ALERTS.filter((alert) => {
+      const matchesSearch =
+        alert.message.toLowerCase().includes(alertSearchQuery.toLowerCase()) ||
+        alert.userName?.toLowerCase().includes(alertSearchQuery.toLowerCase());
+      const matchesSeverity =
+        alertSeverityFilter === "all" || alert.severity === alertSeverityFilter;
+      const matchesStatus =
+        alertStatusFilter === "all" ||
+        (alertStatusFilter === "active" && !alert.resolved) ||
+        (alertStatusFilter === "resolved" && alert.resolved);
+      const matchesType =
+        alertTypeFilter === "all" || alert.type === alertTypeFilter;
+      return matchesSearch && matchesSeverity && matchesStatus && matchesType;
+    }).sort((a, b) => {
+      const modifier = alertSortDirection === "asc" ? 1 : -1;
+      if (alertSortField === "createdAt")
+        return (
+          (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) *
+          modifier
+        );
+      if (alertSortField === "severity") {
+        const severityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+        return (
+          (severityOrder[a.severity as keyof typeof severityOrder] -
+            severityOrder[b.severity as keyof typeof severityOrder]) *
+          modifier
+        );
+      }
+      if (alertSortField === "userName")
+        return (a.userName || "").localeCompare(b.userName || "") * modifier;
+      return 0;
+    });
+
+    // Calculate alert stats
+    const alertStats = {
+      total: MOCK_ALERTS.length,
+      active: MOCK_ALERTS.filter((a) => !a.resolved).length,
+      resolved: MOCK_ALERTS.filter((a) => a.resolved).length,
+      critical: MOCK_ALERTS.filter(
+        (a) => a.severity === "critical" && !a.resolved,
+      ).length,
+      highSeverity: MOCK_ALERTS.filter(
+        (a) => a.severity === "high" && !a.resolved,
+      ).length,
+      expiringSoon: MOCK_ALERTS.filter((a) => a.type === "expiring_soon")
+        .length,
+    };
+
+    const toggleAlertSelection = (id: string) => {
+      setSelectedAlerts((prev) =>
+        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+      );
+    };
+
+    const toggleAllAlerts = () => {
+      if (selectedAlerts.length === filteredAlerts.length) {
+        setSelectedAlerts([]);
+      } else {
+        setSelectedAlerts(filteredAlerts.map((a) => a.id));
+      }
+    };
+
+    const getAlertTypeLabel = (type: string) => {
+      const labels: Record<string, string> = {
+        expiring_soon: "قرب الانتهاء",
+        high_usage: "استخدام عالي",
+        limit_exceeded: "تجاوز الحد",
+        payment_failed: "فشل الدفع",
+        license_warning: "تحذير الترخيص",
+        system_warning: "تحذير النظام",
+      };
+      return labels[type] || type;
+    };
+
+    const getAlertTypeIcon = (type: string) => {
+      switch (type) {
+        case "expiring_soon":
+          return <Clock className="w-4 h-4" />;
+        case "high_usage":
+          return <Activity className="w-4 h-4" />;
+        case "limit_exceeded":
+          return <AlertTriangle className="w-4 h-4" />;
+        case "payment_failed":
+          return <CreditCard className="w-4 h-4" />;
+        case "license_warning":
+          return <Key className="w-4 h-4" />;
+        default:
+          return <AlertOctagon className="w-4 h-4" />;
+      }
+    };
+
+    const getAlertStatusLabel = (resolved: boolean) => {
+      if (resolved) return "تم الحل";
+      return "نشط";
+    };
+
+    // Alert data for charts
+    const alertsBySeverity = [
+      {
+        name: "حرج",
+        value: MOCK_ALERTS.filter((a) => a.severity === "critical").length,
+        color: "#f43f5e",
+      },
+      {
+        name: "عالي",
+        value: MOCK_ALERTS.filter((a) => a.severity === "high").length,
+        color: "#f97316",
+      },
+      {
+        name: "متوسط",
+        value: MOCK_ALERTS.filter((a) => a.severity === "medium").length,
+        color: "#eab308",
+      },
+      {
+        name: "منخفض",
+        value: MOCK_ALERTS.filter((a) => a.severity === "low").length,
+        color: "#3b82f6",
+      },
+    ];
+
+    const alertsByType = [
+      {
+        name: "قرب الانتهاء",
+        value: MOCK_ALERTS.filter((a) => a.type === "expiring_soon").length,
+      },
+      {
+        name: "استخدام عالي",
+        value: MOCK_ALERTS.filter((a) => a.type === "high_usage").length,
+      },
+      {
+        name: "تجاوز الحد",
+        value: MOCK_ALERTS.filter((a) => a.type === "limit_exceeded").length,
+      },
+      {
+        name: "فشل الدفع",
+        value: MOCK_ALERTS.filter((a) => a.type === "payment_failed").length,
+      },
+    ];
+
+    const alertsOverTime = [
+      { date: "1 سبتمبر", count: 3 },
+      { date: "5 سبتمبر", count: 5 },
+      { date: "10 سبتمبر", count: 8 },
+      { date: "15 سبتمبر", count: 6 },
+      { date: "20 سبتمبر", count: 10 },
+      { date: "25 سبتمبر", count: 12 },
+      { date: "29 سبتمبر", count: MOCK_ALERTS.length },
+    ];
+
+    return (
+      <div className="space-y-6 animate-fadeIn">
+        {/* Alert Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          <AlertStatCard
+            title="إجمالي التنبيهات"
+            value={alertStats.total.toString()}
+            icon={<AlertTriangle className="w-6 h-6" />}
+            color="indigo"
+          />
+          <AlertStatCard
+            title="تنبيهات نشطة"
+            value={alertStats.active.toString()}
+            icon={<Activity className="w-6 h-6" />}
+            color="amber"
+            trend={{ value: 12.5, positive: false }}
+          />
+          <AlertStatCard
+            title="تم حلها"
+            value={alertStats.resolved.toString()}
+            icon={<CheckCircle className="w-6 h-6" />}
+            color="emerald"
+            trend={{ value: 8.3, positive: true }}
+          />
+          <AlertStatCard
+            title="حرجة"
+            value={alertStats.critical.toString()}
+            icon={<AlertTriangle className="w-6 h-6" />}
+            color="rose"
+          />
+          <AlertStatCard
+            title="عالية الخطورة"
+            value={alertStats.highSeverity.toString()}
+            icon={<AlertOctagon className="w-6 h-6" />}
+            color="orange"
+          />
+          <AlertStatCard
+            title="قرب الانتهاء"
+            value={alertStats.expiringSoon.toString()}
+            icon={<Clock className="w-6 h-6" />}
+            color="blue"
+          />
+        </div>
+
+        {/* Header & Actions */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-black text-slate-900">
+              إدارة التنبيهات
+            </h3>
+            <p className="text-sm text-slate-500 font-medium">
+              راقب وأدر جميع تنبيهات الاشتراكات والتراخيص
+            </p>
+          </div>
+          {selectedAlerts.length > 0 && (
+            <div className="flex items-center gap-3 bg-indigo-50 px-4 py-2.5 rounded-xl border border-indigo-200">
+              <span className="text-sm font-bold text-indigo-700">
+                تم تحديد {selectedAlerts.length} تنبيه
+              </span>
+              <button className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition-all flex items-center gap-1">
+                <CheckCircle className="w-3 h-3" />
+                حل المحدد
+              </button>
+              <button className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-all flex items-center gap-1">
+                <Send className="w-3 h-3" />
+                إرسال إشعار
+              </button>
+              <button className="px-3 py-1.5 bg-white text-indigo-600 border border-indigo-200 rounded-lg text-xs font-bold hover:bg-indigo-50 transition-all flex items-center gap-1">
+                <Download className="w-3 h-3" />
+                تصدير
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Filters & Controls */}
+        <div className="flex items-center gap-4 bg-white p-4 rounded-[1.5rem] border border-slate-200">
+          <div className="flex-1 relative">
+            <Search className="w-5 h-5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="ابحث عن تنبيه أو مستخدم..."
+              value={alertSearchQuery}
+              onChange={(e) => setAlertSearchQuery(e.target.value)}
+              className="w-full pr-10 pl-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-100"
+            />
+          </div>
+          <select
+            value={alertSeverityFilter}
+            onChange={(e) => setAlertSeverityFilter(e.target.value)}
+            className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+          >
+            <option value="all">جميع الخطورة</option>
+            <option value="critical">حرج</option>
+            <option value="high">عالي</option>
+            <option value="medium">متوسط</option>
+            <option value="low">منخفض</option>
+          </select>
+          <select
+            value={alertStatusFilter}
+            onChange={(e) => setAlertStatusFilter(e.target.value)}
+            className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+          >
+            <option value="all">جميع الحالات</option>
+            <option value="active">نشط</option>
+            <option value="resolved">تم الحل</option>
+          </select>
+          <select
+            value={alertTypeFilter}
+            onChange={(e) => setAlertTypeFilter(e.target.value)}
+            className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+          >
+            <option value="all">جميع الأنواع</option>
+            <option value="expiring_soon">قرب الانتهاء</option>
+            <option value="high_usage">استخدام عالي</option>
+            <option value="limit_exceeded">تجاوز الحد</option>
+            <option value="payment_failed">فشل الدفع</option>
+          </select>
+          <select
+            value={alertDateRange}
+            onChange={(e) => setAlertDateRange(e.target.value)}
+            className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+          >
+            <option value="7">آخر 7 أيام</option>
+            <option value="30">آخر 30 يوم</option>
+            <option value="90">آخر 90 يوم</option>
+          </select>
+        </div>
+
+        {/* Visualizations */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Alerts by Severity */}
+          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl">
+                <PieChart className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900">
+                  التنبيهات حسب الخطورة
+                </h3>
+                <p className="text-sm text-slate-500 font-medium">
+                  توزيع التنبيهات النشطة
+                </p>
+              </div>
+            </div>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={alertsBySeverity}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name} (${value})`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    nameKey="name"
+                  >
+                    {alertsBySeverity.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Alerts by Type */}
+          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
+                <BarChart3 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900">
+                  التنبيهات حسب النوع
+                </h3>
+                <p className="text-sm text-slate-500 font-medium">
+                  أنواع التنبيهات المسجلة
+                </p>
+              </div>
+            </div>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={alertsByType}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} />
+                  <YAxis stroke="#94a3b8" fontSize={12} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#fff",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: "12px",
+                    }}
+                  />
+                  <Bar dataKey="value" fill="#f59e0b" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Alerts Over Time */}
+          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                <TrendingUp className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900">
+                  التنبيهات خلال الوقت
+                </h3>
+                <p className="text-sm text-slate-500 font-medium">
+                  عدد التنبيهات المسجلة يومياً
+                </p>
+              </div>
+            </div>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={alertsOverTime}>
+                  <defs>
+                    <linearGradient
+                      id="colorAlerts"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} />
+                  <YAxis stroke="#94a3b8" fontSize={12} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#fff",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: "12px",
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="count"
+                    stroke="#6366f1"
+                    fillOpacity={1}
+                    fill="url(#colorAlerts)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* Alerts Table */}
+        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-slate-50 border-b-2 border-slate-100">
+                <tr>
+                  <th className="text-right py-4 px-6">
+                    <input
+                      type="checkbox"
+                      checked={selectedAlerts.length === filteredAlerts.length}
+                      onChange={toggleAllAlerts}
+                      className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                  </th>
+                  <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                    التنبيه
+                  </th>
+                  <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                    النوع
+                  </th>
+                  <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                    المستخدم
+                  </th>
+                  <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                    الخطورة
+                  </th>
+                  <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                    التاريخ
+                  </th>
+                  <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                    الحالة
+                  </th>
+                  <th className="text-right py-4 px-6 text-sm font-black text-slate-700">
+                    الإجراءات
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredAlerts.map((alert) => (
+                  <tr
+                    key={alert.id}
+                    className="hover:bg-slate-50 transition-colors group"
+                  >
+                    <td className="py-4 px-6">
+                      <input
+                        type="checkbox"
+                        checked={selectedAlerts.includes(alert.id)}
+                        onChange={() => toggleAlertSelection(alert.id)}
+                        className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`p-2 rounded-lg ${getSeverityColor(alert.severity)}`}
+                        >
+                          {getAlertTypeIcon(alert.type)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-slate-900">
+                            {alert.message}
+                          </p>
+                          <p className="text-xs text-slate-500">#{alert.id}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="text-sm font-bold text-slate-700">
+                        {getAlertTypeLabel(alert.type)}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="text-sm font-medium text-slate-600">
+                        {alert.userName || "-"}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span
+                        className={`inline-block px-3 py-1.5 rounded-xl text-xs font-bold ${getSeverityColor(alert.severity)}`}
+                      >
+                        {alert.severity === "critical"
+                          ? "حرج"
+                          : alert.severity === "high"
+                            ? "عالي"
+                            : alert.severity === "medium"
+                              ? "متوسط"
+                              : "منخفض"}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="text-sm text-slate-600 font-medium">
+                        {new Date(alert.createdAt).toLocaleDateString("ar-SA", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span
+                        className={`inline-block px-3 py-1.5 rounded-xl text-xs font-bold ${
+                          alert.resolved
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-amber-50 text-amber-700"
+                        }`}
+                      >
+                        {getAlertStatusLabel(alert.resolved)}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            setSelectedAlert(alert);
+                            setShowAlertDetails(true);
+                          }}
+                          className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                          title="عرض التفاصيل"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        {!alert.resolved && (
+                          <>
+                            <button
+                              onClick={() => {
+                                // Mark as resolved logic
+                              }}
+                              className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                              title="تحديد كحل"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                            </button>
+                            <button
+                              className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+                              title="إرسال إشعار"
+                            >
+                              <Send className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Alert Details Modal */}
+        {showAlertDetails && selectedAlert && (
+          <AlertDetailsModal
+            alert={selectedAlert}
+            onClose={() => setShowAlertDetails(false)}
+            onResolve={() => {
+              // Resolve logic
+              setShowAlertDetails(false);
+            }}
+          />
+        )}
+      </div>
+    );
+  };
+
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-[1800px] mx-auto p-8 space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
         <div>
           <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
             <div className="p-3 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl shadow-lg shadow-indigo-200">
@@ -1500,16 +4575,16 @@ const SubscriptionsManagement: React.FC = () => {
             </div>
             إدارة الاشتراكات والترخيص
           </h2>
-          <p className="text-slate-500 font-medium mt-2">
+          <p className="text-slate-500 font-medium mt-3">
             تحكّم كامل في الخطط والاشتراكات والتراخيص
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all">
+          <button className="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
             <Download className="w-4 h-4" />
             تصدير التقرير
           </button>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-indigo-200 transition-all">
+          <button className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-indigo-200 transition-all">
             <Plus className="w-4 h-4" />
             خطة جديدة
           </button>
@@ -1517,7 +4592,7 @@ const SubscriptionsManagement: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 bg-white p-2 rounded-[1.5rem] border border-slate-200 shadow-sm w-fit">
+      <div className="flex gap-2 bg-white p-2 rounded-[2rem] border border-slate-200 shadow-sm w-fit">
         <TabButton
           active={activeTab === "overview"}
           onClick={() => setActiveTab("overview")}
@@ -1564,831 +4639,8 @@ const SubscriptionsManagement: React.FC = () => {
       {activeTab === "usage" && renderUsageTab()}
       {activeTab === "alerts" && renderAlertsTab()}
     </div>
-  );
-};
-
-// Sub-components
-const KPICard: React.FC<{
-  title: string;
-  value: string;
-  icon: React.ReactNode;
-  color: "indigo" | "emerald" | "amber" | "rose";
-  trend?: { value: number; positive: boolean };
-}> = ({ title, value, icon, color, trend }) => {
-  const colorClasses = {
-    indigo: "from-indigo-600 to-purple-600",
-    emerald: "from-emerald-600 to-teal-600",
-    amber: "from-amber-600 to-orange-600",
-    rose: "from-rose-600 to-red-600",
-  };
-
-  return (
-    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 hover:shadow-lg transition-all">
-      <div className="flex items-start justify-between mb-4">
-        <div
-          className={`p-3 rounded-2xl bg-gradient-to-br ${colorClasses[color]} text-white`}
-        >
-          {icon}
-        </div>
-        {trend && (
-          <div
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-black ${
-              trend.positive
-                ? "bg-emerald-50 text-emerald-700"
-                : "bg-rose-50 text-rose-700"
-            }`}
-          >
-            <TrendingUp
-              className={`w-3.5 h-3.5 ${!trend.positive ? "rotate-180" : ""}`}
-            />
-            {trend.value}%
-          </div>
-        )}
-      </div>
-      <p className="text-3xl font-black text-slate-900 mb-1">{value}</p>
-      <p className="text-sm font-bold text-slate-500">{title}</p>
     </div>
   );
 };
-
-const TabButton: React.FC<{
-  active: boolean;
-  onClick: () => void;
-  icon: React.ReactNode;
-  label: string;
-}> = ({ active, onClick, icon, label }) => (
-  <button
-    onClick={onClick}
-    className={`flex items-center gap-2 px-5 py-3 rounded-[1.5rem] font-bold text-sm transition-all ${
-      active
-        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
-        : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-    }`}
-  >
-    {icon}
-    {label}
-  </button>
-);
-
-// Placeholder tabs (to be implemented)
-const renderUsageTab = () => (
-  <div className="p-12 text-center text-slate-400">
-    جاري تطوير قسم الاستخدام...
-  </div>
-);
-const renderAlertsTab = () => (
-  <div className="p-12 text-center text-slate-400">
-    جاري تطوير قسم التنبيهات...
-  </div>
-);
-
-const LicenseDetailsModal: React.FC<{ license: any; onClose: () => void }> = ({
-  license,
-  onClose,
-}) => {
-  return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
-      <div className="bg-white rounded-[2rem] w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
-          <div className="flex items-center gap-4">
-            <div className="p-4 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl text-white">
-              <Key className="w-8 h-8" />
-            </div>
-            <div>
-              <h3 className="text-xl font-black text-slate-900">
-                {license.name}
-              </h3>
-              <p className="text-sm text-slate-500 font-mono">{license.key}</p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all"
-          >
-            <X className="w-5 h-5 text-slate-400" />
-          </button>
-        </div>
-        <div className="p-6 space-y-6">
-          <div className="bg-gradient-to-l from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">
-            <h4 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-indigo-600" />
-              معلومات الترخيص
-            </h4>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <InfoItem
-                label="نوع الترخيص"
-                value={
-                  license.type === "enterprise"
-                    ? "مؤسسات"
-                    : license.type === "team"
-                      ? "فريق"
-                      : "فردي"
-                }
-              />
-              <InfoItem label="الحالة" value={license.status} badge />
-              <InfoItem
-                label="تاريخ الإصدار"
-                value={new Date(license.issuedDate).toLocaleDateString("ar-SA")}
-              />
-              <InfoItem
-                label="تاريخ الانتهاء"
-                value={new Date(license.expiryDate).toLocaleDateString("ar-SA")}
-              />
-            </div>
-          </div>
-          <div>
-            <h4 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
-              <Activity className="w-5 h-5 text-indigo-600" />
-              استخدام الترخيص
-            </h4>
-            <div className="bg-white rounded-xl p-6 border border-slate-100">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-bold text-slate-700">
-                  المستخدمين
-                </span>
-                <span className="text-lg font-black text-slate-900">
-                  {license.currentUsers} / {license.maxUsers}
-                </span>
-              </div>
-              <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full ${license.currentUsers / license.maxUsers > 0.9 ? "bg-rose-500" : license.currentUsers / license.maxUsers > 0.7 ? "bg-amber-500" : "bg-emerald-500"}`}
-                  style={{
-                    width: `${(license.currentUsers / license.maxUsers) * 100}%`,
-                  }}
-                />
-              </div>
-              <p className="text-xs font-bold text-slate-400 mt-2">
-                {((license.currentUsers / license.maxUsers) * 100).toFixed(0)}%
-                مستخدم
-              </p>
-            </div>
-          </div>
-          {license.allowedDomains && license.allowedDomains.length > 0 && (
-            <div>
-              <h4 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
-                <Globe className="w-5 h-5 text-indigo-600" />
-                النطاقات المسموحة
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {license.allowedDomains.map((domain: string, idx: number) => (
-                  <span
-                    key={idx}
-                    className="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-bold border border-indigo-200"
-                  >
-                    {domain}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-          <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
-            <button
-              onClick={onClose}
-              className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all"
-            >
-              إغلاق
-            </button>
-            <button className="px-6 py-2.5 bg-indigo-50 text-indigo-600 rounded-xl text-sm font-bold hover:bg-indigo-100 transition-all">
-              تجديد الترخيص
-            </button>
-            <button className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all">
-              تعديل المستخدمين
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const StatCard: React.FC<{
-  title: string;
-  value: string;
-  icon: React.ReactNode;
-  color: "indigo" | "emerald" | "blue" | "amber";
-  trend?: { value: number; positive: boolean };
-}> = ({ title, value, icon, color, trend }) => {
-  const colorClasses = {
-    indigo: "from-indigo-600 to-purple-600",
-    emerald: "from-emerald-600 to-teal-600",
-    blue: "from-blue-600 to-cyan-600",
-    amber: "from-amber-600 to-orange-600",
-  };
-
-  return (
-    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 hover:shadow-lg transition-all">
-      <div className="flex items-start justify-between mb-4">
-        <div
-          className={`p-3 rounded-2xl bg-gradient-to-br ${colorClasses[color]} text-white`}
-        >
-          {icon}
-        </div>
-        {trend && (
-          <div
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-black ${
-              trend.positive
-                ? "bg-emerald-50 text-emerald-700"
-                : "bg-rose-50 text-rose-700"
-            }`}
-          >
-            <TrendingUp
-              className={`w-3.5 h-3.5 ${!trend.positive ? "rotate-180" : ""}`}
-            />
-            {trend.value}%
-          </div>
-        )}
-      </div>
-      <p className="text-3xl font-black text-slate-900 mb-1">{value}</p>
-      <p className="text-sm font-bold text-slate-500">{title}</p>
-    </div>
-  );
-};
-
-const UserDetailsModal: React.FC<{ user: any; onClose: () => void }> = ({
-  user,
-  onClose,
-}) => {
-  return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
-      <div className="bg-white rounded-[2rem] w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-black text-2xl">
-              {user.name.charAt(0)}
-            </div>
-            <div>
-              <h3 className="text-xl font-black text-slate-900">{user.name}</h3>
-              <p className="text-sm text-slate-500">{user.email}</p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all"
-          >
-            <X className="w-5 h-5 text-slate-400" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="p-6 space-y-6">
-          {/* Subscription Info */}
-          <div className="bg-gradient-to-l from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">
-            <h4 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-indigo-600" />
-              معلومات الاشتراك
-            </h4>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <InfoItem label="الخطة الحالية" value={user.plan} />
-              <InfoItem label="الحالة" value={user.status} badge />
-              <InfoItem
-                label="تاريخ البداية"
-                value={new Date(user.startDate).toLocaleDateString("ar-SA")}
-              />
-              <InfoItem
-                label="تاريخ النهاية"
-                value={new Date(user.endDate).toLocaleDateString("ar-SA")}
-              />
-            </div>
-          </div>
-
-          {/* Usage Metrics */}
-          <div>
-            <h4 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
-              <Activity className="w-5 h-5 text-indigo-600" />
-              استخدام الخدمة
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <UsageBar
-                label="لوحات التحكم"
-                used={user.usage.dashboardInteractions || 0}
-                limit={user.limits.maxDashboards}
-                percentage={user.usagePercentage.dashboard || 0}
-              />
-              <UsageBar
-                label="مجموعات البيانات"
-                used={user.usage.datasetQueries || 0}
-                limit={user.limits.maxDatasets}
-                percentage={user.usagePercentage.datasets || 0}
-              />
-              <UsageBar
-                label="طلبات API"
-                used={user.usage.apiCalls}
-                limit={user.limits.apiRequestsPerMonth}
-                percentage={user.usagePercentage.api || 0}
-              />
-              <UsageBar
-                label="استعلامات AI"
-                used={
-                  user.usage.aiQueries.prediction +
-                  user.usage.aiQueries.analysis +
-                  user.usage.aiQueries.summarization
-                }
-                limit={user.limits.aiQueriesPerMonth}
-                percentage={user.usagePercentage.ai || 0}
-              />
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
-            <button
-              onClick={onClose}
-              className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all"
-            >
-              إغلاق
-            </button>
-            <button className="px-6 py-2.5 bg-indigo-50 text-indigo-600 rounded-xl text-sm font-bold hover:bg-indigo-100 transition-all">
-              تغيير الخطة
-            </button>
-            <button className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all">
-              إعادة تعيين كلمة المرور
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const InfoItem: React.FC<{
-  label: string;
-  value: string | number;
-  badge?: boolean;
-}> = ({ label, value, badge }) => (
-  <div>
-    <p className="text-xs font-bold text-slate-500 mb-1">{label}</p>
-    {badge ? (
-      <span
-        className={`inline-block px-3 py-1.5 rounded-lg text-xs font-bold ${getStatusColor(String(value))}`}
-      >
-        {value === "active"
-          ? "نشط"
-          : value === "trial"
-            ? "تجريبي"
-            : value === "expired"
-              ? "منتهي"
-              : "ملغى"}
-      </span>
-    ) : (
-      <p className="text-sm font-black text-slate-900">{value}</p>
-    )}
-  </div>
-);
-
-const UsageBar: React.FC<{
-  label: string;
-  used: number;
-  limit: number;
-  percentage: number;
-}> = ({ label, used, limit, percentage }) => (
-  <div className="bg-white rounded-xl p-4 border border-slate-100">
-    <div className="flex items-center justify-between mb-2">
-      <span className="text-sm font-bold text-slate-700">{label}</span>
-      <span className="text-xs font-bold text-slate-500">
-        {used.toLocaleString()} / {limit.toLocaleString()}
-      </span>
-    </div>
-    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-      <div
-        className={`h-full rounded-full transition-all ${
-          percentage > 90
-            ? "bg-rose-500"
-            : percentage > 70
-              ? "bg-amber-500"
-              : "bg-emerald-500"
-        }`}
-        style={{ width: `${Math.min(100, percentage)}%` }}
-      />
-    </div>
-    <p className="text-xs font-bold text-slate-400 mt-2">
-      {percentage.toFixed(0)}% مستخدم
-    </p>
-  </div>
-);
-
-const LimitRow: React.FC<{ label: string; value: string | number }> = ({
-  label,
-  value,
-}) => (
-  <div className="flex items-center justify-between text-sm">
-    <span className="text-slate-500 font-medium">{label}</span>
-    <span className="text-slate-900 font-black">{value}</span>
-  </div>
-);
-
-const FeatureBadge: React.FC<{ label: string; enabled: boolean }> = ({
-  label,
-  enabled,
-}) => (
-  <div
-    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold ${
-      enabled ? "bg-emerald-50 text-emerald-700" : "bg-slate-50 text-slate-400"
-    }`}
-  >
-    {enabled ? (
-      <CheckCircle className="w-3.5 h-3.5" />
-    ) : (
-      <XCircle className="w-3.5 h-3.5" />
-    )}
-    {label}
-  </div>
-);
-
-const ComparisonRow: React.FC<{
-  label: string;
-  values: any[];
-  type?: "text" | "boolean";
-}> = ({ label, values, type = "text" }) => (
-  <tr className="border-b border-slate-50">
-    <td className="py-4 px-4 text-sm font-bold text-slate-700">{label}</td>
-    {values.map((value, idx) => (
-      <td key={idx} className="text-center py-4 px-4">
-        {type === "boolean" ? (
-          value ? (
-            <CheckCircle className="w-5 h-5 text-emerald-500 mx-auto" />
-          ) : (
-            <XCircle className="w-5 h-5 text-slate-300 mx-auto" />
-          )
-        ) : (
-          <span className="text-sm font-bold text-slate-700">{value}</span>
-        )}
-      </td>
-    ))}
-  </tr>
-);
-
-const PlanModal: React.FC<{
-  plan: any;
-  onClose: () => void;
-  onSave: () => void;
-}> = ({ plan, onClose, onSave }) => {
-  const [formData, setFormData] = useState(
-    plan || {
-      name: "",
-      type: "basic",
-      price: { monthly: 0, yearly: 0 },
-      description: "",
-      features: {
-        dataAngles: false,
-        datasetExplorer: false,
-        dashboardInsights: false,
-        aiPrediction: false,
-        aiAnalysis: false,
-        aiSummarization: false,
-        exportData: false,
-        apiAccess: false,
-        customBranding: false,
-        prioritySupport: false,
-      },
-      limits: {
-        maxDashboards: 0,
-        maxDatasets: 0,
-        apiRequestsPerMonth: 0,
-        aiQueriesPerMonth: 0,
-        maxUsers: 0,
-        storageGB: 0,
-      },
-    },
-  );
-
-  return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
-      <div className="bg-white rounded-[2rem] w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-100">
-          <div>
-            <h3 className="text-xl font-black text-slate-900">
-              {plan ? "تعديل الخطة" : "إنشاء خطة جديدة"}
-            </h3>
-            <p className="text-sm text-slate-500 font-medium">
-              أدخل تفاصيل الخطة الجديدة
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all"
-          >
-            <X className="w-5 h-5 text-slate-400" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="p-6 space-y-6">
-          {/* Basic Info */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">
-                اسم الخطة
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-100"
-                placeholder="مثال: محترف"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">
-                نوع الخطة
-              </label>
-              <select
-                value={formData.type}
-                onChange={(e) =>
-                  setFormData({ ...formData, type: e.target.value })
-                }
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-100"
-              >
-                <option value="free">مجاني</option>
-                <option value="basic">أساسي</option>
-                <option value="pro">محترف</option>
-                <option value="enterprise">مؤسسات</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Pricing */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">
-                السعر الشهري (ر.س)
-              </label>
-              <input
-                type="number"
-                value={formData.price.monthly}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    price: {
-                      ...formData.price,
-                      monthly: Number(e.target.value),
-                    },
-                  })
-                }
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-100"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">
-                السعر السنوي (ر.س)
-              </label>
-              <input
-                type="number"
-                value={formData.price.yearly}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    price: {
-                      ...formData.price,
-                      yearly: Number(e.target.value),
-                    },
-                  })
-                }
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-100"
-              />
-            </div>
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">
-              الوصف
-            </label>
-            <textarea
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-100"
-              rows={3}
-              placeholder="وصف قصير للخطة..."
-            />
-          </div>
-
-          {/* Limits */}
-          <div>
-            <h4 className="text-sm font-black text-slate-700 mb-4 flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
-              حدود الخطة
-            </h4>
-            <div className="grid grid-cols-2 gap-4">
-              <LimitInput
-                label="لوحات التحكم"
-                value={formData.limits.maxDashboards}
-                onChange={(v) =>
-                  setFormData({
-                    ...formData,
-                    limits: { ...formData.limits, maxDashboards: v },
-                  })
-                }
-              />
-              <LimitInput
-                label="مجموعات البيانات"
-                value={formData.limits.maxDatasets}
-                onChange={(v) =>
-                  setFormData({
-                    ...formData,
-                    limits: { ...formData.limits, maxDatasets: v },
-                  })
-                }
-              />
-              <LimitInput
-                label="طلبات API"
-                value={formData.limits.apiRequestsPerMonth}
-                onChange={(v) =>
-                  setFormData({
-                    ...formData,
-                    limits: { ...formData.limits, apiRequestsPerMonth: v },
-                  })
-                }
-              />
-              <LimitInput
-                label="استعلامات AI"
-                value={formData.limits.aiQueriesPerMonth}
-                onChange={(v) =>
-                  setFormData({
-                    ...formData,
-                    limits: { ...formData.limits, aiQueriesPerMonth: v },
-                  })
-                }
-              />
-              <LimitInput
-                label="المستخدمين"
-                value={formData.limits.maxUsers}
-                onChange={(v) =>
-                  setFormData({
-                    ...formData,
-                    limits: { ...formData.limits, maxUsers: v },
-                  })
-                }
-              />
-              <LimitInput
-                label="التخزين (GB)"
-                value={formData.limits.storageGB}
-                onChange={(v) =>
-                  setFormData({
-                    ...formData,
-                    limits: { ...formData.limits, storageGB: v },
-                  })
-                }
-              />
-            </div>
-          </div>
-
-          {/* Features */}
-          <div>
-            <h4 className="text-sm font-black text-slate-700 mb-4 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4" />
-              الميزات
-            </h4>
-            <div className="grid grid-cols-2 gap-3">
-              <FeatureToggle
-                label="زوايا البيانات"
-                enabled={formData.features.dataAngles}
-                onChange={(v) =>
-                  setFormData({
-                    ...formData,
-                    features: { ...formData.features, dataAngles: v },
-                  })
-                }
-              />
-              <FeatureToggle
-                label="مستكشف البيانات"
-                enabled={formData.features.datasetExplorer}
-                onChange={(v) =>
-                  setFormData({
-                    ...formData,
-                    features: { ...formData.features, datasetExplorer: v },
-                  })
-                }
-              />
-              <FeatureToggle
-                label="رؤى لوحة القيادة"
-                enabled={formData.features.dashboardInsights}
-                onChange={(v) =>
-                  setFormData({
-                    ...formData,
-                    features: { ...formData.features, dashboardInsights: v },
-                  })
-                }
-              />
-              <FeatureToggle
-                label="تنبؤات AI"
-                enabled={formData.features.aiPrediction}
-                onChange={(v) =>
-                  setFormData({
-                    ...formData,
-                    features: { ...formData.features, aiPrediction: v },
-                  })
-                }
-              />
-              <FeatureToggle
-                label="تحليلات AI"
-                enabled={formData.features.aiAnalysis}
-                onChange={(v) =>
-                  setFormData({
-                    ...formData,
-                    features: { ...formData.features, aiAnalysis: v },
-                  })
-                }
-              />
-              <FeatureToggle
-                label="تصدير البيانات"
-                enabled={formData.features.exportData}
-                onChange={(v) =>
-                  setFormData({
-                    ...formData,
-                    features: { ...formData.features, exportData: v },
-                  })
-                }
-              />
-              <FeatureToggle
-                label="وصول API"
-                enabled={formData.features.apiAccess}
-                onChange={(v) =>
-                  setFormData({
-                    ...formData,
-                    features: { ...formData.features, apiAccess: v },
-                  })
-                }
-              />
-              <FeatureToggle
-                label="دعم ذو أولوية"
-                enabled={formData.features.prioritySupport}
-                onChange={(v) =>
-                  setFormData({
-                    ...formData,
-                    features: { ...formData.features, prioritySupport: v },
-                  })
-                }
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-100 bg-slate-50">
-          <button
-            onClick={onClose}
-            className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all"
-          >
-            إلغاء
-          </button>
-          <button
-            onClick={onSave}
-            className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-sm font-bold hover:shadow-lg transition-all"
-          >
-            <Save className="w-4 h-4" />
-            حفظ الخطة
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const LimitInput: React.FC<{
-  label: string;
-  value: number;
-  onChange: (v: number) => void;
-}> = ({ label, value, onChange }) => (
-  <div>
-    <label className="block text-xs font-bold text-slate-500 mb-1.5">
-      {label}
-    </label>
-    <input
-      type="number"
-      value={value}
-      onChange={(e) => onChange(Number(e.target.value))}
-      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-    />
-  </div>
-);
-
-const FeatureToggle: React.FC<{
-  label: string;
-  enabled: boolean;
-  onChange: (v: boolean) => void;
-}> = ({ label, enabled, onChange }) => (
-  <button
-    onClick={() => onChange(!enabled)}
-    className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${
-      enabled
-        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-        : "border-slate-200 bg-slate-50 text-slate-500"
-    }`}
-  >
-    <span className="text-sm font-bold">{label}</span>
-    {enabled ? (
-      <ToggleRight className="w-5 h-5 text-emerald-600" />
-    ) : (
-      <ToggleLeft className="w-5 h-5 text-slate-400" />
-    )}
-  </button>
-);
 
 export default SubscriptionsManagement;
