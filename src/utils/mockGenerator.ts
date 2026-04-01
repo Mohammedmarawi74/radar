@@ -1,4 +1,4 @@
-import { FeedItem, FeedContentType } from '../../types';
+import { FeedItem, FeedContentType } from '../types';
 
 const TITLES = [
     "تحليل أداء قطاع البتروكيماويات", "مستقبل الذكاء الاصطناعي في الاستثمار", "تقرير التضخم الربع سنوي",

@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { analyzeWidgetData } from '../services/geminiService';
 import { generateMetabaseUrl } from '../services/metabaseService';
-import { DATASETS } from '../constants';
+import { DATASETS } from '../constants/constants';
 
 interface WidgetCardProps {
   widget: Widget;

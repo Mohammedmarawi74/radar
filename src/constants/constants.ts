@@ -1,6 +1,6 @@
 
-import { ChartType, Dashboard, Dataset, FeedContentType, FeedItem, FollowableEntity, RefreshLog, TimelineEvent, TimelineEventType, User, UserRole, Widget } from './types';
-import { generateFeedBatch } from './src/utils/mockGenerator';
+import { ChartType, Dashboard, Dataset, FeedContentType, FeedItem, FollowableEntity, RefreshLog, TimelineEvent, TimelineEventType, User, UserRole, Widget } from '../types';
+import { generateFeedBatch } from '../utils/mockGenerator';
 
 export const CURRENT_USER: User = {
   id: 'u1',

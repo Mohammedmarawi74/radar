@@ -110,7 +110,7 @@ import {
   WIDGETS,
   TIMELINE_EVENTS,
   FEED_ITEMS
-} from './constants';
+} from './constants/constants';
 import WidgetCard from './components/WidgetCard';
 import TimelineCard from './components/TimelineCard';
 import HomeFeed from './components/HomeFeed';
