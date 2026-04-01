@@ -1,8 +1,8 @@
 import json
 
 def generate_arabic_text_summary():
-    json_path = "radar_posts.json"
-    txt_path = "ملخص_المنشورات.txt"
+    json_path = "../data/radar_posts.json"
+    txt_path = "../data/ملخص_المنشورات.txt"
     
     with open(json_path, 'r', encoding='utf-8') as f:
         posts = json.load(f)

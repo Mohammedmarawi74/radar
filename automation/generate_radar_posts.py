@@ -9,8 +9,8 @@ from sqlalchemy import text
 # ==========================================
 # 1. إعدادات الملفات
 # ==========================================
-RADAR_FILES_DIR = "radar files"
-OUTPUT_JSON = "radar_posts.json"
+RADAR_FILES_DIR = "../radar files"
+OUTPUT_JSON = "../data/radar_posts.json"
 TABLE_NAME = "real_estate_transactions"
 
 COLUMN_MAPPING = {
