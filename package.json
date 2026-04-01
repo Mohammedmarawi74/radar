@@ -11,6 +11,8 @@
   "dependencies": {
     "@google/genai": "^1.33.0",
     "driver.js": "^1.4.0",
+    "echarts": "^6.0.0",
+    "echarts-for-react": "^3.0.6",
     "jose": "5.2.3",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.561.0",

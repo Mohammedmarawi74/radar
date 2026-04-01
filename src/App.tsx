@@ -138,6 +138,7 @@ import SmartComparisonsPage from './components/SmartComparisonsPage';
 import DataSourcesPage from './components/DataSourcesPage';
 import AIEconomicDashboard from './components/AIEconomicDashboard';
 import AdvancedContentManagement from './components/AdvancedContentManagement';
+import DashboardTest from './components/DashboardTest';
 
 // --- Safe Navigation Helper ---
 interface NavItemProps {
@@ -388,6 +389,7 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
               <NavItem id="nav-radar" to="/smart-radar" icon={Target} isCollapsed={isCollapsed} important>أدوات التحليل الذكي</NavItem>
               <NavItem id="nav-geo-radar" to="/geo-radar" icon={MapIcon} isCollapsed={isCollapsed} important>الرادار الجغرافي</NavItem>
               <NavItem id="nav-simulator" to="/simulator" icon={Calculator} isCollapsed={isCollapsed} important>محاكي الاستثمار</NavItem>
+              <NavItem id="nav-dashboard-test" to="/dashboard-test" icon={BarChart3} isCollapsed={isCollapsed} important>dashboard teste</NavItem>
               <NavItem id="nav-timeline" to="/timeline" icon={Clock} isCollapsed={isCollapsed}>سجل التغييرات</NavItem>
               <NavItem id="nav-followers" to="/followers" icon={Users} isCollapsed={isCollapsed}>المجتمع</NavItem>
             </NavGroup>
@@ -1295,6 +1297,7 @@ const App = () => {
             {/* Removed official-panels route */}
             <Route path="/signals" element={<AISignalsPage />} />
             <Route path="/timeline" element={<TimelinePage events={TIMELINE_EVENTS} />} />
+            <Route path="/dashboard-test" element={<DashboardTest />} />
             <Route path="/help" element={<HelpCenterPage />} />
             <Route path="/followers" element={<FollowersPage />} />
             <Route path="/profile" element={<UserProfile />} />
