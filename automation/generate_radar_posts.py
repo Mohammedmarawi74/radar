@@ -54,7 +54,7 @@ def upload_excel_files_to_mysql():
     excel_files = []
     for root, dirs, files in os.walk(RADAR_FILES_DIR):
         for file in files:
-            if file.endswith(('.xlsx', '.xls')):
+            if file.endswith(('.xlsx', '.xls')) and not file.startswith('~$'):
                 filename = os.path.basename(file)
                 year, quarter = extract_year_quarter_from_filename(filename)
                 # !! فلترة لاختبار كامل عام 2024 (جميع الأرباع) !!
