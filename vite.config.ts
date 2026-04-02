@@ -19,14 +19,12 @@ export default defineConfig(({ mode }) => {
         rollupOptions: {
           input: {
             main: path.resolve(__dirname, 'index.html'),
-            dashboard: path.resolve(__dirname, 'dashboard/index.html'),
           },
         },
       },
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),
-          '@dashboard': path.resolve(__dirname, 'dashboard'),
         }
       }
     };
