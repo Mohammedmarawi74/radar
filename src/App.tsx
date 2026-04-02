@@ -89,7 +89,9 @@ import {
   Target,
   Map as MapIcon,
   ChevronRight,
-  Ghost
+  Ghost,
+  Building2,
+  MapPin
 } from 'lucide-react';
 import {
   UserRole,
@@ -127,7 +129,7 @@ import FavoritesPage from './components/FavoritesPage';
 import AIRadarDashboard from './components/AIRadarDashboard';
 import SmartRadarPage from './components/SmartRadarPage';
 import TimelinePage from './components/TimelinePage';
-import InvestmentGeoRadar from './components/InvestmentGeoRadar';
+import MapDashboard from './components/MapDashboard';
 import { ToastProvider } from './components/Toast';
 import GuidedTours from './components/GuidedTours';
 import HelpCenterPage from './components/HelpCenterPage';
@@ -139,6 +141,7 @@ import DataSourcesPage from './components/DataSourcesPage';
 import AIEconomicDashboard from './components/AIEconomicDashboard';
 import AdvancedContentManagement from './components/AdvancedContentManagement';
 import DashboardTest from './components/DashboardTest';
+import CityAnalytics from './components/CityAnalytics';
 
 // --- Safe Navigation Helper ---
 interface NavItemProps {
@@ -172,7 +175,7 @@ const NavItem = ({ to, icon: Icon, children, end = false, className = '', badge 
 
   if (isCollapsed && !important) return null;
 
-  const baseClass = `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group cursor-pointer select-none`;
+  const baseClass = `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium font-['IBM_Plex_Sans_Arabic'] transition-all duration-200 group cursor-pointer select-none`;
   const activeClass = `bg-blue-600 text-white shadow-lg shadow-blue-900/40`;
   const inactiveClass = `hover:bg-slate-800 text-slate-400 hover:text-white`;
 
@@ -275,7 +278,7 @@ const NavGroup = ({
         >
           <div className="flex items-center gap-2.5">
             {Icon && <Icon size={16} className={`transition-colors ${open ? 'text-blue-400' : 'text-slate-500'}`} />}
-            <span className={`text-[11px] font-black uppercase tracking-wider transition-colors ${open ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-200'}`}>{title}</span>
+            <span className={`text-[11px] font-black font-['IBM_Plex_Sans_Arabic'] uppercase tracking-wider transition-colors ${open ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-200'}`}>{title}</span>
           </div>
           <ChevronDown 
             size={14} 
@@ -343,7 +346,8 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
     content: true,
     tools: true,
     admin: true,
-    notifications: true
+    notifications: true,
+    cities: false
   });
 
   const toggleSection = (key: keyof typeof sections) => {
@@ -351,7 +355,9 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
   };
 
   return (
-    <aside className={`${isCollapsed ? 'w-20' : 'w-[280px]'} ${isAdminPath ? 'bg-[#09090b] border-l-amber-500/30' : 'bg-slate-950 border-l-slate-800/50'} text-white h-screen fixed inset-y-0 right-0 hidden lg:flex flex-col shadow-2xl z-[100] overflow-hidden border-l transition-all duration-500 ease-in-out`}>
+    <aside 
+      style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif" }}
+      className={`${isCollapsed ? 'w-20' : 'w-[280px]'} ${isAdminPath ? 'bg-[#09090b] border-l-amber-500/30' : 'bg-slate-950 border-l-slate-800/50'} text-white h-screen fixed inset-y-0 right-0 hidden lg:flex flex-col shadow-2xl z-[100] overflow-hidden border-l transition-all duration-500 ease-in-out`}>
       {/* Brand & Toggle */}
       <div id="sidebar-brand" className={`p-6 border-b border-white/5 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} ${isAdminPath ? 'bg-zinc-950/50' : 'bg-slate-950'} shrink-0 relative group/brand transition-colors duration-500`}>
         {!isCollapsed && (
@@ -387,11 +393,16 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
               <NavItem id="nav-home" to="/" icon={Home} end isCollapsed={isCollapsed} important>الصفحة الرئيسية</NavItem>
               <NavItem id="nav-signals" to="/signals" icon={Zap} isCollapsed={isCollapsed} important>إشارات السوق</NavItem>
               <NavItem id="nav-radar" to="/smart-radar" icon={Target} isCollapsed={isCollapsed} important>أدوات التحليل الذكي</NavItem>
-              <NavItem id="nav-geo-radar" to="/geo-radar" icon={MapIcon} isCollapsed={isCollapsed} important>الرادار الجغرافي</NavItem>
               <NavItem id="nav-simulator" to="/simulator" icon={Calculator} isCollapsed={isCollapsed} important>محاكي الاستثمار</NavItem>
-              <NavItem id="nav-dashboard-test" to="/dashboard-test" icon={BarChart3} isCollapsed={isCollapsed} important>dashboard teste</NavItem>
+              <NavItem id="nav-dashboard-test" to="/dashboard-test" icon={Monitor} isCollapsed={isCollapsed} important>لوحة اختبار البيانات</NavItem>
               <NavItem id="nav-timeline" to="/timeline" icon={Clock} isCollapsed={isCollapsed}>سجل التغييرات</NavItem>
               <NavItem id="nav-followers" to="/followers" icon={Users} isCollapsed={isCollapsed}>المجتمع</NavItem>
+            </NavGroup>
+
+            <NavGroup title="تحليل المدن الاستثماري" open={sections.cities} onToggle={() => toggleSection('cities')} isCollapsed={isCollapsed} icon={Building2}>
+              {["الرياض", "جدة", "بريدة", "مكة المكرمة", "المدينة المنورة", "الدمام", "حائل", "الهفوف", "الخبر", "حفر الباطن", "الطائف", "الخرج", "تبوك", "عرعر", "أبها", "نجران", "خميس مشيط", "عنيزة", "المزاحمية", "جيزان", "الدوادمي", "سكاكا", "الجبيل", "بقعاء", "القطيف"].map(city => (
+                <NavItem key={city} to={`/city/${city}`} icon={MapPin} isCollapsed={isCollapsed}>{city}</NavItem>
+              ))}
             </NavGroup>
 
             <div className="h-px bg-slate-800/50 mx-2 my-2"></div>
@@ -1290,7 +1301,6 @@ const App = () => {
             <Route path="/" element={<HomeFeed feedItems={FEED_ITEMS} user={currentUser} onOpenWizard={() => setIsWizardOpen(true)} />} />
             <Route path="/ai-dashboard" element={<AIRadarDashboard />} />
             <Route path="/smart-radar" element={<SmartRadarPage />} />
-            <Route path="/geo-radar" element={<InvestmentGeoRadar />} />
             <Route path="/simulator" element={<InvestmentSimulator />} />
             <Route path="/dashboards" element={<OfficialDashboardsPage dashboards={officialDashboards} widgets={allWidgets} userRole={currentUser.role} />} />
             <Route path="/dataset-explorer/:angleId" element={<DatasetExplorerPage />} />
@@ -1298,6 +1308,7 @@ const App = () => {
             <Route path="/signals" element={<AISignalsPage />} />
             <Route path="/timeline" element={<TimelinePage events={TIMELINE_EVENTS} />} />
             <Route path="/dashboard-test" element={<DashboardTest />} />
+            <Route path="/city/:cityName" element={<CityAnalytics />} />
             <Route path="/help" element={<HelpCenterPage />} />
             <Route path="/followers" element={<FollowersPage />} />
             <Route path="/profile" element={<UserProfile />} />

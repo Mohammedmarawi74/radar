@@ -3,9 +3,13 @@ import ReactECharts from 'echarts-for-react';
 import {
   BarChart3, TrendingUp, Building2, Map, Activity,
   Layers, DollarSign, Home, RefreshCw, ChevronRight,
-  ArrowUpRight, ArrowDownRight, Info
+  ArrowUpRight, ArrowDownRight, Info, LayoutDashboard,
+  Globe, Sparkles, ClipboardList, Award, Maximize, MapPin,
+  Banknote, BarChart, PieChart, LineChart, TrendingDown,
+  Radar, Flame, Circle, FileText, LayoutTemplate, History, Clock
 } from 'lucide-react';
 import rawData from '../../data/dashboard_charts.json';
+import MapDashboard from './MapDashboard';
 
 // ────────────────────────────────────────────────────────────
 // Type helpers
@@ -16,6 +20,7 @@ const PALETTE = [
   '#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6',
   '#06b6d4','#ec4899','#84cc16','#f97316','#64748b',
 ];
+const CHART_FONT = 'IBM Plex Sans Arabic';
 
 function kfmt(n: number, unit = '') {
   if (Math.abs(n) >= 1000) return (n / 1000).toFixed(1) + 'K' + unit;
@@ -50,10 +55,13 @@ const KPICard = ({ label, value, sub, icon: Icon, color, delta }: any) => (
 // ────────────────────────────────────────────────────────────
 // Chart Section wrapper
 // ────────────────────────────────────────────────────────────
-const ChartCard = ({ title, subtitle, children, colSpan = 1 }: any) => (
+const ChartCard = ({ title, subtitle, children, colSpan = 1, icon: Icon }: any) => (
   <div className={`bg-white rounded-3xl border border-slate-100 shadow-sm p-6 flex flex-col ${colSpan === 2 ? 'col-span-2' : ''}`}>
     <div className="mb-4">
-      <h3 className="text-base font-black text-slate-800">{title}</h3>
+      <div className="flex items-center gap-2 mb-1">
+        {Icon && <Icon size={18} className="text-blue-500" />}
+        <h3 className="text-base font-black text-slate-800">{title}</h3>
+      </div>
       {subtitle && <p className="text-xs text-slate-400 mt-0.5 font-medium">{subtitle}</p>}
     </div>
     {children}
@@ -64,14 +72,14 @@ const ChartCard = ({ title, subtitle, children, colSpan = 1 }: any) => (
 // MAIN DASHBOARD
 // ────────────────────────────────────────────────────────────
 const DashboardTest: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'overview'|'regions'|'advanced'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview'|'regions'|'advanced'|'longterm'|'georadar'>('overview');
   const kpi = D.kpi;
 
   // ── 1. Liquidity Area + Line (dual axis) ──────────────────
   const liquidityOption = useMemo(() => ({
     backgroundColor: 'transparent',
     tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
-    legend: { data: ['السيولة (مليار)', 'عدد الصفقات'], bottom: 0, textStyle: { fontFamily: 'IBM Plex Sans Arabic' } },
+    legend: { data: ['السيولة (مليار)', 'عدد الصفقات'], bottom: 0, textStyle: { fontFamily: CHART_FONT } },
     grid: { left: 60, right: 60, top: 30, bottom: 50 },
     xAxis: { type: 'category', data: D.quarterlyTrend.categories, axisLine: { lineStyle: { color: '#e2e8f0' } } },
     yAxis: [
@@ -109,12 +117,12 @@ const DashboardTest: React.FC = () => {
 
   // ── 2. Region Grouped Bar ─────────────────────────────────
   const regionBarOption = useMemo(() => ({
-    tooltip: { trigger: 'axis' },
-    legend: { data: ['السيولة(م)', 'الصفقات(100)'], bottom: 0 },
+    tooltip: { trigger: 'axis', textStyle: { fontFamily: CHART_FONT } },
+    legend: { data: ['السيولة(م)', 'الصفقات(100)'], bottom: 0, textStyle: { fontFamily: CHART_FONT } },
     grid: { left: 80, right: 20, top: 20, bottom: 50 },
-    xAxis: { type: 'value', splitLine: { lineStyle: { color: '#f1f5f9' } } },
+    xAxis: { type: 'value', splitLine: { lineStyle: { color: '#f1f5f9' } }, axisLabel: { fontFamily: CHART_FONT } },
     yAxis: { type: 'category', data: [...D.regionMulti.regions].reverse(),
-      axisLabel: { width: 70, overflow: 'truncate', fontSize: 11 } },
+      axisLabel: { width: 70, overflow: 'truncate', fontSize: 11, fontFamily: CHART_FONT } },
     series: [
       {
         name: 'السيولة(م)', type: 'bar', stack: 'total',
@@ -129,13 +137,13 @@ const DashboardTest: React.FC = () => {
 
   // ── 3. Donut – Property Type ──────────────────────────────
   const donutOption = useMemo(() => ({
-    tooltip: { trigger: 'item', formatter: '{b}: {c} صفقة ({d}%)' },
-    legend: { orient: 'vertical', right: 10, top: 'center', textStyle: { fontSize: 11 } },
+    tooltip: { trigger: 'item', formatter: '{b}: {c} صفقة ({d}%)', textStyle: { fontFamily: CHART_FONT } },
+    legend: { orient: 'vertical', right: 10, top: 'center', textStyle: { fontSize: 11, fontFamily: CHART_FONT } },
     series: [{
       type: 'pie', radius: ['45%', '72%'], center: ['38%', '50%'],
       avoidLabelOverlap: true,
       itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 3 },
-      label: { show: false },
+      label: { show: false, fontFamily: CHART_FONT },
       emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold', formatter: '{b}\n{c}' } },
       data: D.propertyTypes.map((p: any, i: number) => ({ name: p.name, value: p.count, itemStyle: { color: PALETTE[i] } }))
     }]
@@ -145,13 +153,14 @@ const DashboardTest: React.FC = () => {
   const priceRangeOption = useMemo(() => {
     const total = D.priceRanges.reduce((s: number, p: any) => s + p.value, 0);
     return {
-      tooltip: { trigger: 'item', formatter: (params: any) =>
+      tooltip: { trigger: 'item', textStyle: { fontFamily: CHART_FONT }, formatter: (params: any) =>
         `${params.name}<br/>الصفقات: ${params.value.toLocaleString()}<br/>النسبة: ${(params.value/total*100).toFixed(1)}%`
       },
       series: [{
         type: 'pie', radius: ['25%', '60%'], roseType: 'area',
         itemStyle: { borderRadius: 6 },
         label: { alignTo: 'edge', minMargin: 5, edgeDistance: 10, lineHeight: 15,
+          fontFamily: CHART_FONT,
           formatter: '{b|{b}}\n{per|{d}%}',
           rich: { b: { fontSize: 11, color: '#475569', fontWeight: 'bold' }, per: { fontSize: 10, color: '#94a3b8' } }
         },
@@ -163,12 +172,12 @@ const DashboardTest: React.FC = () => {
   // ── 5. Radar ──────────────────────────────────────────────
   const radarOption = useMemo(() => ({
     backgroundColor: 'transparent',
-    tooltip: {},
-    legend: { data: D.radarRegions.series.map((s: any) => s.name), bottom: 0, textStyle: { fontSize: 11 } },
+    tooltip: { textStyle: { fontFamily: CHART_FONT } },
+    legend: { data: D.radarRegions.series.map((s: any) => s.name), bottom: 0, textStyle: { fontSize: 11, fontFamily: CHART_FONT } },
     radar: {
       indicator: D.radarRegions.indicators,
       shape: 'polygon', splitNumber: 4,
-      axisName: { color: '#475569', fontWeight: 'bold', fontSize: 12 },
+      axisName: { color: '#475569', fontWeight: 'bold', fontSize: 12, fontFamily: CHART_FONT },
       splitArea: { areaStyle: { color: ['rgba(241,245,249,0.3)', 'rgba(241,245,249,0.5)'] } },
       splitLine: { lineStyle: { color: '#e2e8f0' } }
     },
@@ -189,12 +198,13 @@ const DashboardTest: React.FC = () => {
   const hmMax = useMemo(() => Math.max(...D.heatmap.data.map((d: number[]) => d[2])), []);
   const heatmapOption = useMemo(() => ({
     tooltip: {
+      textStyle: { fontFamily: CHART_FONT },
       formatter: (params: any) =>
         `<b>${D.heatmap.xaxis[params.data[0]]}</b><br/>${D.heatmap.yaxis[params.data[1]]}<br/>الصفقات: <b>${params.data[2].toLocaleString()}</b>`
     },
     grid: { left: 100, right: 40, top: 20, bottom: 60 },
-    xAxis: { type: 'category', data: D.heatmap.xaxis, axisLabel: { rotate: 30, fontSize: 11, overflow: 'truncate', width: 80 } },
-    yAxis: { type: 'category', data: D.heatmap.yaxis, axisLabel: { fontSize: 11 } },
+    xAxis: { type: 'category', data: D.heatmap.xaxis, axisLabel: { rotate: 30, fontSize: 11, overflow: 'truncate', width: 80, fontFamily: CHART_FONT } },
+    yAxis: { type: 'category', data: D.heatmap.yaxis, axisLabel: { fontSize: 11, fontFamily: CHART_FONT } },
     visualMap: {
       min: 0, max: hmMax, calculable: true, orient: 'horizontal',
       left: 'center', bottom: 0, inRange: { color: ['#eff6ff', '#bfdbfe', '#3b82f6', '#1d4ed8'] }
@@ -211,10 +221,10 @@ const DashboardTest: React.FC = () => {
   const scatterOption = useMemo(() => {
     const types = Object.keys(D.scatter);
     return {
-      tooltip: { trigger: 'item', formatter: (p: any) =>
+      tooltip: { trigger: 'item', textStyle: { fontFamily: CHART_FONT }, formatter: (p: any) =>
         `<b>${p.seriesName}</b><br/>المساحة: ${p.data[0]} م²<br/>السعر: ${p.data[1]} مليون ريال`
       },
-      legend: { data: types, bottom: 0, textStyle: { fontSize: 10 } },
+      legend: { data: types, bottom: 0, textStyle: { fontSize: 10, fontFamily: CHART_FONT } },
       grid: { left: 60, right: 20, top: 20, bottom: 50 },
       xAxis: { type: 'value', name: 'المساحة (م²)', nameTextStyle: { color: '#94a3b8' },
         splitLine: { lineStyle: { color: '#f1f5f9' } } },
@@ -232,10 +242,10 @@ const DashboardTest: React.FC = () => {
 
   // ── 8. Q1 vs Q4 Column Comparison ────────────────────────
   const qCompOption = useMemo(() => ({
-    tooltip: { trigger: 'axis' },
-    legend: { data: ['Q1 2024', 'Q4 2024'], bottom: 0 },
+    tooltip: { trigger: 'axis', textStyle: { fontFamily: CHART_FONT } },
+    legend: { data: ['Q1 2024', 'Q4 2024'], bottom: 0, textStyle: { fontFamily: CHART_FONT } },
     grid: { left: 80, right: 20, top: 20, bottom: 50 },
-    xAxis: { type: 'category', data: D.qComparison.regions, axisLabel: { rotate: 20, fontSize: 10, overflow: 'truncate', width: 80 } },
+    xAxis: { type: 'category', data: D.qComparison.regions, axisLabel: { rotate: 20, fontSize: 10, overflow: 'truncate', width: 80, fontFamily: CHART_FONT } },
     yAxis: { type: 'value', axisLabel: { formatter: (v: number) => v + 'B' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
     series: [
       {
@@ -255,10 +265,10 @@ const DashboardTest: React.FC = () => {
 
   // ── 9. Top Cities Bar Race ────────────────────────────────
   const cityOption = useMemo(() => ({
-    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, textStyle: { fontFamily: CHART_FONT } },
     grid: { left: 100, right: 60, top: 10, bottom: 20 },
-    xAxis: { type: 'value', axisLabel: { formatter: (v: number) => v + 'B' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
-    yAxis: { type: 'category', data: [...D.topCities.cities].reverse(), axisLabel: { fontSize: 11 } },
+    xAxis: { type: 'value', axisLabel: { formatter: (v: number) => v + 'B', fontFamily: CHART_FONT }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
+    yAxis: { type: 'category', data: [...D.topCities.cities].reverse(), axisLabel: { fontSize: 11, fontFamily: CHART_FONT } },
     series: [{
       type: 'bar', data: [...D.topCities.total_B].reverse(),
       label: { show: true, position: 'right', formatter: (p: any) => p.value + 'B', fontSize: 11, color: '#475569' },
@@ -274,10 +284,10 @@ const DashboardTest: React.FC = () => {
 
   // ── 10. Area – Avg Price Trend ────────────────────────────
   const avgPriceOption = useMemo(() => ({
-    tooltip: { trigger: 'axis', valueFormatter: (v: number) => v.toFixed(2) + ' مليون' },
+    tooltip: { trigger: 'axis', textStyle: { fontFamily: CHART_FONT }, valueFormatter: (v: number) => v.toFixed(2) + ' مليون' },
     grid: { left: 60, right: 20, top: 30, bottom: 40 },
-    xAxis: { type: 'category', data: D.liquidityTrend.periods, axisLabel: { fontSize: 11 } },
-    yAxis: { type: 'value', axisLabel: { formatter: (v: number) => v + 'M' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
+    xAxis: { type: 'category', data: D.liquidityTrend.periods, axisLabel: { fontSize: 11, fontFamily: CHART_FONT } },
+    yAxis: { type: 'value', axisLabel: { formatter: (v: number) => v + 'M', fontFamily: CHART_FONT }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
     series: [
       {
         name: 'متوسط السعر', type: 'line', smooth: true,
@@ -296,14 +306,126 @@ const DashboardTest: React.FC = () => {
     ]
   }), []);
 
+  // ── 11. Multi-Year Trend ──────────────────
+  const multiYearOption = useMemo(() => ({
+    backgroundColor: 'transparent',
+    tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+    legend: { data: ['السيولة (مليار)', 'عدد الصفقات'], bottom: 0, textStyle: { fontFamily: CHART_FONT } },
+    grid: { left: 60, right: 60, top: 30, bottom: 50 },
+    xAxis: { type: 'category', data: D.multiYearTrend?.years || [], axisLine: { lineStyle: { color: '#e2e8f0' } }, axisLabel: { fontFamily: CHART_FONT, fontWeight: 'bold' } },
+    yAxis: [
+      { type: 'value', name: 'مليار ريال', nameTextStyle: { color: '#94a3b8', fontFamily: CHART_FONT }, axisLabel: { formatter: (v: number) => v + 'B', fontFamily: CHART_FONT }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
+      { type: 'value', name: 'صفقات', nameTextStyle: { color: '#94a3b8', fontFamily: CHART_FONT }, axisLabel: { formatter: (v: number) => kfmt(v), fontFamily: CHART_FONT }, splitLine: { show: false } }
+    ],
+    series: [
+      {
+        name: 'السيولة (مليار)', type: 'line', yAxisIndex: 0,
+        data: D.multiYearTrend?.liquidity_B || [],
+        smooth: true, lineStyle: { width: 4, color: '#f59e0b' },
+        symbol: 'circle', symbolSize: 10,
+        itemStyle: { color: '#f59e0b', borderWidth: 3, borderColor: '#fff' },
+        areaStyle: {
+          color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(245,158,11,0.35)' }, { offset: 1, color: 'rgba(245,158,11,0)' }] }
+        }
+      },
+      {
+        name: 'عدد الصفقات', type: 'bar', yAxisIndex: 1,
+        data: D.multiYearTrend?.txn_count || [],
+        barWidth: '30%',
+        itemStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(99,102,241,0.9)' }, { offset: 1, color: 'rgba(99,102,241,0.3)' }] }, borderRadius: [6, 6, 0, 0] }
+      }
+    ]
+  }), [D.multiYearTrend]);
+
+  // ── 12. YoY Growth ────────────────────────
+  const yoyOption = useMemo(() => {
+    if (!D.yoyGrowth) return {};
+    return {
+      tooltip: { trigger: 'axis', formatter: (p: any) => `<b>${p[0].name}</b><br/>نمو: ${p[0].value}%`, textStyle: { fontFamily: CHART_FONT } },
+      grid: { left: 50, right: 20, top: 20, bottom: 40 },
+      xAxis: { type: 'category', data: D.yoyGrowth.map((y: any) => y.label), axisLabel: { fontFamily: CHART_FONT } },
+      yAxis: { type: 'value', axisLabel: { formatter: '{value}%', fontFamily: CHART_FONT }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
+      series: [{
+        type: 'bar', data: D.yoyGrowth.map((y: any) => y.growth),
+        label: { show: true, position: 'top', formatter: '{c}%', fontFamily: CHART_FONT, fontWeight: 'bold', color: 'inherit' },
+        itemStyle: {
+          borderRadius: [4, 4, 0, 0],
+          color: (params: any) => params.value >= 0 ? '#10b981' : '#ef4444' // Emerald for positive, Red for negative
+        }
+      }]
+    };
+  }, [D.yoyGrowth]);
+
+  // ── 13. Seasonality ───────────────────────
+  const seasonalityOption = useMemo(() => {
+    if (!D.seasonality) return {};
+    return {
+      tooltip: { trigger: 'item', formatter: '{b}: {c}B ({d}%)', textStyle: { fontFamily: CHART_FONT } },
+      legend: { bottom: 0, textStyle: { fontFamily: CHART_FONT } },
+      series: [{
+        type: 'pie', radius: ['40%', '70%'],
+        itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 },
+        label: { fontFamily: CHART_FONT, formatter: '{b}\n{d}%', fontWeight: 'bold' },
+        data: D.seasonality.quarters.map((q: string, i: number) => ({
+          name: q, value: D.seasonality.total_B[i], itemStyle: { color: PALETTE[i % PALETTE.length] }
+        }))
+      }]
+    };
+  }, [D.seasonality]);
+
+  // ── 14. Top Cities 5 Years ────────────────
+  const topCities5Option = useMemo(() => {
+    if (!D.topCities5Years) return {};
+    return {
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, textStyle: { fontFamily: CHART_FONT } },
+      grid: { left: 100, right: 60, top: 10, bottom: 20 },
+      xAxis: { type: 'value', axisLabel: { formatter: (v: number) => v + 'B', fontFamily: CHART_FONT }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
+      yAxis: { type: 'category', data: [...D.topCities5Years.cities].reverse(), axisLabel: { fontSize: 11, fontFamily: CHART_FONT } },
+      series: [{
+        type: 'bar', data: [...D.topCities5Years.total_B].reverse(),
+        label: { show: true, position: 'right', formatter: (p: any) => p.value + 'B', fontSize: 11, color: '#475569' },
+        itemStyle: {
+          borderRadius: [0, 8, 8, 0],
+          color: (p: any) => PALETTE[p.dataIndex % PALETTE.length]
+        }
+      }]
+    };
+  }, [D.topCities5Years]);
+
+  // ── 15. Heatmap Year x Quarter ────────────
+  const yqHmMax = useMemo(() => D.heatmapYearQuarter ? Math.max(...D.heatmapYearQuarter.data.map((d: number[]) => d[2])) : 0, [D.heatmapYearQuarter]);
+  const heatmapYQOption = useMemo(() => {
+    if (!D.heatmapYearQuarter) return {};
+    return {
+      tooltip: {
+        textStyle: { fontFamily: CHART_FONT },
+        formatter: (p: any) => `<b>${D.heatmapYearQuarter.years[p.data[0]]}</b> - ${D.heatmapYearQuarter.quarters[p.data[1]]}<br/>السيولة: <b>${p.data[2].toLocaleString()} مليار</b>`
+      },
+      grid: { left: 60, right: 40, top: 20, bottom: 60 },
+      xAxis: { type: 'category', data: D.heatmapYearQuarter.years, axisLabel: { fontFamily: CHART_FONT, fontWeight: 'bold' } },
+      yAxis: { type: 'category', data: D.heatmapYearQuarter.quarters, axisLabel: { fontFamily: CHART_FONT, fontWeight: 'bold' } },
+      visualMap: {
+        min: 0, max: yqHmMax, calculable: true, orient: 'horizontal',
+        left: 'center', bottom: 0, inRange: { color: ['#f8fafc', '#bae6fd', '#3b82f6', '#1e3a8a'] }
+      },
+      series: [{
+        type: 'heatmap', data: D.heatmapYearQuarter.data,
+        label: { show: true, fontSize: 11, color: '#334155', formatter: (p: any) => p.data[2] > 0 ? p.data[2].toFixed(1) + 'B' : '' },
+        emphasis: { itemStyle: { shadowBlur: 10, shadowColor: 'rgba(59,130,246,0.5)' } }
+      }]
+    };
+  }, [D.heatmapYearQuarter, yqHmMax]);
+
   const tabs = [
-    { key: 'overview', label: 'نظرة عامة', icon: Activity },
-    { key: 'regions',  label: 'تحليل المناطق', icon: Map },
-    { key: 'advanced', label: 'التحليل المتعمق', icon: Layers },
+    { key: 'overview', label: 'نظرة عامة', icon: LayoutDashboard },
+    { key: 'regions',  label: 'تحليل منطقي', icon: Map },
+    { key: 'advanced', label: 'التحليل المتعمق', icon: Sparkles },
+    { key: 'georadar', label: 'الرادار الجغرافي', icon: Globe },
+    { key: 'longterm', label: 'المدى الطويل (5 سنوات)', icon: History },
   ] as const;
 
   return (
-    <div className="min-h-screen bg-slate-50" dir="rtl">
+    <div className="min-h-screen bg-slate-50 font-['IBM_Plex_Sans_Arabic']" dir="rtl">
 
       {/* ── Header ── */}
       <div className="bg-gradient-to-l from-slate-900 via-blue-950 to-slate-900 text-white px-8 py-8">
@@ -312,7 +434,7 @@ const DashboardTest: React.FC = () => {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 bg-blue-500/20 border border-blue-400/30 rounded-2xl flex items-center justify-center backdrop-blur">
-                  <BarChart3 size={20} className="text-blue-300" />
+                  <LayoutTemplate size={20} className="text-blue-300" />
                 </div>
                 <span className="text-blue-300 text-xs font-bold uppercase tracking-widest">ECharts Analytics Engine</span>
               </div>
@@ -335,15 +457,15 @@ const DashboardTest: React.FC = () => {
           {/* KPI Strip */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mt-6">
             {[
-              { label: 'إجمالي السيولة', val: kpi.total_price_B?.toFixed(1) + ' مليار', icon: '💰' },
-              { label: 'عدد الصفقات', val: kpi.total_txn?.toLocaleString(), icon: '📋' },
-              { label: 'متوسط السعر', val: kpi.avg_price_M?.toFixed(2) + 'M ريال', icon: '📈' },
-              { label: 'أعلى صفقة', val: kpi.max_price_M?.toFixed(1) + 'M ريال', icon: '🏆' },
-              { label: 'متوسط المساحة', val: kpi.avg_area?.toFixed(0) + ' م²', icon: '📐' },
-              { label: 'سعر المتر', val: kpi.price_per_sqm?.toFixed(0) + ' ريال', icon: '📍' },
+              { label: 'إجمالي السيولة', val: kpi.total_price_B?.toFixed(1) + ' مليار', icon: Banknote },
+              { label: 'عدد الصفقات', val: kpi.total_txn?.toLocaleString(), icon: ClipboardList },
+              { label: 'متوسط السعر', val: kpi.avg_price_M?.toFixed(2) + 'M ريال', icon: TrendingUp },
+              { label: 'أعلى صفقة', val: kpi.max_price_M?.toFixed(1) + 'M ريال', icon: Award },
+              { label: 'متوسط المساحة', val: kpi.avg_area?.toFixed(0) + ' م²', icon: Maximize },
+              { label: 'سعر المتر', val: kpi.price_per_sqm?.toFixed(0) + ' ريال', icon: MapPin },
             ].map((k, i) => (
               <div key={i} className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3 flex items-center gap-3 hover:bg-white/10 transition-colors">
-                <span className="text-2xl">{k.icon}</span>
+                <k.icon size={20} className="text-blue-400" />
                 <div>
                   <p className="text-white font-black text-sm">{k.val}</p>
                   <p className="text-slate-400 text-[10px] font-medium">{k.label}</p>
@@ -381,7 +503,8 @@ const DashboardTest: React.FC = () => {
           <div className="space-y-8">
             {/* Row 1: Full-width Liquidity Chart */}
             <ChartCard
-              title="📈 مسار السيولة الربعي مع حجم الصفقات"
+              title="مسار السيولة الربعي مع حجم الصفقات"
+              icon={LineChart}
               subtitle="خط السيولة (مليار ريال) + أعمدة عدد الصفقات — محوران مستقلان"
               colSpan={2}
             >
@@ -390,20 +513,20 @@ const DashboardTest: React.FC = () => {
 
             {/* Row 2: Donut + Price Range Rose */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ChartCard title="🏠 توزيع تصنيفات العقارات" subtitle="الدونات حسب عدد الصفقات لكل نوع">
+              <ChartCard title="توزيع تصنيفات العقارات" icon={Home} subtitle="الدونات حسب عدد الصفقات لكل نوع">
                 <ReactECharts option={donutOption} style={{ height: 300 }} notMerge />
               </ChartCard>
-              <ChartCard title="💲 توزيع نطاقات الأسعار" subtitle="Rose / Nightingale — نسبة كل شريحة سعرية">
+              <ChartCard title="توزيع نطاقات الأسعار" icon={Banknote} subtitle="Rose / Nightingale — نسبة كل شريحة سعرية">
                 <ReactECharts option={priceRangeOption} style={{ height: 300 }} notMerge />
               </ChartCard>
             </div>
 
             {/* Row 3: Avg Price Area + Top Cities */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ChartCard title="📉 تطور متوسط سعر الصفقة ربعياً" subtitle="Area Chart — مليون ريال مع خط المتوسط السنوي">
+              <ChartCard title="تطور متوسط سعر الصفقة ربعياً" icon={TrendingDown} subtitle="Area Chart — مليون ريال مع خط المتوسط السنوي">
                 <ReactECharts option={avgPriceOption} style={{ height: 300 }} notMerge />
               </ChartCard>
-              <ChartCard title="🏙️ أعلى 10 مدن حسب السيولة" subtitle="Horizontal Bars — المليار ريال">
+              <ChartCard title="أعلى 10 مدن حسب السيولة" icon={Building2} subtitle="Horizontal Bars — المليار ريال">
                 <ReactECharts option={cityOption} style={{ height: 300 }} notMerge />
               </ChartCard>
             </div>
@@ -414,23 +537,24 @@ const DashboardTest: React.FC = () => {
         {activeTab === 'regions' && (
           <div className="space-y-8">
             {/* Region Horizontal Bar */}
-            <ChartCard title="🗺️ أعلى 8 مناطق حسب السيولة" subtitle="Bar أفقي — المليار ريال" colSpan={2}>
+            <ChartCard title="أعلى 8 مناطق حسب السيولة" icon={Map} subtitle="Bar أفقي — المليار ريال" colSpan={2}>
               <ReactECharts option={regionBarOption} style={{ height: 340 }} notMerge />
             </ChartCard>
 
             {/* Radar + Q Comparison */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ChartCard title="🕸️ مقارنة أداء المناطق الكبرى" subtitle="Radar Chart — 4 مؤشرات منسوبة لأعلى قيمة">
+              <ChartCard title="مقارنة أداء المناطق الكبرى" icon={Radar} subtitle="Radar Chart — 4 مؤشرات منسوبة لأعلى قيمة">
                 <ReactECharts option={radarOption} style={{ height: 380 }} notMerge />
               </ChartCard>
-              <ChartCard title="📊 مقارنة Q1 مقابل Q4 حسب المنطقة" subtitle="Grouped Column — بداية السنة ونهايتها">
+              <ChartCard title="مقارنة Q1 مقابل Q4 حسب المنطقة" icon={BarChart} subtitle="Grouped Column — بداية السنة ونهايتها">
                 <ReactECharts option={qCompOption} style={{ height: 380 }} notMerge />
               </ChartCard>
             </div>
 
             {/* Heatmap full width */}
             <ChartCard
-              title="🔥 خريطة الحرارة: كثافة الصفقات (المنطقة × نوع العقار)"
+              title="خريطة الحرارة: كثافة الصفقات (المنطقة × نوع العقار)"
+              icon={Flame}
               subtitle="Heatmap — الأكثر تركيزاً يظهر بالأزرق الداكن"
               colSpan={2}
             >
@@ -444,7 +568,8 @@ const DashboardTest: React.FC = () => {
           <div className="space-y-8">
             {/* Scatter full width */}
             <ChartCard
-              title="🔵 تحليل الارتباط: المساحة × السعر (300 عينة)"
+              title="تحليل الارتباط: المساحة × السعر (300 عينة)"
+              icon={Circle}
               subtitle="Bubble Scatter مقسّم حسب نوع العقار — حجم الدائرة يعكس قيمة الصفقة"
               colSpan={2}
             >
@@ -469,7 +594,7 @@ const DashboardTest: React.FC = () => {
             </div>
 
             {/* Summary Table */}
-            <ChartCard title="📋 ملخص تحليلي شامل للمناطق" subtitle="جدول مقارنة بكافة المؤشرات" colSpan={2}>
+            <ChartCard title="ملخص تحليلي شامل للمناطق" icon={ClipboardList} subtitle="جدول مقارنة بكافة المؤشرات" colSpan={2}>
               <div className="overflow-x-auto mt-2">
                 <table className="w-full text-sm">
                   <thead>
@@ -499,11 +624,53 @@ const DashboardTest: React.FC = () => {
           </div>
         )}
 
+        {/* ═══ TAB 4: LONG TERM ═══════════════════════════════ */}
+        {activeTab === 'longterm' && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Multi-Year Trend */}
+            <ChartCard
+              title="السيولة وحجم التداول عبر 5 سنوات (2020 - 2024)"
+              icon={LineChart}
+              subtitle="رسم بياني مركب (Line & Bar) لتتبع السياسة النقدية والنشاط"
+              colSpan={2}
+            >
+              <ReactECharts option={multiYearOption} style={{ height: 360 }} notMerge />
+            </ChartCard>
+
+            {/* YoY Growth + Seasonality */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ChartCard title="معدل النمو السنوي (Year-over-Year)" icon={TrendingUp} subtitle="نسبة نمو أو تراجع السيولة مقارنة بالسنة السابقة">
+                <ReactECharts option={yoyOption} style={{ height: 320 }} notMerge />
+              </ChartCard>
+              <ChartCard title="التركيز الموسمي عبر جميع السنوات" icon={PieChart} subtitle="الأرباع الأكثر سيولة تاريخياً (Seasonality)">
+                <ReactECharts option={seasonalityOption} style={{ height: 320 }} notMerge />
+              </ChartCard>
+            </div>
+
+            {/* Top Cities 5 Years */}
+            <ChartCard title="أقوى المدن تأثيراً في سيولة الـ 5 سنوات" icon={Building2} subtitle="إجمالي مليارات الريالات مجمعة للـ Top 10" colSpan={2}>
+              <ReactECharts option={topCities5Option} style={{ height: 340 }} notMerge />
+            </ChartCard>
+
+            {/* Heatmap Year x Quarter */}
+            <ChartCard title="خريطة الحرارة الزمنية: ذروات السوق العقاري" icon={Flame} subtitle="تركيز السيولة (مليار) عبر التقاطع بين السنة والربع" colSpan={2}>
+              <ReactECharts option={heatmapYQOption} style={{ height: 360 }} notMerge />
+            </ChartCard>
+          </div>
+        )}
+  
+        {/* ═══ TAB 5: GEOGRAPHIC RADAR ════════════════════════ */}
+        {activeTab === 'georadar' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 rounded-3xl overflow-hidden border border-slate-200">
+            <MapDashboard />
+          </div>
+        )}
+
       </div>
 
       {/* ── Footer ── */}
       <div className="bg-slate-900 text-slate-400 text-center text-xs py-4 mt-8">
-        البيانات مستخرجة من قاعدة بيانات MySQL · سجلات عقارية المملكة العربية السعودية 2024 · ECharts 5
+        البيانات مستخرجة من قاعدة بيانات MySQL · سجلات عقارية المملكة العربية السعودية 2020-2024 · ECharts 5
       </div>
     </div>
   );

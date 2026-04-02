@@ -7,15 +7,22 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Data & Dependencies
+node_modules/
+dist/
+dist-ssr/
 *.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# Excel & Automation
+*.xlsx
+radar files/
+automation/
+!automation/data/
+!data/
+
+# Editor
+.vscode/
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
