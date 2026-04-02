@@ -196,15 +196,15 @@ const GuidedTours = () => {
     <div className="relative" ref={menuRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all font-black text-sm border ${
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all font-black text-[10px] border ${
           isOpen 
           ? 'bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-500/20' 
           : 'bg-white text-slate-600 border-slate-200 hover:border-blue-500 hover:text-blue-600 shadow-sm'
         }`}
       >
-        <Compass size={18} className={isOpen ? 'animate-spin' : ''} />
-        <span>الجولات التعريفية</span>
-        <ChevronDown size={14} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        <Compass size={13} className={isOpen ? 'animate-spin' : ''} />
+        <span>الجولات</span>
+        <ChevronDown size={11} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (

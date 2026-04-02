@@ -631,29 +631,27 @@ const Breadcrumbs = () => {
   const crumbs = getBreadcrumbs(path);
 
   return (
-    <div className="px-6 lg:px-12 py-1">
-      <nav className="flex items-center gap-1.5 bg-white/50 border border-slate-200/60 p-0.5 px-3 rounded-[12px] shadow-sm backdrop-blur-sm w-fit">
-        {crumbs.map((crumb, idx) => (
-          <div key={idx} className="flex items-center gap-1 group">
-            {idx > 0 && <ChevronLeft size={8} className="text-slate-300 mx-0.5" />}
-            
-            {crumb.path ? (
-              <Link 
-                to={crumb.path}
-                className="flex items-center gap-1 text-slate-500 hover:text-blue-600 transition-all text-[10px] font-bold"
-              >
-                <crumb.icon size={11} className="text-slate-400 group-hover:text-blue-500 transition-colors" />
-                <span>{crumb.label}</span>
-              </Link>
-            ) : (
-              <div className="flex items-center gap-1 text-slate-900 text-[10px] font-black">
-                <crumb.icon size={11} className="text-blue-600" />
-                <span>{crumb.label}</span>
-              </div>
-            )}
-          </div>
-        ))}
-      </nav>
+    <div className="flex items-center gap-1.5 px-2">
+      {crumbs.map((crumb, idx) => (
+        <div key={idx} className="flex items-center gap-1 group whitespace-nowrap">
+          {idx > 0 && <ChevronLeft size={8} className="text-slate-300 mx-0.5" />}
+          
+          {crumb.path ? (
+            <Link 
+              to={crumb.path}
+              className="flex items-center gap-1 text-slate-500 hover:text-blue-600 transition-all text-[9px] font-bold"
+            >
+              <crumb.icon size={10} className="text-slate-400 group-hover:text-blue-500 transition-colors" />
+              <span>{crumb.label}</span>
+            </Link>
+          ) : (
+            <div className="flex items-center gap-1 text-slate-900 text-[9px] font-black">
+              <crumb.icon size={10} className="text-blue-600" />
+              <span>{crumb.label}</span>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 };
@@ -710,8 +708,8 @@ const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange
   };
 
   return (
-    <header className="h-[44px] lg:h-[50px] sticky top-0 z-[90] w-full bg-white/80 backdrop-blur-xl border-b border-slate-200/60 transition-all duration-300">
-      <div className="px-6 lg:px-12 h-full flex items-center justify-between gap-4">
+    <header className="h-[44px] lg:h-[37px] sticky top-0 z-[90] w-full bg-white/80 backdrop-blur-xl border-b border-slate-200/60 transition-all duration-300">
+      <div className="px-6 lg:px-12 h-full flex items-center justify-between gap-4 pt-1.5">
 
         {/* --- Section 1: Logo (Mobile) --- */}
         <div className="flex items-center gap-4">
@@ -727,20 +725,10 @@ const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange
           </div>
         </div>
 
-        {/* --- Section 2: Navigation & Search --- */}
+        {/* --- Section 2: Breadcrumbs & Search --- */}
         <div className="flex-1 flex items-center gap-2 max-w-4xl hidden md:flex">
-          {/* Main Navigation Links */}
-          <nav className="flex items-center bg-slate-100/50 p-0.5 rounded-lg border border-slate-200/30">
-            <Link to="/" className="px-2 py-1 text-[8px] font-black text-slate-600 hover:text-blue-600 transition-all">البحث</Link>
-            <div className="w-px h-2 bg-slate-300 mx-0.5 opacity-40"></div>
-            <Link to="/sources" className="px-2 py-1 text-[8px] font-black text-slate-600 hover:text-blue-600 transition-all">البيانات</Link>
-            <div className="w-px h-2 bg-slate-300 mx-0.5 opacity-40"></div>
-            <Link to="/indicators" className="px-2 py-1 text-[8px] font-black text-slate-600 hover:text-blue-600 transition-all">المؤشرات</Link>
-            <div className="w-px h-2 bg-slate-300 mx-0.5 opacity-40"></div>
-            <Link to="/dashboards" className="px-2 py-1 text-[8px] font-black text-slate-600 hover:text-blue-600 transition-all">اللوحات</Link>
-            <div className="w-px h-2 bg-slate-300 mx-0.5 opacity-40"></div>
-            <Link to="/create-post" className="px-2 py-1 text-[8px] font-black text-slate-600 hover:text-blue-600 transition-all">إنشاء</Link>
-          </nav>
+          {/* Integrated Breadcrumbs */}
+          <Breadcrumbs />
 
           {/* Search Box */}
           <div className="flex-1 group">
@@ -751,7 +739,7 @@ const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange
               <input
                 id="header-search"
                 type="text"
-                className="block w-full py-1 pr-8 pl-10 text-[9px] text-slate-900 bg-slate-100/50 border border-slate-200/50 rounded-lg focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 focus:bg-white transition-all placeholder-slate-400 shadow-sm hover:border-slate-300"
+                className="block w-full h-8 pr-8 pl-10 text-[9px] text-slate-900 bg-slate-100/50 border border-slate-200/50 rounded-lg focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 focus:bg-white transition-all placeholder-slate-400 shadow-sm hover:border-slate-300"
                 placeholder="ابحث..."
               />
             </div>
@@ -766,23 +754,23 @@ const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange
           <div className="flex items-center bg-slate-100/50 p-1 rounded-xl border border-slate-200/30">
             {/* Favorites */}
             <Link to="/favorites"
-              className="p-2 text-slate-500 hover:text-blue-600 hover:bg-white rounded-lg transition-all"
+              className="p-1 text-slate-500 hover:text-blue-600 hover:bg-white rounded-md transition-all"
               title="مفضلتي"
             >
-              <Bookmark size={18} />
+              <Bookmark size={13} />
             </Link>
 
-            <div className="w-px h-5 bg-slate-200 mx-1 opacity-50"></div>
+            <div className="w-px h-3 bg-slate-200 mx-1 opacity-50"></div>
 
             {/* Notifications */}
             <div className="relative" ref={notificationsRef}>
               <button 
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className={`p-2 rounded-lg transition-all ${isNotificationsOpen ? 'bg-white text-blue-600 shadow-sm border-slate-200' : 'text-slate-500 hover:text-blue-600 hover:bg-white'}`}
+                className={`p-1 rounded-md transition-all ${isNotificationsOpen ? 'bg-white text-blue-600 shadow-sm border-slate-200' : 'text-slate-500 hover:text-blue-600 hover:bg-white'}`}
               >
-                <Bell size={18} className={isNotificationsOpen ? '' : 'group-hover:animate-swing'} />
+                <Bell size={13} className={isNotificationsOpen ? '' : 'group-hover:animate-swing'} />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-red-600 border-2 border-white rounded-full flex items-center justify-center text-[8px] font-black text-white">
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-600 border border-white rounded-full flex items-center justify-center text-[6px] font-black text-white">
                     {unreadCount}
                   </span>
                 )}
@@ -860,13 +848,13 @@ const Topbar = ({ user, onRoleChange, onOpenWizard }: { user: User, onRoleChange
             <button 
               id="user-profile-button"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="flex items-center gap-1.5 p-0.5 hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-100"
+              className="flex items-center gap-1 p-0.5 hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-100"
             >
               <div className="relative">
-                <img src={user.avatar} alt="User" className="w-7 h-7 rounded-md border-2 border-white shadow-md object-cover" />
-                <div className="absolute -bottom-0.5 -left-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
+                <img src={user.avatar} alt="User" className="w-[22px] h-[22px] rounded border border-white shadow-sm object-cover" />
+                <div className="absolute -bottom-0.5 -left-0.5 w-1.5 h-1.5 bg-green-500 border border-white rounded-full"></div>
               </div>
-              <ChevronDown size={12} className={`text-slate-400 transition-transform duration-300 ${isMenuOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown size={10} className={`text-slate-400 transition-transform duration-300 ${isMenuOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {/* Dropdown Menu */}
@@ -1298,7 +1286,6 @@ const App = () => {
           onRoleChange={handleRoleChange}
           onOpenWizard={() => setIsWizardOpen(true)}
         />
-        <Breadcrumbs />
         <div className="animate-fadeIn">
           <Routes>
             <Route path="/" element={<HomeFeed feedItems={FEED_ITEMS} user={currentUser} onOpenWizard={() => setIsWizardOpen(true)} />} />

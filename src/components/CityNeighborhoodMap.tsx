@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import * as echarts from 'echarts';
 import ReactECharts from 'echarts-for-react';
+import NeighborhoodTable from './NeighborhoodTable';
 import { 
   MapPin, Info, Activity, Banknote, 
   Target, Maximize2, Minimize2, Compass, Layers,
@@ -673,6 +674,13 @@ const CityNeighborhoodMap: React.FC<CityNeighborhoodMapProps> = ({ cityName }) =
           )}
         </div>
       </div>
+
+      {/* --- Data Deep-Dive: Transactions Table (Riyadh Only) --- */}
+      {cityName === 'الرياض' && (
+        <div className="max-w-7xl mx-auto px-8 pb-12 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+          <NeighborhoodTable />
+        </div>
+      )}
     </div>
   );
 };
