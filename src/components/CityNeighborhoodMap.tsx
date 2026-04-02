@@ -60,6 +60,18 @@ const CityNeighborhoodMap: React.FC<CityNeighborhoodMapProps> = ({ cityName }) =
     { id: 'صناعي', label: 'صناعي' }
   ];
 
+  const SEARCH_PLACEHOLDERS: { [key: string]: string } = {
+    "الرياض": "الملقا، الياسمين...",
+    "جدة": "الشاطئ، أبحر الشمالي...",
+    "مكة المكرمة": "الشوقية، العوالي...",
+    "المدينة المنورة": "الخالدية، باقدو...",
+    "بريدة": "الفايزية، الريان...",
+    "الدمام": "الشاطئ، الحي الجامعي...",
+    "الخبر": "العزيزية، الراكة...",
+    "تبوك": "المروج، الصفا...",
+    "أبها": "المنسك، الموظفين..."
+  };
+
   const [geoData, setGeoData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -323,7 +335,7 @@ const CityNeighborhoodMap: React.FC<CityNeighborhoodMapProps> = ({ cityName }) =
                    type="text" 
                    value={searchQuery}
                    onChange={(e) => { setSearchQuery(e.target.value); setShowSearchResults(true); }}
-                   placeholder="ابحث عن حي... (الملقا، الياسمين...)"
+                   placeholder={`ابحث عن حي في ${cityName}... (${SEARCH_PLACEHOLDERS[cityName] || 'اكتب اسم الحي...'})`}
                    className="w-full h-11 pr-11 pl-4 bg-slate-100/50 border border-slate-200/60 rounded-2xl text-xs font-bold text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 />
                 {searchQuery && (

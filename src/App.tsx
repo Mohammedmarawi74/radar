@@ -93,6 +93,7 @@ import {
   Building2,
   MapPin
 } from 'lucide-react';
+import SmartCityDuel from './components/SmartCityDuel';
 import {
   UserRole,
   User,
@@ -400,6 +401,8 @@ const Sidebar = ({ role, dashboards, isCollapsed, onToggle }: {
             </NavGroup>
 
             <NavGroup title="تحليل المدن الاستثماري" open={sections.cities} onToggle={() => toggleSection('cities')} isCollapsed={isCollapsed} icon={Building2}>
+              <NavItem to="/city-duel" icon={GitCompare} isCollapsed={isCollapsed} important>مواجهة المدن الذكية</NavItem>
+              <div className="h-px bg-slate-800/20 mx-4 my-1"></div>
               {["الرياض", "جدة", "بريدة", "مكة المكرمة", "المدينة المنورة", "الدمام", "حائل", "الهفوف", "الخبر", "حفر الباطن", "الطائف", "الخرج", "تبوك", "عرعر", "أبها", "نجران", "خميس مشيط", "عنيزة", "المزاحمية", "جيزان", "الدوادمي", "سكاكا", "الجبيل", "بقعاء", "القطيف"].map(city => (
                 <NavItem key={city} to={`/city/${city}`} icon={MapPin} isCollapsed={isCollapsed}>{city}</NavItem>
               ))}
@@ -1309,6 +1312,7 @@ const App = () => {
             <Route path="/timeline" element={<TimelinePage events={TIMELINE_EVENTS} />} />
             <Route path="/dashboard-test" element={<DashboardTest />} />
             <Route path="/city/:cityName" element={<CityAnalytics />} />
+            <Route path="/city-duel" element={<SmartCityDuel />} />
             <Route path="/help" element={<HelpCenterPage />} />
             <Route path="/followers" element={<FollowersPage />} />
             <Route path="/profile" element={<UserProfile />} />
