@@ -675,12 +675,14 @@ const CityNeighborhoodMap: React.FC<CityNeighborhoodMapProps> = ({ cityName }) =
         </div>
       </div>
 
-      {/* --- Data Deep-Dive: Transactions Table (Riyadh Only) --- */}
-      {cityName === 'الرياض' && (
-        <div className="max-w-7xl mx-auto px-8 pb-12 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
-          <NeighborhoodTable />
-        </div>
-      )}
+      {/* --- Data Deep-Dive: Transactions Table (All Cities) --- */}
+      <div className="max-w-7xl mx-auto px-8 pb-12 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+        <NeighborhoodTable 
+          cityName={cityName} 
+          data={processedData.series} 
+          isLoading={loading}
+        />
+      </div>
     </div>
   );
 };
