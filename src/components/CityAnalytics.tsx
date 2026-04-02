@@ -6,9 +6,11 @@ import {
   BarChart3, PieChart, Activity, ArrowUpRight, 
   ArrowDownRight, ChevronRight, Info, Banknote,
   Navigation, Target, Zap, Waves, Sparkles, Home,
-  Search, ShieldCheck, Download, Share2
+  Search, ShieldCheck, Download, Share2, Layers,
+  Globe, Compass
 } from 'lucide-react';
 import cityDataRaw from '../../data/city_analytics.json';
+import CityNeighborhoodMap from './CityNeighborhoodMap';
 
 const CITY_DATA = cityDataRaw as any;
 const CHART_FONT = 'IBM Plex Sans Arabic';
@@ -209,6 +211,11 @@ const CityAnalytics: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* --- INTERACTIVE NEIGHBORHOOD MAP --- */}
+        <div className="mt-12">
+          <CityNeighborhoodMap cityName={cityName || ''} />
         </div>
 
         {/* MAIN ANALYTICS: GRID 12 */}
