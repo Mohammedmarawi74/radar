@@ -119,7 +119,7 @@ const CityAnalytics: React.FC = () => {
       
 
       {/* ── HERO SECTION: THE CROWN JEWEL ── */}
-      <div className="bg-slate-900 relative overflow-hidden pt-8 pb-20">
+      <div className="bg-slate-900 relative overflow-hidden pt-4 pb-4">
         {/* Animated Background Elements */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[50%] bg-blue-600/10 blur-[100px] rounded-full animate-pulse"></div>
@@ -130,44 +130,44 @@ const CityAnalytics: React.FC = () => {
         <div className="max-w-7xl mx-auto px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
-            <div className="lg:col-span-8 flex flex-col gap-5">
-              <div className="flex items-center gap-4">
+            <div className="lg:col-span-8 flex flex-col gap-3">
+              <div className="flex items-center gap-3">
                 <div className="relative group">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-[24px] blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
-                  <div className="relative w-16 h-16 bg-slate-900 border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl">
-                    <Building2 size={32} className="text-blue-500 transform group-hover:scale-110 transition-transform duration-500" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-[20px] blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
+                  <div className="relative w-12 h-12 bg-slate-900 border border-white/10 rounded-xl flex items-center justify-center shadow-2xl">
+                    <Building2 size={24} className="text-blue-500 transform group-hover:scale-110 transition-transform duration-500" />
                   </div>
                 </div>
                 <div>
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="bg-blue-500/20 text-blue-300 text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border border-blue-500/30">Strategic Hub</span>
-                    <span className="flex items-center gap-1 text-slate-500 text-[9px] font-bold">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="bg-blue-500/20 text-blue-300 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-blue-500/30">Strategic Hub</span>
+                    <span className="flex items-center gap-1 text-slate-500 text-[8px] font-bold">
                        <Activity size={10}/> عينة التحليل: {city.stats.txn_count.toLocaleString()} صفقة
                     </span>
                   </div>
-                  <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white drop-shadow-sm">
+                  <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white drop-shadow-sm">
                     استشراف <span className="text-transparent bg-clip-text bg-gradient-to-l from-blue-400 via-indigo-300 to-white">مستقبل {cityName}</span>
                   </h1>
                 </div>
               </div>
-              <p className="text-slate-400 text-base leading-relaxed max-w-xl font-medium">
+              <p className="text-slate-400 text-[11px] leading-relaxed max-w-lg font-medium opacity-90">
                 تحليل استراتيجي لمسار السيولة والفرص العقارية الواعدة في مدينة {cityName}. نقدم لك بيانات دقيقة مدعومة بأتمتة MySQL واتجاهات السوق التاريخية.
               </p>
             </div>
 
             <div className="lg:col-span-4 flex flex-col gap-4">
-               {/* Growth Pulse Badge */}
-               <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[32px] p-6 flex flex-col items-center justify-center relative group select-none">
-                  <div className="absolute top-4 left-4 text-white/5"><Sparkles size={32}/></div>
-                  <div className={`text-5xl font-black tracking-tighter mb-1 ${city.growth_index >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                    {city.growth_index > 0 ? '+' : ''}{city.growth_index}%
-                  </div>
-                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-3">CITY GROWTH INDEX</p>
-                  <div className={`flex items-center gap-2 px-5 py-1.5 rounded-full font-black text-[10px] ${city.growth_index >= 0 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
-                    {city.growth_index >= 0 ? <ArrowUpRight size={14}/> : <ArrowDownRight size={14}/>}
-                    {city.growth_index >= 10 ? 'بيئة نمو خارقة' : city.growth_index >= 0 ? 'استقرار متنامٍ' : 'ترقب استراتيجي'}
-                  </div>
-               </div>
+                {/* Growth Pulse Badge */}
+                <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[24px] p-5 flex flex-col items-center justify-center relative group select-none max-w-[200px] mx-auto lg:mr-auto lg:ml-0">
+                   <div className="absolute top-3 left-3 text-white/5"><Sparkles size={20}/></div>
+                   <div className={`text-3xl font-black tracking-tighter mb-0.5 ${city.growth_index >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                     {city.growth_index > 0 ? '+' : ''}{city.growth_index}%
+                   </div>
+                   <p className="text-slate-500 text-[8px] font-black uppercase tracking-widest mb-2.5">GROWTH INDEX</p>
+                   <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-black text-[8px] ${city.growth_index >= 0 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
+                     {city.growth_index >= 0 ? <ArrowUpRight size={10}/> : <ArrowDownRight size={10}/>}
+                     {city.growth_index >= 10 ? 'نمو خارق' : city.growth_index >= 0 ? 'استقرار' : 'ترقب'}
+                   </div>
+                </div>
             </div>
 
           </div>
@@ -175,37 +175,10 @@ const CityAnalytics: React.FC = () => {
       </div>
 
       {/* ── DYNAMIC CONTENT: DATA GRID ── */}
-      <div className="max-w-7xl mx-auto px-8 -mt-10 relative z-30">
+      <div className="max-w-7xl mx-auto px-8 mt-6 relative z-30">
         
-        {/* KPI CARDS: Bento Glass Style */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { label: 'صافي السيولة', val: city.stats.total_price_B.toFixed(1) + ' مليار', icon: Banknote, color: 'blue', sub: 'سوق ملياري ضخم' },
-            { label: 'كثافة الصفقات', val: city.stats.txn_count.toLocaleString(), icon: Waves, color: 'indigo', sub: 'نشاط تشغيلي عالٍ' },
-            { label: 'متوسط المتر', val: city.stats.price_per_sqm.toFixed(0), icon: Target, color: 'amber', sub: 'ريال لكل متر مربع' },
-            { label: 'جودة الاستثمار', val: city.growth_index + 'x', icon: ShieldCheck, color: 'emerald', sub: 'تصنيف آمن ومستقر' },
-          ].map((k, i) => (
-            <div key={i} className="group relative bg-white border border-slate-100/60 p-4 rounded-2xl shadow-[0_4px_12px_-4px_rgba(30,41,59,0.05),0_8px_16px_-4px_rgba(30,41,59,0.02)] hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-500 hover:-translate-y-1 hover:border-blue-500/20">
-              <div className="flex items-center justify-between mb-3">
-                <div className={`w-9 h-9 bg-${k.color}-500/5 rounded-xl flex items-center justify-center text-${k.color}-600 group-hover:scale-110 transition-transform duration-500`}>
-                  <k.icon size={16} strokeWidth={2.5}/>
-                </div>
-                <div className={`px-1.5 py-0.5 rounded-full bg-${k.color}-500/10 text-${k.color}-600 text-[7px] font-black uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity`}>
-                   LIVE
-                </div>
-              </div>
-              <h3 className="text-base font-black text-slate-900 tracking-tight mb-0.5 leading-none">{k.val}</h3>
-              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">{k.label}</p>
-              <div className="mt-3 pt-2.5 border-t border-slate-50 flex items-center gap-1.5">
-                <span className={`w-1 h-1 rounded-full bg-${k.color}-500 animate-pulse`}></span>
-                <span className="text-[8px] font-bold text-slate-400/80 truncate">{k.sub}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
         {/* --- INTERACTIVE NEIGHBORHOOD MAP --- */}
-        <div className="mt-8">
+        <div className="mt-0">
           <CityNeighborhoodMap cityName={cityName || ''} />
         </div>
 
@@ -259,6 +232,33 @@ const CityAnalytics: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* KPI CARDS: Repositioned under the charts */}
+          <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { label: 'صافي السيولة', val: city.stats.total_price_B.toFixed(1) + ' مليار', icon: Banknote, color: 'blue', sub: 'سوق ملياري ضخم' },
+              { label: 'كثافة الصفقات', val: city.stats.txn_count.toLocaleString(), icon: Waves, color: 'indigo', sub: 'نشاط تشغيلي عالٍ' },
+              { label: 'متوسط المتر', val: city.stats.price_per_sqm.toFixed(0), icon: Target, color: 'amber', sub: 'ريال لكل متر مربع' },
+              { label: 'جودة الاستثمار', val: city.growth_index + 'x', icon: ShieldCheck, color: 'emerald', sub: 'تصنيف آمن ومستقر' },
+            ].map((k, i) => (
+              <div key={i} className="group relative bg-white border border-slate-100/60 p-4 rounded-2xl shadow-[0_4px_12px_-4px_rgba(30,41,59,0.05),0_8px_16px_-4px_rgba(30,41,59,0.02)] hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-500 hover:-translate-y-1 hover:border-blue-500/20">
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`w-9 h-9 bg-${k.color}-500/5 rounded-xl flex items-center justify-center text-${k.color}-600 group-hover:scale-110 transition-transform duration-500`}>
+                    <k.icon size={16} strokeWidth={2.5}/>
+                  </div>
+                  <div className={`px-1.5 py-0.5 rounded-full bg-${k.color}-500/10 text-${k.color}-600 text-[7px] font-black uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity`}>
+                     LIVE
+                  </div>
+                </div>
+                <h3 className="text-base font-black text-slate-900 tracking-tight mb-0.5 leading-none">{k.val}</h3>
+                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">{k.label}</p>
+                <div className="mt-3 pt-2.5 border-t border-slate-50 flex items-center gap-1.5">
+                  <span className={`w-1 h-1 rounded-full bg-${k.color}-500 animate-pulse`}></span>
+                  <span className="text-[8px] font-bold text-slate-400/80 truncate">{k.sub}</span>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Price Brackets - Full Width Bento */}

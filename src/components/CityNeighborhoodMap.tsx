@@ -519,7 +519,7 @@ const CityNeighborhoodMap: React.FC<CityNeighborhoodMapProps> = ({ cityName }) =
         </div>
       </div>
 
-      <div className={`relative flex flex-col lg:flex-row transition-all duration-500 ${isFullScreen ? 'h-[calc(100vh-80px)]' : 'min-h-[700px]'} bg-slate-50`}>
+      <div className={`relative flex flex-col lg:flex-row transition-all duration-500 ${isFullScreen ? 'h-[calc(100vh-80px)]' : 'min-h-[500px]'} bg-slate-50`}>
         <div className="flex-grow p-4 relative h-full bg-slate-100/40 border-l border-slate-200/40 shadow-inner">
           {loading ? (
             <div className="absolute inset-0 flex items-center justify-center gap-3 text-slate-400 font-bold z-50 bg-slate-50/80 backdrop-blur">
@@ -558,28 +558,28 @@ const CityNeighborhoodMap: React.FC<CityNeighborhoodMapProps> = ({ cityName }) =
                   }
                 }}
                 option={mapOption} 
-                style={{ height: '100%', minHeight: isFullScreen ? 'calc(100vh - 120px)' : 650, width: '100%', backgroundColor: '#f1f5f9', borderRadius: '16px' }} 
+                style={{ height: '100%', minHeight: isFullScreen ? 'calc(100vh - 120px)' : 500, width: '100%', backgroundColor: '#f1f5f9', borderRadius: '16px' }} 
                 lazyUpdate={false}
                 notMerge={true}
               />
               {hoveredDistrict && (
-                <div className={`absolute ${isFullScreen ? 'top-32 lg:top-36 right-12 lg:right-32' : 'top-16 right-12'} w-64 bg-slate-900/95 backdrop-blur-xl border border-white/10 p-6 rounded-[32px] shadow-2xl text-white animate-in fade-in slide-in-from-right-4 pointer-events-none z-40 text-right`}>
-                  <h4 className="text-lg font-black mb-4">
+                <div className={`absolute ${isFullScreen ? 'top-32 lg:top-36 right-12 lg:right-32' : 'top-12 right-8'} w-52 bg-slate-900/95 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-2xl text-white animate-in fade-in slide-in-from-right-4 pointer-events-none z-40 text-right`}>
+                  <h4 className="text-sm font-black mb-2.5">
                     {hoveredDistrict.name.startsWith('حي') ? hoveredDistrict.name : `حي ${hoveredDistrict.name}`}
                   </h4>
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div>
-                      <p className="text-[10px] font-black text-slate-500 uppercase">السيولة المتداولة</p>
-                      <p className="text-xl font-black text-blue-400">{hoveredDistrict.detailedStats.total_price_M.toFixed(1)} <span className="text-xs">مليون</span></p>
+                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">السيولة المتداولة</p>
+                      <p className="text-base font-black text-blue-400 leading-tight">{hoveredDistrict.detailedStats.total_price_M.toFixed(1)} <span className="text-[10px]">مليون</span></p>
                     </div>
-                    <div className="flex flex-row-reverse justify-between border-t border-white/5 pt-4">
+                    <div className="flex flex-row-reverse justify-between border-t border-white/5 pt-3">
                       <div>
-                        <p className="text-[9px] font-black text-slate-500 uppercase">الصفقات</p>
-                        <p className="text-sm font-bold">{hoveredDistrict.detailedStats.txn_count}</p>
+                        <p className="text-[8px] font-black text-slate-500 uppercase">الصفقات</p>
+                        <p className="text-xs font-bold">{hoveredDistrict.detailedStats.txn_count}</p>
                       </div>
                       <div>
-                        <p className="text-[9px] font-black text-slate-500 uppercase text-left">م. السعر</p>
-                        <p className="text-sm font-bold text-emerald-400 text-left">{hoveredDistrict.detailedStats.avg_price_M.toFixed(1)}M</p>
+                        <p className="text-[8px] font-black text-slate-500 uppercase text-left">م. السعر</p>
+                        <p className="text-xs font-bold text-emerald-400 text-left">{hoveredDistrict.detailedStats.avg_price_M.toFixed(1)}M</p>
                       </div>
                     </div>
                   </div>
@@ -722,12 +722,12 @@ const CityNeighborhoodMap: React.FC<CityNeighborhoodMapProps> = ({ cityName }) =
               </button>
             </div>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-center p-8 opacity-40">
-               <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mb-4">
-                  <MapPin size={28}/>
+            <div className="h-full flex flex-col items-center justify-center text-center p-6 opacity-40">
+               <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mb-3">
+                  <MapPin size={24}/>
                </div>
-               <p className="text-lg text-slate-900 font-black mb-1.5 tracking-tight">استكشف أحياء {cityName}</p>
-               <p className="text-[10px] font-bold text-slate-500 max-w-[180px] leading-relaxed">اضغط على أي حي لاستعراض التفاصيل أو قارن بين حيين بالضغط عليهما</p>
+               <p className="text-base text-slate-900 font-black mb-1 tracking-tight">استكشف أحياء {cityName}</p>
+               <p className="text-[9px] font-bold text-slate-500 max-w-[170px] leading-relaxed">اضغط على أي حي لاستعراض التفاصيل أو قارن بين حيين بالضغط عليهما</p>
             </div>
           )}
           </div>
