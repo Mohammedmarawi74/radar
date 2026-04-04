@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import { useChartResize } from '../hooks/useChartResize';
 import * as echarts from 'echarts';
 import ReactECharts from 'echarts-for-react';
 import NeighborhoodTable from './NeighborhoodTable';
@@ -93,6 +94,9 @@ const CityNeighborhoodMap: React.FC<CityNeighborhoodMapProps> = ({ cityName }) =
   const selectedDistrict = selectedDistricts[0] || null;
   const chartRef = React.useRef<any>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
+
+  // Apply the production-grade resize hook
+  useChartResize(chartRef, cityName);
 
   const norm = (s: string) => (s || '').replace(/^حي\s+/, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').trim();
 
