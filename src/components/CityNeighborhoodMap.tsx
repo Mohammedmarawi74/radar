@@ -78,6 +78,7 @@ const CityNeighborhoodMap: React.FC<CityNeighborhoodMapProps> = ({ cityName }) =
   const [error, setError] = useState(false);
   
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [isActualFullScreen, setIsActualFullScreen] = useState(false);
   const [selectedYear, setSelectedYear] = useState('2024');
   const [selectedQuarter, setSelectedQuarter] = useState('all');
   const [selectedPropType, setSelectedPropType] = useState('all');
@@ -91,8 +92,31 @@ const CityNeighborhoodMap: React.FC<CityNeighborhoodMapProps> = ({ cityName }) =
   // For compatibility with reports
   const selectedDistrict = selectedDistricts[0] || null;
   const chartRef = React.useRef<any>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   const norm = (s: string) => (s || '').replace(/^حي\s+/, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').trim();
+
+  const toggleFullScreen = () => {
+    if (!containerRef.current) return;
+    
+    if (!document.fullscreenElement) {
+      containerRef.current.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
+  useEffect(() => {
+    const handleFullScreenChange = () => {
+      const isFS = !!document.fullscreenElement;
+      setIsActualFullScreen(isFS);
+      setIsFullScreen(isFS); // Sync CSS-based FS as well
+    };
+    document.addEventListener('fullscreenchange', handleFullScreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullScreenChange);
+  }, []);
 
   const handleDownloadReport = () => {
     if (!selectedDistrict) return;
@@ -123,7 +147,9 @@ const CityNeighborhoodMap: React.FC<CityNeighborhoodMapProps> = ({ cityName }) =
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsFullScreen(false);
+      if (e.key === 'Escape' && !document.fullscreenElement) {
+        setIsFullScreen(false);
+      }
     };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
@@ -313,31 +339,42 @@ const CityNeighborhoodMap: React.FC<CityNeighborhoodMapProps> = ({ cityName }) =
   }
 
   return (
-    <div className={`bg-white border shadow-2xl transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${isFullScreen ? 'fixed top-0 bottom-0 left-0 right-0 !w-screen !h-screen z-[9999] rounded-none !m-0 overflow-y-auto' : 'rounded-[60px] border-slate-100'}`} dir="rtl">
+    <div ref={containerRef} className={`bg-white border shadow-2xl transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${isFullScreen ? 'fixed top-0 bottom-0 left-0 right-0 !w-screen !h-screen z-[9999] rounded-none !m-0 overflow-y-auto' : 'rounded-[48px] border-slate-100'}`} dir="rtl">
       {/* ── HEADER ── */}
-      <div className={`${isFullScreen ? 'px-8 lg:px-24 py-5 mt-1' : 'px-6 lg:px-10 py-5'} bg-gradient-to-br from-white to-slate-50/50 border-b border-slate-100 shrink-0 transition-all`}>
+      <div className={`${isFullScreen ? 'px-8 lg:px-16 py-3.5 mt-1' : 'px-6 lg:px-8 py-3.5'} bg-gradient-to-br from-white to-slate-50/50 border-b border-slate-100 shrink-0 transition-all`}>
         <div className="flex flex-col xl:flex-row gap-4 justify-between items-center">
-          <div className="flex items-center gap-4">
-            <div className={`p-3 bg-blue-600 rounded-[22px] text-white shadow-xl shadow-blue-500/20 transition-all ${isFullScreen ? 'scale-90' : ''}`}>
-              <Layers size={22}/>
+          {!isFullScreen && (
+            <div className="flex items-center gap-4 animate-in fade-in slide-in-from-right-4">
+              <div className="p-2.5 bg-blue-600 rounded-2xl text-white shadow-xl shadow-blue-500/20 transition-all">
+                <Layers size={18}/>
+              </div>
+              <div className="hidden sm:block">
+                <h3 className="text-lg font-black text-slate-900 tracking-tight transition-all leading-tight">رادارات الأحياء الذكية</h3>
+                <p className="text-slate-400 text-[10px] font-bold mt-0.5 flex items-center gap-1.5 opacity-80">
+                  <MapPin size={10} className="text-blue-500"/> تحليل جيو-مكاني متقدم لمدينة {cityName}
+                </p>
+              </div>
             </div>
-            <div className="hidden sm:block">
-              <h3 className={`${isFullScreen ? 'text-xl' : 'text-2xl'} font-black text-slate-900 tracking-tight transition-all`}>رادارات الأحياء الذكية</h3>
-              <p className="text-slate-400 text-[11px] font-bold mt-0.5 flex items-center gap-2">
-                <MapPin size={12} className="text-blue-500"/> تحليل جيو-مكاني متقدم لمدينة {cityName}
-              </p>
-            </div>
-          </div>
+          )}
+
+          {isFullScreen && (
+             <div className="flex items-center gap-3 animate-in fade-in slide-in-from-right-4">
+                <div className="p-2 bg-slate-900 rounded-xl text-white">
+                  <MapPin size={16}/>
+                </div>
+                <h3 className="text-lg font-black text-slate-900 tracking-tight">{cityName} - خريطة الاستثمار</h3>
+             </div>
+          )}
 
           <div className="flex-grow max-w-md mx-4 relative hidden md:block">
              <div className="relative group">
-                <Search size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                <Search size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                 <input 
                    type="text" 
                    value={searchQuery}
                    onChange={(e) => { setSearchQuery(e.target.value); setShowSearchResults(true); }}
                    placeholder={`ابحث عن حي في ${cityName}... (${SEARCH_PLACEHOLDERS[cityName] || 'اكتب اسم الحي...'})`}
-                   className="w-full h-11 pr-11 pl-4 bg-slate-100/50 border border-slate-200/60 rounded-2xl text-xs font-bold text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                   className="w-full h-9 pr-10 pl-4 bg-slate-100/50 border border-slate-200/60 rounded-[14px] text-[11px] font-bold text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 />
                 {searchQuery && (
                    <button 
@@ -414,49 +451,69 @@ const CityNeighborhoodMap: React.FC<CityNeighborhoodMapProps> = ({ cityName }) =
              )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 bg-white/80 backdrop-blur p-1 rounded-[32px] border border-slate-200/60 shadow-sm">
+          <div className="flex flex-wrap items-center gap-2 bg-white/80 backdrop-blur p-0.5 rounded-2xl border border-slate-200/60 shadow-sm">
             {/* Filter Dropdowns */}
-            <div className="flex items-center gap-2 px-3 border-l border-slate-100">
-              <Calendar size={14} className="text-slate-400"/>
-              <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="bg-transparent border-none text-xs font-black text-slate-700 focus:ring-0">
+            <div className="flex items-center gap-1.5 px-2 border-l border-slate-100">
+              <Calendar size={12} className="text-slate-400"/>
+              <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="bg-transparent border-none text-[10px] font-black text-slate-700 focus:ring-0">
                 {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
               </select>
             </div>
-            <div className="flex items-center gap-2 px-3 border-l border-slate-100">
-              <Clock size={14} className="text-slate-400"/>
-              <select value={selectedQuarter} onChange={(e) => setSelectedQuarter(e.target.value)} className="bg-transparent border-none text-xs font-black text-slate-700 focus:ring-0">
-                {QUARTERS.map(q => <option key={q.id} value={q.id}>{q.label}</option>)}
-              </select>
+            <div className="flex items-center gap-1.5 px-2 border-l border-slate-100">
+               <Clock size={12} className="text-slate-400"/>
+               <select value={selectedQuarter} onChange={(e) => setSelectedQuarter(e.target.value)} className="bg-transparent border-none text-[10px] font-black text-slate-700 focus:ring-0">
+                  <option value="all">كافة الأرباع</option>
+                  <option value="1">الربع الأول</option>
+                  <option value="2">الربع الثاني</option>
+                  <option value="3">الربع الثالث</option>
+                  <option value="4">الربع الرابع</option>
+               </select>
             </div>
-            <div className="flex items-center gap-2 px-3 border-l border-slate-100">
-              <Building2 size={14} className="text-slate-400"/>
-              <select value={selectedPropType} onChange={(e) => setSelectedPropType(e.target.value)} className="bg-transparent border-none text-xs font-black text-slate-700 focus:ring-0">
-                {PROP_TYPES.map(pt => <option key={pt.id} value={pt.id}>{pt.label}</option>)}
-              </select>
+
+            <div className="flex items-center gap-1.5 px-2 border-l border-slate-100">
+               <Building2 size={12} className="text-slate-400"/>
+               <select value={selectedPropType} onChange={(e) => setSelectedPropType(e.target.value)} className="bg-transparent border-none text-[10px] font-black text-slate-700 focus:ring-0">
+                  <option value="all">الكل</option>
+                  <option value="سكني">سكني</option>
+                  <option value="تجاري">تجاري</option>
+                  <option value="زراعي">زراعي</option>
+                  <option value="صناعي">صناعي</option>
+               </select>
             </div>
-            <div className="flex bg-slate-100 p-0.5 rounded-2xl">
-              <button 
-                onClick={() => setSelectedMetric('liquidity')}
-                className={`px-4 py-1.5 rounded-xl text-[10px] font-black transition-all ${selectedMetric === 'liquidity' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-              >
-                السيولة
-              </button>
-              <button 
-                onClick={() => setSelectedMetric('transactions')}
-                className={`px-4 py-1.5 rounded-xl text-[10px] font-black transition-all ${selectedMetric === 'transactions' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-              >
-                الصفقات
-              </button>
+
+            <div className="flex bg-slate-100 p-0.5 rounded-xl">
+               <button 
+                 onClick={() => setSelectedMetric('liquidity')} 
+                 className={`px-3 py-1 rounded-lg text-[9px] font-black transition-all ${selectedMetric === 'liquidity' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+               >
+                 السيولة
+               </button>
+               <button 
+                 onClick={() => setSelectedMetric('transactions')} 
+                 className={`px-3 py-1 rounded-lg text-[9px] font-black transition-all ${selectedMetric === 'transactions' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+               >
+                 الصفقات
+               </button>
             </div>
-            {/* Full Screen Toggle Button */}
-            <div className="px-2">
-              <button 
-                onClick={() => setIsFullScreen(!isFullScreen)}
-                title={isFullScreen ? "تصغير" : "ملء الشاشة"}
-                className={`p-2 rounded-xl transition-all ${isFullScreen ? 'bg-slate-900 text-white' : 'hover:bg-slate-100 text-slate-400 hover:text-slate-600'}`}
-              >
-                {isFullScreen ? <Minimize2 size={18}/> : <Maximize2 size={18}/>}
-              </button>
+
+            <div className="px-1.5 flex items-center gap-2">
+               <button 
+                 onClick={toggleFullScreen}
+                 title="ملء الشاشة الحقيقي"
+                 className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all ${isFullScreen ? 'bg-red-600 hover:bg-red-500' : 'bg-slate-900 hover:bg-slate-800'} text-white shadow-lg`}
+               >
+                 {isFullScreen ? (
+                   <>
+                     <Minimize2 size={14}/>
+                     <span className="text-[9px] font-black">خروج</span>
+                   </>
+                 ) : (
+                   <>
+                     <Maximize2 size={14}/>
+                     <span className="text-[9px] font-black">ملء الشاشة</span>
+                   </>
+                 )}
+               </button>
             </div>
           </div>
         </div>
@@ -530,13 +587,14 @@ const CityNeighborhoodMap: React.FC<CityNeighborhoodMapProps> = ({ cityName }) =
               )}
             </>
           )}
-          <div className="absolute left-8 bottom-8 text-xs font-black text-slate-400">
-            <Maximize2 size={16} className="inline mr-2"/> استخدم عجلة الفأرة للتكبير
+          <div className="absolute left-6 bottom-6 text-[10px] font-black text-slate-400 opacity-60">
+            <Maximize2 size={12} className="inline mr-2"/> استخدم عجلة الفأرة للتكبير
           </div>
         </div>
 
         {/* ── SIDEBAR ── */}
-        <div className={`w-full lg:w-[420px] bg-white border-r border-slate-100 transition-all duration-500 overflow-y-auto ${selectedDistricts.length > 0 ? 'translate-x-0' : 'translate-x-full lg:translate-x-0 lg:opacity-40'}`}>
+        <div className={`transition-all duration-500 overflow-y-auto ${isFullScreen ? 'fixed top-24 bottom-8 left-8 w-[380px] z-[50] rounded-[40px] shadow-2xl border-none' : 'w-full lg:w-[420px] bg-white border-r border-slate-100'} ${selectedDistricts.length > 0 ? 'translate-x-0 opacity-100' : 'translate-x-[120%] lg:translate-x-0 lg:opacity-40'}`}>
+          <div className={`${isFullScreen ? 'bg-white/95 backdrop-blur-xl h-full border border-white/20' : 'h-full bg-white'} rounded-[inherit]`}>
           {selectedDistricts.length > 1 ? (
             <div className="p-8 flex flex-col gap-6 animate-fadeIn">
               {/* Comparison Header */}
@@ -665,52 +723,55 @@ const CityNeighborhoodMap: React.FC<CityNeighborhoodMapProps> = ({ cityName }) =
             </div>
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-center p-8 opacity-40">
-               <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mb-6">
-                  <MapPin size={40}/>
+               <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mb-4">
+                  <MapPin size={28}/>
                </div>
-               <p className="text-xl text-slate-900 font-black mb-2">استكشف أحياء {cityName}</p>
-               <p className="text-sm text-slate-500 font-bold max-w-[200px]">اضغط على أي حي لاستعراض التفاصيل أو قارن بين حيين بالضغط عليهما</p>
+               <p className="text-lg text-slate-900 font-black mb-1.5 tracking-tight">استكشف أحياء {cityName}</p>
+               <p className="text-[10px] font-bold text-slate-500 max-w-[180px] leading-relaxed">اضغط على أي حي لاستعراض التفاصيل أو قارن بين حيين بالضغط عليهما</p>
             </div>
           )}
+          </div>
         </div>
       </div>
 
       {/* --- Data Deep-Dive: Transactions Table (All Cities) --- */}
-      <div className="max-w-7xl mx-auto px-8 pb-12 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
-        <NeighborhoodTable 
-          cityName={cityName} 
-          data={processedData.series} 
-          isLoading={loading}
-        />
-      </div>
+      {!isFullScreen && (
+        <div className="max-w-7xl mx-auto px-8 pb-12 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+          <NeighborhoodTable 
+            cityName={cityName} 
+            data={processedData.series} 
+            isLoading={loading}
+          />
+        </div>
+      )}
     </div>
   );
 };
 
 const StatCard = ({ icon: Icon, color, label, val }: any) => (
-  <div className={`bg-slate-50 p-6 rounded-[32px] border border-slate-100 hover:bg-${color}-50 transition-colors`}>
-    <Icon className={`text-${color}-600 mb-3`} size={24}/>
-    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</p>
-    <p className="text-2xl font-black text-slate-900">{val}</p>
+  <div className={`bg-slate-50 p-4.5 rounded-2xl border border-slate-100 hover:bg-${color}-50 transition-colors`}>
+    <Icon className={`text-${color}-600 mb-2`} size={18}/>
+    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5 opacity-80">{label}</p>
+    <p className="text-lg font-black text-slate-900">{val}</p>
   </div>
 );
 
 const ComparisonRow = ({ title, val1, val2, unit = '', color1, color2 }: any) => {
   const isBetter = val1 > val2;
   return (
-    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-      <p className="text-[10px] font-black text-slate-400 mb-3 text-center uppercase tracking-widest">{title}</p>
-      <div className="grid grid-cols-2 gap-4 items-center">
+    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+      <p className="text-[9px] font-black text-slate-400 mb-2.5 text-center uppercase tracking-widest opacity-80">{title}</p>
+      <div className="grid grid-cols-2 gap-3 items-center">
         <div className={`text-center transition-all ${isBetter ? 'scale-105' : 'opacity-60'}`}>
           <div className={`inline-flex items-center gap-1 ${isBetter ? 'text-emerald-600' : 'text-slate-400'}`}>
-            <p className="text-lg font-black">{(typeof val1 === 'number' ? val1.toFixed(1) : val1)}{unit}</p>
-            {isBetter && <ArrowUpRight size={14}/>}
+            <p className="text-base font-black">{(typeof val1 === 'number' ? val1.toFixed(1) : val1)}{unit}</p>
+            {isBetter && <ArrowUpRight size={12}/>}
           </div>
         </div>
         <div className={`text-center transition-all ${!isBetter ? 'scale-105' : 'opacity-60'}`}>
           <div className={`inline-flex items-center gap-1 ${!isBetter ? 'text-emerald-600' : 'text-slate-400'}`}>
-            <p className="text-lg font-black">{(typeof val2 === 'number' ? val2.toFixed(1) : val2)}{unit}</p>
-            {!isBetter && <ArrowUpRight size={14}/>}
+            <p className="text-base font-black">{(typeof val2 === 'number' ? val2.toFixed(1) : val2)}{unit}</p>
+            {!isBetter && <ArrowUpRight size={12}/>}
           </div>
         </div>
       </div>

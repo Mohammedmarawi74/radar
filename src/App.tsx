@@ -621,6 +621,10 @@ const Breadcrumbs = () => {
     } else if (pathname.includes('/simulator')) {
       crumbs.push({ label: 'المحور الرئيسي', path: '', icon: Target });
       crumbs.push({ label: 'محاكي الاستثمار', path: '', icon: Calculator });
+    } else if (pathname.includes('/city/')) {
+      const city = decodeURIComponent(pathname.split('/city/')[1]);
+      crumbs.push({ label: 'تحليل المدن', path: '', icon: Building2 });
+      crumbs.push({ label: `تحليل مدينة ${city}`, path: '', icon: MapPin });
     } else {
       crumbs.push({ label: 'لوحة التحكم', path: '', icon: LayoutTemplate });
     }
