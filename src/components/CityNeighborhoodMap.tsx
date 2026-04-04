@@ -559,7 +559,7 @@ const CityNeighborhoodMap: React.FC<CityNeighborhoodMapProps> = ({ cityName }) =
                 }}
                 option={mapOption} 
                 style={{ height: '100%', minHeight: isFullScreen ? 'calc(100vh - 120px)' : 500, width: '100%', backgroundColor: '#f1f5f9', borderRadius: '16px' }} 
-                lazyUpdate={false}
+                lazyUpdate={true}
                 notMerge={true}
               />
               {hoveredDistrict && (

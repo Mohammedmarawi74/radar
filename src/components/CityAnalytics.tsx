@@ -201,7 +201,12 @@ const CityAnalytics: React.FC = () => {
                 ))}
               </div>
             </div>
-            <ReactECharts option={yearlyOption} style={{ height: 320 }} />
+            <ReactECharts 
+              option={yearlyOption} 
+              style={{ height: 320, width: '100%' }} 
+              notMerge={true}
+              lazyUpdate={true}
+            />
           </div>
 
           {/* Property Mix (Compact) */}
@@ -212,7 +217,12 @@ const CityAnalytics: React.FC = () => {
                 <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest mb-6">Asset Allocation</p>
                 
                 <div className="relative flex justify-center items-center">
-                  <ReactECharts option={mixOption} style={{ height: 200, width: '100%' }} />
+                  <ReactECharts 
+                    option={mixOption} 
+                    style={{ height: 200, width: '100%' }} 
+                    notMerge={true}
+                    lazyUpdate={true}
+                  />
                   <div className="absolute inset-x-0 inset-y-0 flex flex-col items-center justify-center pointer-events-none">
                     <p className="text-xl font-black text-slate-900">%{city.property_mix[0]?.pct.toFixed(0)}</p>
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{city.property_mix[0]?.name}</p>
@@ -242,20 +252,23 @@ const CityAnalytics: React.FC = () => {
               { label: 'متوسط المتر', val: city.stats.price_per_sqm.toFixed(0), icon: Target, color: 'amber', sub: 'ريال لكل متر مربع' },
               { label: 'جودة الاستثمار', val: city.growth_index + 'x', icon: ShieldCheck, color: 'emerald', sub: 'تصنيف آمن ومستقر' },
             ].map((k, i) => (
-              <div key={i} className="group relative bg-white border border-slate-100/60 p-4 rounded-2xl shadow-[0_4px_12px_-4px_rgba(30,41,59,0.05),0_8px_16px_-4px_rgba(30,41,59,0.02)] hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-500 hover:-translate-y-1 hover:border-blue-500/20">
+              <div key={i} className="group relative bg-white border border-slate-200/60 p-4 rounded-2xl shadow-[0_8px_16px_-6px_rgba(0,0,0,0.05)] hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 hover:-translate-y-1 hover:border-blue-500/30 overflow-hidden">
+                {/* Decorative Accent */}
+                <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-${k.color}-500 to-transparent opacity-40 group-hover:opacity-100 transition-opacity`}></div>
+                
                 <div className="flex items-center justify-between mb-3">
-                  <div className={`w-9 h-9 bg-${k.color}-500/5 rounded-xl flex items-center justify-center text-${k.color}-600 group-hover:scale-110 transition-transform duration-500`}>
+                  <div className={`w-9 h-9 bg-${k.color}-500/10 rounded-xl flex items-center justify-center text-${k.color}-600 group-hover:scale-110 transition-transform duration-500`}>
                     <k.icon size={16} strokeWidth={2.5}/>
                   </div>
-                  <div className={`px-1.5 py-0.5 rounded-full bg-${k.color}-500/10 text-${k.color}-600 text-[7px] font-black uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity`}>
+                  <div className={`px-1.5 py-0.5 rounded-full bg-${k.color}-500/10 text-${k.color}-700 text-[7px] font-black uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity`}>
                      LIVE
                   </div>
                 </div>
                 <h3 className="text-base font-black text-slate-900 tracking-tight mb-0.5 leading-none">{k.val}</h3>
-                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">{k.label}</p>
-                <div className="mt-3 pt-2.5 border-t border-slate-50 flex items-center gap-1.5">
+                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">{k.label}</p>
+                <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center gap-1.5">
                   <span className={`w-1 h-1 rounded-full bg-${k.color}-500 animate-pulse`}></span>
-                  <span className="text-[8px] font-bold text-slate-400/80 truncate">{k.sub}</span>
+                  <span className="text-[8px] font-bold text-slate-600 truncate">{k.sub}</span>
                 </div>
               </div>
             ))}
